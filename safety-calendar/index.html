@@ -101,7 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <div class="foot">提示：家长请在微信中打开本页面，进度自动保存在手机上</div>
 </div>
 <div class="settings">
-<button onclick="toggleReset()">⚙️</button>
+<button onclick="toggleMusic()" id="musicBtn">🔇</button><button onclick="toggleReset()">⚙️</button>
 <div class="reset-confirm" id="rc">
 <p>确定要重置所有进度吗？</p>
 <button class="btn btn-outline" style="margin-top:6px;padding:8px;font-size:13px" onclick="doReset()">确认重置</button>
@@ -191,7 +191,7 @@ h+='<div class="'+cls+'" '+clk+'><div class="dd">'+dn+'</div><div class="di">'+i
 document.getElementById('cal').innerHTML=h;
 updateProgress()}
 function updateProgress(){var c=starCount(),pct=Math.round(c/45*100);document.getElementById('pf').style.width=pct+'%';document.getElementById('pt').textContent='⭐ '+c+' / 45'}
-function openDay(d){curDay=d;var day=DAYS.find(function(x){return x.d===d});if(!day)return;
+function openDay(d){curDay=d;var day=DAYS.find(function(x){return x.d===d});if(!day)return;if(day.c==='防溺水'){startBgMusic();document.getElementById('musicBtn').textContent='🔊'}else{stopBgMusic();document.getElementById('musicBtn').textContent='🔇'}
 var done=completed(d);
 var html='<div class="modal-head"><span class="close" onclick="closeModal()">✕</span>';
 html+='<div class="day-label">'+parseInt(day.d.substring(0,2))+'月'+parseInt(day.d.substring(2,4))+'日 · '+day.c+'</div>';
@@ -221,7 +221,7 @@ if(i===day.a){
 opts[i].classList.add('correct');
 fb.className='feedback ok show';
 fb.innerHTML='<div class="result">✅ 答对了！获得⭐</div>'+day.e;
-state.completed[curDay]=true;save();
+state.completed[curDay]=true;save();playCorrect();
 flyStar();
 var ah='';
 if(day.task)ah+='<div class="task-box"><div class="tt">👨‍👩‍👧 亲子任务</div><div class="tc">'+day.task+'</div></div>';
@@ -233,14 +233,15 @@ setTimeout(function(){renderCal()},500)
 opts[i].classList.add('wrong');
 setTimeout(function(){opts[day.a].classList.add('correct')},500);
 fb.className='feedback no show';
+playWrong();
 fb.innerHTML='<div class="result">❌ 答错了</div>正确答案：'+String.fromCharCode(65+day.a)+'. '+day.o[day.a]+'<br><br>'+day.e;
 after.innerHTML='<button class="btn btn-outline" onclick="retry()">再试一次</button>';
 after.style.display='block'}}
 function retry(){openDay(curDay)}
-function closeModal(){document.getElementById('overlay').classList.remove('show');curDay=null}
-function flyStar(){for(var k=0;k<6;k++){var s=document.createElement('div');s.className='star-anim';s.textContent='⭐';s.style.left=(Math.random()*window.innerWidth)+'px';s.style.top=(window.innerHeight/2)+'px';s.style.animationDelay=(k*80)+'ms';document.body.appendChild(s);setTimeout(function(e){return function(){e.remove()}}(s),1200)}}
+function closeModal(){document.getElementById('overlay').classList.remove('show');curDay=null;stopBgMusic();document.getElementById('musicBtn').textContent='🔇'}
+function flyStar(){playStar();for(var k=0;k<6;k++){var s=document.createElement('div');s.className='star-anim';s.textContent='⭐';s.style.left=(Math.random()*window.innerWidth)+'px';s.style.top=(window.innerHeight/2)+'px';s.style.animationDelay=(k*80)+'ms';document.body.appendChild(s);setTimeout(function(e){return function(){e.remove()}}(s),1200)}}
 function checkCert(){if(starCount()>=45){showCert()}}
-function showCert(){
+function showCert(){playCert();
 var html='<div class="cert">';
 html+='<div class="medal">🏅</div>';
 html+='<h2>暑期安全小卫士</h2>';
@@ -266,6 +267,20 @@ document.getElementById('certOverlay').classList.add('show')}
 function saveCertName(){var n=document.getElementById('certName').value.trim();if(!n){alert('请输入姓名');return}state.name=n;save();showCert()}
 function toggleReset(){document.getElementById('rc').classList.toggle('show')}
 function doReset(){state={completed:{},name:''};save();renderCal();document.getElementById('rc').classList.remove('show');closeModal();document.getElementById('certOverlay').classList.remove('show')}
+// ===== 音效系统 =====
+var audioCtx=null,bgMusicOn=false,bgMusicTimer=null;
+function initAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function beep(f,d,t,v){if(!audioCtx)return;var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(audioCtx.destination);var vol=v||0.15;g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+0.02);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.start();o.stop(audioCtx.currentTime+d)}
+function playCorrect(){initAudio();beep(523,0.1,'sine',0.2);setTimeout(function(){beep(659,0.1,'sine',0.2)},100);setTimeout(function(){beep(784,0.1,'sine',0.2)},200);setTimeout(function(){beep(1047,0.15,'sine',0.2)},300);try{var u=new SpeechSynthesisUtterance('你真棒！');u.lang='zh-CN';u.rate=1.1;u.pitch=1.2;speechSynthesis.speak(u)}catch(e){}}
+function playWrong(){initAudio();beep(523,0.12,'sine',0.15);setTimeout(function(){beep(440,0.12,'sine',0.15)},120);setTimeout(function(){beep(392,0.2,'sine',0.15)},240);try{var u=new SpeechSynthesisUtterance('再努力一次');u.lang='zh-CN';u.rate=0.9;u.pitch=1.1;speechSynthesis.speak(u)}catch(e){}}
+function playStar(){initAudio();beep(1318,0.08,'sine',0.15);setTimeout(function(){beep(1568,0.08,'sine',0.12)},80);setTimeout(function(){beep(2093,0.12,'sine',0.1)},160)}
+function playCert(){initAudio();var notes=[523,659,784,1047,784,1047,1319];notes.forEach(function(n,i){setTimeout(function(){beep(n,0.15,'triangle',0.18)},i*120)})}
+var bgAudio=null;
+function startBgMusic(){if(!bgAudio){bgAudio=new Audio('https://cjmyy.github.io/safety-calendar/bgm.mp3');bgAudio.loop=true;bgAudio.volume=0.35}bgAudio.play().catch(function(e){})}
+function stopBgMusic(){if(bgAudio){bgAudio.pause()}}
+function toggleMusic(){if(bgAudio&&!bgAudio.paused){stopBgMusic();document.getElementById('musicBtn').textContent='🔇'}else{startBgMusic();document.getElementById('musicBtn').textContent='🔊'}}
+document.addEventListener('touchstart',function(){initAudio();if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume()}},{once:false});
+
 load();renderCal();
 </script>
 </body>
