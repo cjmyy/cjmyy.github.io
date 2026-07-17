@@ -140,7 +140,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <button class="lock-btn" id="unlockBtn" onclick="attemptUnlock()">解锁</button>
     <div class="lock-spinner" id="lockSpinner"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v2.1</div>
+    <div class="lock-hint">核心数据已加密保护 · v2.2</div>
   </div>
 </div>
 
@@ -283,10 +283,12 @@ async function decryptFile(encryptedB64, aesKey) {
   return new TextDecoder().decode(decrypted);
 }
 
-// Execute decrypted JS in global scope
+// Execute decrypted JS in global scope via dynamic <script> tag
+// This ensures const/let declarations are accessible globally (like normal <script> tags)
 function executeJS(code) {
-  // Use indirect eval to run in global scope
-  (0, eval)(code);
+  var script = document.createElement('script');
+  script.textContent = code;
+  document.head.appendChild(script);
 }
 
 let unlocked = false;
