@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>暑期安全小卫士 · 45天亲子安全挑战</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--blue:#1565C0;--blue2:#2196F3;--blue-bg:#E3F2FD;--green:#4CAF50;--orange:#FF9800;--gray:#BDBDBD;--bg:#F0F4F8;--red:#f44336;--gold:#FFC107}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#333;line-height:1.6;font-size:15px}
+#app{max-width:500px;margin:0 auto;min-height:100vh;padding-bottom:30px}
+.header{background:linear-gradient(135deg,#0D47A1,#1976D2,#42A5F5);color:#fff;padding:20px 16px 16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.header h1{font-size:22px;margin-bottom:2px;letter-spacing:1px}
+.header .sub{font-size:12px;opacity:.85;margin-bottom:10px}
+.progress-wrap{background:rgba(255,255,255,.15);border-radius:20px;height:32px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.progress-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#FFD54F,#FFC107,#FF8F00);border-radius:20px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0}
+.progress-text{position:relative;z-index:1;font-size:13px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.intro{padding:12px 16px 4px;font-size:12px;color:#666;text-align:center}
+.intro b{color:var(--blue)}
+.calendar{padding:8px 12px;display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.week-header{text-align:center;font-size:10px;color:#999;padding:4px 0}
+.day-card{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.day-card:active{transform:scale(.93)}
+.day-card.locked{background:#E0E0E0;color:#AAA;cursor:default}
+.day-card.locked:active{transform:none}
+.day-card.available{background:#fff;border:2px solid var(--blue2);color:var(--blue);box-shadow:0 2px 6px rgba(33,150,243,.2)}
+.day-card.today{border-color:var(--orange);animation:pulse 2s infinite}
+.day-card.completed{background:linear-gradient(135deg,#43A047,#66BB6A);color:#fff}
+.day-card .dd{font-weight:700;font-size:13px}
+.day-card .di{font-size:14px;margin-top:1px}
+.day-card .star-badge{position:absolute;top:1px;right:1px;font-size:9px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,152,0,.5)}50%{box-shadow:0 0 0 4px rgba(255,152,0,0)}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;overflow-y:auto;padding:16px}
+.overlay.show{display:flex;align-items:flex-start;justify-content:center}
+.modal{background:#fff;border-radius:16px;padding:0;max-width:440px;width:100%;margin-top:30px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.modal-head{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:16px 20px;position:relative}
+.modal-head .close{position:absolute;top:12px;right:16px;font-size:22px;cursor:pointer;opacity:.8}
+.modal-head .day-label{font-size:11px;opacity:.8}
+.modal-head h3{font-size:18px;margin-top:2px}
+.modal-body{padding:20px}
+.scenario{background:var(--blue-bg);border-left:4px solid var(--blue2);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:14px;color:#444}
+.question{font-weight:700;font-size:16px;margin-bottom:14px;color:#222}
+.opt{display:block;width:100%;padding:14px 16px;margin-bottom:8px;border:2px solid #E0E0E0;border-radius:10px;background:#fff;font-size:14px;text-align:left;cursor:pointer;transition:all .15s;line-height:1.4}
+.opt:active{transform:scale(.98)}
+.opt.correct{border-color:var(--green);background:#E8F5E9;color:#2E7D32;font-weight:600}
+.opt.wrong{border-color:var(--red);background:#FFEBEE;color:#C62828}
+.opt.disabled{pointer-events:none}
+.opt-label{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#f5f5f5;font-size:12px;font-weight:700;margin-right:8px}
+.opt.correct .opt-label{background:var(--green);color:#fff}
+.opt.wrong .opt-label{background:var(--red);color:#fff}
+.feedback{display:none;margin-top:14px;padding:14px;border-radius:10px;font-size:13px;line-height:1.6}
+.feedback.show{display:block;animation:slideIn .3s ease}
+.feedback.ok{background:#E8F5E9;border:1px solid #A5D6A7}
+.feedback.no{background:#FFF3E0;border:1px solid #FFCC80}
+.feedback .result{font-weight:700;font-size:15px;margin-bottom:4px}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.task-box{margin-top:14px;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:12px 14px}
+.task-box .tt{font-size:12px;font-weight:700;color:#F57C00;margin-bottom:4px}
+.task-box .tc{font-size:13px;color:#5D4037}
+.video-box{margin-top:14px;background:#F3E5F5;border:1px solid #CE93D8;border-radius:10px;padding:12px 14px}
+.video-box .vt{font-size:12px;font-weight:700;color:#7B1FA2;margin-bottom:4px}
+.video-box .vc{font-size:13px;color:#4A148C}
+.btn{display:block;width:100%;padding:14px;text-align:center;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:16px;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff}
+.btn-green{background:linear-gradient(135deg,#388E3C,#4CAF50);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--blue);color:var(--blue)}
+.star-anim{position:fixed;font-size:40px;z-index:2000;pointer-events:none;animation:starFly 1s ease-out forwards}
+@keyframes starFly{0%{opacity:0;transform:scale(0) rotate(0)}30%{opacity:1;transform:scale(1.5) rotate(180deg)}100%{opacity:0;transform:scale(.5) translateY(-80px) rotate(360deg)}}
+.cert{background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:8px double var(--gold);border-radius:12px;padding:30px 20px;text-align:center}
+.cert .medal{font-size:60px}
+.cert h2{font-size:22px;color:var(--blue);margin:8px 0 2px}
+.cert .cert-sub{font-size:13px;color:#888;margin-bottom:16px}
+.cert .cert-name{font-size:24px;font-weight:700;color:#333;border-bottom:2px solid var(--gold);display:inline-block;padding:4px 20px;margin:8px 0}
+.cert .cert-text{font-size:14px;color:#555;margin:12px 0;line-height:1.8}
+.cert .cert-stars{font-size:18px;margin:10px 0}
+.cert .cert-date{font-size:12px;color:#999;margin-top:12px}
+.cert .cert-seal{margin-top:12px;font-size:13px;color:var(--orange);font-weight:600}
+.name-input{width:100%;padding:12px 14px;border:2px solid #FFE082;border-radius:10px;font-size:16px;text-align:center;margin:12px 0}
+.name-input:focus{outline:none;border-color:var(--gold)}
+.settings{position:fixed;bottom:12px;right:12px;z-index:50}
+.settings button{background:rgba(255,255,255,.9);border:1px solid #ddd;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.reset-confirm{display:none;margin-top:8px;font-size:12px;color:var(--red)}
+.reset-confirm.show{display:block}
+.foot{text-align:center;font-size:11px;color:#BBB;padding:20px 16px}
+.locked-tip{text-align:center;color:#999;font-size:12px;padding:8px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="header">
+<h1>🌊 暑期安全小卫士</h1>
+<div class="sub">45天亲子安全挑战 · 7.18 - 8.31</div>
+<div class="progress-wrap">
+<div class="progress-fill" id="pf"></div>
+<div class="progress-text" id="pt">⭐ 0 / 45</div>
+</div>
+</div>
+<div class="intro">每天解锁一个安全任务，家长带孩子<b>一起答题</b>，答对得⭐，集满45颗获得<b>安全卫士证书</b>！</div>
+<div class="calendar" id="cal"></div>
+<div class="foot">提示：家长请在微信中打开本页面，进度自动保存在手机上</div>
+</div>
+<div class="settings">
+<button onclick="toggleReset()">⚙️</button>
+<div class="reset-confirm" id="rc">
+<p>确定要重置所有进度吗？</p>
+<button class="btn btn-outline" style="margin-top:6px;padding:8px;font-size:13px" onclick="doReset()">确认重置</button>
+</div>
+</div>
+<div class="overlay" id="overlay">
+<div class="modal" id="modal"></div>
+</div>
+<div class="overlay" id="certOverlay">
+<div class="modal">
+<div class="modal-body" style="padding:30px 20px">
+<div id="certContent"></div>
+</div>
+</div>
+</div>
+<script>
+var DAYS=[
+{d:"0718",i:"🌊",c:"防溺水",n:"认识危险水域",s:"周末你和家人出去玩，路过一条清澈的小河，水看起来很浅、很干净。",q:"看到这样的野外水域，正确的做法是？",o:["水浅又干净，下去踩踩水没问题","带上游泳圈就能下去玩","不下水，野外水域即使看着浅也可能有暗流或深坑","和小伙伴一起下去互相照应"],a:2,e:"野外水域情况复杂，水浅可能有暗流、深坑或淤泥。清澈不等于安全，记住——野外水域不下水！",task:"和孩子一起找出你家附近3处有水的地方（池塘/河流/景观池），告诉孩子这些地方暑假绝对不能去。"},
+{d:"0719",i:"🌊",c:"防溺水",n:"防溺水六不准",s:"同学约你暑假去河边玩水，说\"反正我们都会游泳，没事的\"。",q:"面对同学的邀约，你应该怎么做？",o:["都会游泳，一起去也没事","坚决不去，还要劝同学也别去","去看看，不下水就行","带救生圈一起去"],a:1,e:"防溺水\"六不准\"明确要求：不私自下水、不结伴下水。会游泳在自然水域反而容易放松警惕，更危险。"},
+{d:"0720",i:"🚗",c:"交通安全",n:"头盔佩戴",s:"妈妈骑电动车带你出门，你的头盔下巴带子勒得有点紧，想调松一点。",q:"头盔下巴带子调到什么程度最合适？",o:["越松越舒服，能塞进两根手指","完全贴紧下巴，什么都塞不进","能塞进去一根手指的松紧度","随便扣上就行，戴了头盔就够了"],a:2,e:"头盔下巴带子要能插进一根手指——多了太松头盔会飞出去，少了太紧不舒服孩子会偷偷解开。"},
+{d:"0721",i:"🌊",c:"防溺水",n:"溺水施救",s:"你看到有人掉进水里了，周围没有大人。",q:"你的第一反应应该是什么？",o:["赶紧跳下去救人","找根竹竿拉他上来","大声呼喊\"有人落水了\"，找大人来救","用手机拍视频发给家长"],a:2,e:"未成年人发现有人落水，第一件事是大声呼喊找大人，绝不能下水施救。溺水施救中最常见的悲剧就是救人者一起溺水。",video:"溺水黄金10秒 正确施救"},
+{d:"0722",i:"🏠",c:"居家安全",n:"独自在家三件事",s:"暑假你一个人在家，以下三件事哪件最重要？",q:"孩子独自在家，最需要做好什么？",o:["把门锁好，谁敲门都不开","关好电视和空调就行","窗户装限位器、危险物品收好、留紧急联系电话","把家里灯都开着假装有人"],a:2,e:"孩子独自在家三件事比锁门更重要：①窗户加装限位器（开不超过15厘米）②打火机/刀具收好③紧急联系人电话贴冰箱上。"},
+{d:"0723",i:"🌊",c:"防溺水",n:"家长四知道",s:"出门前妈妈问你几个问题。以下哪个不属于家长\"四知道\"？",q:"家长\"四知道\"不包括以下哪一项？",o:["你去哪儿","跟谁去","去干嘛","你带了多少零花钱"],a:3,e:"家长\"四知道\"是：知道孩子去哪、跟谁去、去干嘛、什么时候回。跟零花钱没关系！"},
+{d:"0724",i:"💻",c:"上网安全",n:"检查APP",s:"妈妈想看看你手机里装的APP，你觉得很烦。",q:"家长检查APP的主要目的是什么？",o:["查你的聊天记录","了解你在用什么软件，帮你远离网络风险","没收你的手机","找理由限制你上网"],a:1,e:"家长检查APP是为了了解孩子的网络世界，及时发现不安全的软件。同时约定暑假每天上网不超过1小时。",task:"和孩子一起看TA手机/平板里装的APP，问一句\"这个是干嘛的\"，约定每天上网不超过1小时。"},
+{d:"0725",i:"🌊",c:"防溺水",n:"憋气实验",s:"爸爸让你把脸浸入水盆中憋气，体会\"在水里没法呼吸\"的感觉。",q:"做这个实验的目的是什么？",o:["练习游泳憋气","体会溺水时的感觉，记住不能下水","看谁憋气时间长","锻炼肺活量"],a:1,e:"让孩子亲身体验\"在水里没法呼吸\"的恐惧感，比说一百遍\"不要下水\"更有效。溺水就是这种感觉，但没人能帮你呼吸。",task:"拿一盆水让孩子憋气把脸浸入水中（不超过10秒），然后告诉孩子：溺水就是这种感觉。"},
+{d:"0726",i:"☀️",c:"高温防暑",n:"中暑识别",s:"夏天户外活动后，你感觉头晕、恶心、不出汗、皮肤发烫。",q:"这可能是中暑了，应该怎么办？",o:["\"缓一缓\"就好了，继续玩","喝冰水降温","立刻转移到阴凉处，用湿毛巾敷脖子和腋下","跑到空调房里猛吹空调"],a:2,e:"中暑不是\"热一下就好\"。孩子出现头晕、恶心、不出汗、皮肤发烫，要立刻转移到阴凉处，用湿毛巾敷脖子和腋下。中暑耽误10分钟可能进ICU。"},
+{d:"0727",i:"🚗",c:"交通安全",n:"大车内轮差",s:"路口等红灯时，旁边停着一辆大货车，绿灯亮了大车要转弯。",q:"你应该站在哪里最安全？",o:["紧贴大车旁边，离越近越安全","多退两步，离大车远一点","站到大车正前方","跑到大车另一侧"],a:1,e:"大车转弯时有\"内轮差\"，站旁边看着离车还有一米，其实已经在轮子底下了。路口遇到大车，永远多退两步。"},
+{d:"0728",i:"🌊",c:"防溺水",n:"溺水速度",s:"你了解到溺水发生时，从挣扎到沉没通常只有多少时间？",q:"真实溺水从挣扎到沉没大约多长时间？",o:["1分钟","2-3分钟","20秒左右","5分钟以上"],a:2,e:"真实监控拍到的溺水过程：从挣扎到沉默只有20秒，而且旁边人根本没发现。这就是为什么防溺水要反复强调。",video:"溺水真实监控 20秒"},
+{d:"0729",i:"🍦",c:"饮食安全",n:"冷饮危害",s:"夏天特别热，你想把冰可乐当水喝。",q:"大量喝冷饮对身体有什么影响？",o:["没什么影响，夏天就该喝凉的","可能导致腹泻或急性肠胃炎","只要不冰过头就行","运动后喝冷饮最解渴"],a:1,e:"大量冷饮刺激肠胃，轻则腹泻，重则引发急性肠胃炎。白开水永远是第一选择，运动后少量多次补充。"},
+{d:"0730",i:"🌊",c:"防溺水",n:"暴雨后远离河道",s:"刚下完暴雨，你想去河边看看涨水了没有。",q:"暴雨后24小时内，以下哪个做法是安全的？",o:["去河边看涨水，不下水就行","远离河道、水库和排水沟","穿雨鞋去踩水","去排水沟旁边看水流"],a:1,e:"暴雨后24小时内，远离河道、水库、排水沟。水看着浅，其实流速极快，15厘米深的水就能冲倒一个成人。"},
+{d:"0731",i:"🛡️",c:"防拐骗",n:"陌生人敲门",s:"你一个人在家，有人敲门说是送快递的。",q:"你应该怎么做？",o:["打开门签收","隔着门说放门口就行","打电话问爸妈有没有快递","B和C都正确"],a:3,e:"90%的孩子嘴上说不开门，实际一敲门就开。跟孩子玩\"陌生人敲门\"情景演练，你来演快递员/送水工，看孩子会不会开门。",task:"跟孩子玩一个\"陌生人敲门\"情景演练，你来演快递员/送水工/爸妈朋友，看孩子会不会开门。"},
+{d:"0801",i:"🌊",c:"防溺水",n:"施救原则",s:"你看到小伙伴掉进水里了，你游泳很好。",q:"你应该怎么做？",o:["赶紧跳下去救人","大声呼喊找大人，不下水","找绳子拉他上来","先拍照发给家长"],a:1,e:"教会孩子一句救命话——\"如果有人落水，第一件事是喊大人，不是跳下去救。\"你不是救生员，你的任务是喊人。",task:"教会孩子一句救命话：\"如果有人落水，第一件事是喊大人，不是跳下去救。\"跟孩子说三遍。"},
+{d:"0802",i:"⚡",c:"用电安全",n:"湿手不碰电",s:"你的手刚洗完湿漉漉的，手机充电器插在墙上够不着。",q:"你应该怎么做？",o:["湿手直接去拔插头","擦干手再去拔","用嘴咬着线拔出来","用脚踢下来"],a:1,e:"夏天用电高峰三个\"不要\"：①不用湿手插拔插头②不一个插板接太多电器③打雷时拔掉电视和电脑网线。触电不挑人，预防很简单。"},
+{d:"0803",i:"🚗",c:"交通安全",n:"汽车盲区",s:"你在停车场走路，想从一辆停着的车后面绕过去。",q:"停车场里走路应该走哪里？",o:["走车尾后面绕过去","走车头前面","走两车中间","哪里近走哪里"],a:1,e:"车有三个\"死亡盲区\"：车头前2米、车尾后3米、A柱两侧。只要看不到司机的眼睛，司机就看不到你。永远走车头前面。"},
+{d:"0804",i:"🌊",c:"防溺水",n:"水上乐园安全",s:"爸爸带你去水上乐园玩，你觉得有救生员就安全了。",q:"关于水上乐园安全，哪个说法正确？",o:["有救生员就完全安全","救生员顾不过来，家长还是要盯紧","浅水区不用管","穿了救生衣就不用看"],a:1,e:"水上乐园的救生员要同时看很多人，根本顾不过来。家长带孩子去水边，眼睛要盯着孩子，不能放松。",video:"水上乐园 隐形危险 监控"},
+{d:"0805",i:"🔥",c:"消防安全",n:"火灾逃生",s:"你发现家里着火了，火还不小。",q:"第一件事应该做什么？",o:["找水灭火","拍照发朋友圈","赶紧跑出去，然后打119","躲到卫生间里"],a:2,e:"孩子看到着火第一件事是跑，不是灭火；跑出去之后打119，不是先拍照。把打火机收好，暑假是儿童火灾高发期。"},
+{d:"0806",i:"🌊",c:"防溺水",n:"会游泳≠不会溺水",s:"你会游泳，同学约你去野外河里游。",q:"为什么会游泳的孩子在自然水域反而更危险？",o:["因为河流太宽","会游泳容易放松警惕，但自然水域有暗流、水草、淤泥","因为水太冷","没有更危险的说法"],a:1,e:"会游泳≠不会溺水。自然水域有暗流、水草、淤泥，跟游泳池完全是两回事。会游泳的孩子反而更容易放松警惕，家长更要盯紧。"},
+{d:"0807",i:"💻",c:"上网安全",n:"隐私设置",s:"你的社交账号上，以下哪个信息可以让陌生人看到？",q:"社交账号上哪个信息可以对外公开？",o:["你的真实姓名","你的家庭住址","你的学校班级","以上都不可以"],a:3,e:"检查孩子社交账号隐私设置——个人资料、定位、好友列表是否对陌生人可见。花3分钟设置好，比出事后报警有用100倍。",task:"检查孩子社交账号隐私设置——个人资料、定位、好友列表是否对陌生人可见。"},
+{d:"0808",i:"🌊",c:"防溺水",n:"看天气预报",s:"你和孩子一起看天气预报，这周有大暴雨。",q:"暴雨天气应该避免去哪里？",o:["河边、低洼处","商场室内","家里","学校"],a:0,e:"打开手机天气APP，和孩子一起看本周天气预报。如果有暴雨，提前约定：下雨天不去河边、不在低洼处玩耍。让孩子自己说出原因，比你唠叨管用。",task:"打开手机天气APP，和孩子一起看本周天气预报，如果有暴雨提前约定不去河边。"},
+{d:"0809",i:"🌧️",c:"防自然灾害",n:"暴雨行走",s:"暴雨天走在路上，前面有一段积水路段。",q:"积水没过脚踝了，你应该？",o:["继续往前走","绕道走，积水可能盖住缺失的井盖","跑过去","蹲下来看水深不深"],a:1,e:"暴雨\"三避\"：避开低洼路段、避开积水区域（可能有缺失井盖）、避开大树和广告牌。水深没过脚踝就别往前走了。"},
+{d:"0810",i:"🚲",c:"交通安全",n:"小区骑行",s:"你在小区里骑自行车，看到地下车库出入口的斜坡。",q:"小区骑车以下哪个地方不能去？",o:["小区花园小路","机动车道、车库出入口和斜坡","小区广场","自行车道上"],a:1,e:"骑自行车/滑板车，这三个地方不能去：机动车道、小区车库出入口、小区斜坡。暑假小区内交通事故不少，不是车快，是孩子突然冲出来。"},
+{d:"0811",i:"🌊",c:"防溺水",n:"农村溺水",s:"你了解到农村孩子溺水率是城市的3倍。",q:"农村孩子溺水率高的主要原因是？",o:["农村孩子不会游泳","缺乏安全教育和大人在场看护","农村水更多","农村孩子更调皮"],a:1,e:"不是不会游泳，是没人教、没人看。农村留守儿童暑假缺乏大人看护，是溺水高发的根本原因。",video:"农村儿童溺水 安全教育短片"},
+{d:"0812",i:"🏠",c:"居家安全",n:"厨房安全",s:"你一个人在家想热东西吃，微波炉里能加热以下哪个？",q:"微波炉不能加热以下哪个？",o:["带壳鸡蛋","密封牛奶袋","剩饭剩菜（打开盖子）","A和B都不能"],a:3,e:"暑假孩子一个人在家，厨房是最危险的地方。微波炉不能加热密封食物（鸡蛋、牛奶袋会炸），不能空烧锅。规矩：大人不在家，厨房门关上。"},
+{d:"0813",i:"🌊",c:"防溺水",n:"家长看水",s:"爸爸带你游泳，游了一会儿爸爸想看手机。",q:"带孩子在水边时，家长应该？",o:["可以看手机，不时抬头看看就行","眼睛盯着孩子，不看手机","让孩子自己玩，有事叫","让救生员看着就行"],a:1,e:"防溺水最有效的一招：家长学会\"看水\"。溺水是安静的——没有呼救、没有挣扎、头在水下。你走神30秒，可能就是一辈子。"},
+{d:"0814",i:"💛",c:"心理健康",n:"亲子聊天",s:"今晚睡前妈妈想跟你聊10分钟，问三个问题。",q:"妈妈问\"暑假到现在最开心的事是什么\"，你应该？",o:["说\"没有开心的\"","随便说一个敷衍过去","认真想想，分享真实的感受","说\"别问了，我要睡觉\""],a:2,e:"睡前跟孩子聊10分钟，问三个问题：①最开心的事②有没有烦心事③下学期有什么期待。不评价、不教育，只听。",task:"今晚睡前跟孩子聊10分钟，问三个问题：①暑假到现在最开心的事②有没有什么烦心事③下学期有什么期待。"},
+{d:"0815",i:"🌊",c:"防溺水",n:"危险水域地图",s:"爸爸和你一起画了一张\"危险水域地图\"。",q:"画这张地图的目的是什么？",o:["标记好以后去玩的地方","知道哪里危险，才能主动避开","交给学校完成作业","就是画画玩"],a:1,e:"和孩子一起把家附近2公里内的河流、池塘、工地积水坑都标出来，贴在冰箱上。看见才知道，知道才能避。",task:"和孩子一起画一张\"危险水域地图\"，把家附近2公里内的河流、池塘、工地积水坑都标出来，贴在冰箱上。"},
+{d:"0816",i:"🍉",c:"饮食安全",n:"食物保存",s:"冰箱里有前天的剩菜，你看看好像没坏。",q:"冰箱里的剩菜超过多长时间就不该吃了？",o:["12小时","24小时","48小时","一周"],a:1,e:"夏天食物变质速度是冬天的3倍。冰箱里的剩菜超过24小时就别给孩子吃了，常温下超过2小时的熟食直接倒掉。拉肚子事小，急性食物中毒是要住院的。"},
+{d:"0817",i:"🚸",c:"交通安全",n:"开学前提醒",s:"快开学了，你走在路上看手机。",q:"走路看手机有什么危险？",o:["没什么危险，注意看路就行","可能撞到人","看不到红绿灯和车辆，容易出交通事故","手机容易摔"],a:2,e:"开学倒计时两周，安全不能松。走路不看手机，过马路走斑马线，不在马路上追跑打闹。暑假最后两周，安全不能松。"},
+{d:"0818",i:"🌊",c:"防溺水",n:"落水自救",s:"如果不小心掉进水里，不会游泳，最正确的做法是？",q:"落水后最正确的自救做法是？",o:["拼命挣扎、大声呼救","仰面朝上，口鼻露出水面，双手轻划等待救援","抱紧身体沉到水底","抓住水草不动"],a:1,e:"落水后不要挣扎，仰面朝上，口鼻露出水面，双手轻划。这个动作能在水里坚持30分钟以上等待救援。",video:"溺水正确施救 错误示范"},
+{d:"0819",i:"🛡️",c:"防拐骗",n:"人贩子新套路",s:"陌生人说\"你妈妈让我来接你\"。",q:"你应该怎么做？",o:["跟着走，万一是真的呢","先问清妈妈的名字","不跟走，先给爸妈打电话确认","让他证明认识你妈妈"],a:2,e:"人贩子新套路：\"你妈妈让我来接你\"\"帮叔叔找一下小狗\"\"你长得真好看，要不要当小模特\"。不管什么理由，跟陌生人走之前，必须先给爸妈打电话确认。"},
+{d:"0820",i:"🌊",c:"防溺水",n:"真实溺水姿态",s:"你在泳池游泳，看到旁边一个人头在水面上方、身体直立不动、没有挣扎。",q:"这个人可能怎么了？",o:["在练习漂浮，没事","在休息，正常","可能溺水了，真实溺水是安静的","在等人"],a:2,e:"溺水不是电影里的样子——没有扑腾、没有喊叫、没有水花。真实的溺水是安静的，头微微后仰，嘴在水面上方，身体直立不动。看到这种姿态，立刻拉上来。"},
+{d:"0821",i:"💻",c:"上网安全",n:"屏幕时间",s:"暑假你想多玩会儿手机，妈妈说要设\"屏幕使用时间\"。",q:"暑假每天上网不超过多长时间比较合理？",o:["不限制","1小时","3小时","5小时"],a:1,e:"和孩子一起设置手机/平板的\"屏幕使用时间\"，约定每天可用时段和时长。让孩子自己参与设置规则，比单方面下命令执行率高3倍。",task:"和孩子一起设置手机/平板的\"屏幕使用时间\"，约定每天可用时段和时长。"},
+{d:"0822",i:"🌊",c:"防溺水",n:"仰漂自救",s:"爸爸教你\"仰漂\"，落水后的自救姿势。",q:"仰漂能在水里坚持多长时间等待救援？",o:["1-2分钟","5分钟","30分钟以上","不到1分钟"],a:2,e:"教会孩子\"仰漂\"——落水后不要挣扎，仰面朝上，口鼻露出水面，双手轻划。这个动作能在水里坚持30分钟以上等待救援。今天洗澡时就练练。",task:"教会孩子\"仰漂\"——落水后不要挣扎，仰面朝上，口鼻露出水面，双手轻划。今天洗澡时就练练。"},
+{d:"0823",i:"⚡",c:"用电安全",n:"雷雨天安全",s:"打雷了，你的手机正在充电。",q:"雷雨天以下哪个做法是安全的？",o:["继续充电玩手机","拔掉充电器，远离窗户和金属物品","站在窗边看闪电","用有线耳机听音乐"],a:1,e:"雷雨天三个\"远离\"：远离窗户、远离金属物品、远离充电中的手机。雷电击中窗户玻璃的碎片比子弹还危险。充电时打雷，拔掉充电器比什么都重要。"},
+{d:"0824",i:"🚗",c:"交通安全",n:"乘车安全",s:"爸爸开车送你去培训班，你想坐副驾驶。",q:"12岁以下儿童乘车应该怎么坐？",o:["坐副驾驶，系安全带就行","坐后排，必须使用安全座椅","坐后排，不用安全座椅","坐谁腿上都行"],a:1,e:"孩子坐后排不坐副驾，12岁以下必须用安全座椅，停车后从右侧下车。开学前把习惯养成，开学后不慌。"},
+{d:"0825",i:"🌊",c:"防溺水",n:"水域深浅",s:"你看到一条小溪，水看起来只有膝盖深。",q:"看起来浅的水可能比你想象的深多少？",o:["差不多就是那么深","可能深3倍以上","深一点点","水清就能看准深度"],a:1,e:"看起来浅的水，可能比你想象的深3倍。野外水域深浅不可测，暑假最后一周，安全不放假。",video:"野外水域 深浅不可测 安全教育"},
+{d:"0826",i:"🔥",c:"消防安全",n:"消防通道",s:"着火了要往楼下跑，但楼道里有烟。",q:"有烟的地方应该怎么走？",o:["捂住鼻子直接跑过去","弯腰走，用湿毛巾捂口鼻","屏住呼吸冲过去","不跑了，躲回房间"],a:1,e:"带孩子认一认小区/楼道的消防通道和灭火器位置。记住一句话：着火了往楼下跑，不往楼上跑；有烟的地方弯腰走，用湿毛巾捂口鼻。"},
+{d:"0827",i:"🌊",c:"防溺水",n:"四知道复习",s:"暑假最后一周，妈妈再次确认你的情况。",q:"家长\"四知道\"包括以下哪四个？",o:["去哪、跟谁、干嘛、什么时候回","去哪、带什么、干嘛、跟谁","跟谁、干嘛、带多少、什么时候回","去哪、跟谁、干嘛、带什么"],a:0,e:"暑假最后一周，防溺水不能松懈。家长再确认一遍：孩子暑假常去的地方有没有水域？孩子跟谁玩？有没有大人看？把\"四知道\"再过一遍。"},
+{d:"0828",i:"💛",c:"心理健康",n:"新学期计划",s:"快开学了，妈妈让你自己定一份\"新学期生活计划\"。",q:"这份计划应该由谁来定？",o:["妈妈定，你照着做","你自己定，妈妈只签字确认","老师定","爸爸定"],a:1,e:"开学前3天，跟孩子一起做一份\"新学期小计划\"——不是学习计划，是生活计划：几点起床、几点睡觉、放学后先写作业还是先玩。让孩子自己定，你只签字。",task:"跟孩子一起做一份\"新学期小计划\"——几点起床、几点睡觉、放学后先写作业还是先玩。让孩子自己定，你只签字。"},
+{d:"0829",i:"🌊",c:"防溺水",n:"暑期回顾",s:"暑假最后一个周末，爸爸问你：\"如果遇到危险，你第一个电话打给谁？\"",q:"这个问题的目的是什么？",o:["考你的记忆力","确认你真的记住了安全知识，说出来的才算记住","没什么目的就是聊天","检查你有没有存号码"],a:1,e:"跟孩子一起回顾这个暑假聊过的安全话题，问一句\"如果遇到危险，你第一个电话打给谁？\"。记住，说出来的才算记住。",task:"跟孩子一起回顾这个暑假聊过的安全话题，问一句\"如果遇到危险，你第一个电话打给谁？\"。"},
+{d:"0830",i:"📚",c:"开学准备",n:"开学安全准备",s:"明天开学！今晚整理书包时发现里面有把小剪刀。",q:"整理书包时应该注意什么？",o:["不用管，小剪刀没什么","取出尖锐物品，确认上学路线和放学等家长的位置","把所有东西都带上","只带课本就行"],a:1,e:"今晚帮孩子做好三件事：①整理书包，不放尖锐物品②确认上学路线，路上有几个红绿灯③跟孩子约定放学后等家长的位置，不在校门口乱跑。"},
+{d:"0831",i:"🚸",c:"交通安全",n:"开学第一天",s:"开学第一天早上，路上有很多学生和家长。",q:"上学路上应该注意什么？",o:["不看手机、不追跑打闹、过马路左右看","跑快点别迟到","边走边跟同学聊天","走机动车道更快"],a:0,e:"开学第一天：上学路上不看手机、不追跑打闹、过马路左右看。家长接送注意校门口不乱停车，即停即走。新学期，安全启航！"}
+];
+var STORAGE_KEY='safety_cal_2026';
+var state={completed:{},name:''};
+var curDay=null;
+function load(){try{var d=localStorage.getItem(STORAGE_KEY);if(d){state=JSON.parse(d)}}catch(e){}}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+function todayStr(){var n=new Date(),t=n.getTimezoneOffset(),s=new Date(n.getTime()+(t+480)*60000);return s.getUTCFullYear()+String(s.getUTCMonth()+1).padStart(2,'0')+String(s.getUTCDate()).padStart(2,'0')}
+function isPreview(){return new URLSearchParams(location.search).get('preview')==='1'}
+function unlocked(d){return isPreview()||('2026'+d<=todayStr())}
+function isToday(d){return'2026'+d===todayStr()}
+function completed(d){return!!state.completed[d]}
+function starCount(){return Object.keys(state.completed).length}
+function renderCal(){
+var h='';
+DAYS.forEach(function(day){
+var cls='day-card ';
+if(completed(day.d)){cls+='completed'}
+else if(unlocked(day.d)){cls+='available';if(isToday(day.d))cls+=' today'}
+else{cls+='locked'}
+var dn=parseInt(day.d.substring(2,4));
+var ic=completed(day.d)?'⭐':(unlocked(day.d)?day.i:'🔒');
+var clk=unlocked(day.d)?'onclick="openDay(\''+day.d+'\')"':'';
+h+='<div class="'+cls+'" '+clk+'><div class="dd">'+dn+'</div><div class="di">'+ic+'</div></div>';
+});
+document.getElementById('cal').innerHTML=h;
+updateProgress()}
+function updateProgress(){var c=starCount(),pct=Math.round(c/45*100);document.getElementById('pf').style.width=pct+'%';document.getElementById('pt').textContent='⭐ '+c+' / 45'}
+function openDay(d){curDay=d;var day=DAYS.find(function(x){return x.d===d});if(!day)return;
+var done=completed(d);
+var html='<div class="modal-head"><span class="close" onclick="closeModal()">✕</span>';
+html+='<div class="day-label">'+parseInt(day.d.substring(0,2))+'月'+parseInt(day.d.substring(2,4))+'日 · '+day.c+'</div>';
+html+='<h3>'+day.i+' '+day.n+'</h3></div><div class="modal-body">';
+if(done){
+html+='<div class="scenario">'+day.s+'</div>';
+html+='<div class="question">'+day.q+'</div>';
+day.o.forEach(function(opt,i){var cl=i===day.a?'opt correct':'opt disabled';html+='<button class="'+cl+'"><span class="opt-label">'+String.fromCharCode(65+i)+'</span>'+opt+'</button>'});
+html+='<div class="feedback ok show"><div class="result">✅ 已完成！</div>'+day.e+'</div>';
+if(day.task)html+='<div class="task-box"><div class="tt">👨‍👩‍👧 亲子任务</div><div class="tc">'+day.task+'</div></div>';
+if(day.video)html+='<div class="video-box"><div class="vt">📹 推荐视频</div><div class="vc">抖音搜索：「'+day.video+'」</div></div>';
+html+='<button class="btn btn-outline" onclick="closeModal()">返回日历</button>';
+}else{
+html+='<div class="scenario">'+day.s+'</div>';
+html+='<div class="question">'+day.q+'</div>';
+day.o.forEach(function(opt,i){html+='<button class="opt" onclick="answer('+i+')" id="opt'+i+'"><span class="opt-label">'+String.fromCharCode(65+i)+'</span>'+opt+'</button>'});
+html+='<div class="feedback" id="fb"></div>';
+html+='<div id="afterAns" style="display:none"></div>'}
+html+='</div>';
+document.getElementById('modal').innerHTML=html;
+document.getElementById('overlay').classList.add('show')}
+function answer(i){
+var day=DAYS.find(function(x){return x.d===curDay});if(!day)return;
+var opts=document.querySelectorAll('.opt');opts.forEach(function(o){o.classList.add('disabled')});
+var fb=document.getElementById('fb');var after=document.getElementById('afterAns');
+if(i===day.a){
+opts[i].classList.add('correct');
+fb.className='feedback ok show';
+fb.innerHTML='<div class="result">✅ 答对了！获得⭐</div>'+day.e;
+state.completed[curDay]=true;save();
+flyStar();
+var ah='';
+if(day.task)ah+='<div class="task-box"><div class="tt">👨‍👩‍👧 亲子任务</div><div class="tc">'+day.task+'</div></div>';
+if(day.video)ah+='<div class="video-box"><div class="vt">📹 推荐视频</div><div class="vc">抖音搜索：「'+day.video+'」</div></div>';
+ah+='<button class="btn btn-green" onclick="closeModal();checkCert()">完成打卡 ⭐</button>';
+after.innerHTML=ah;after.style.display='block';
+setTimeout(function(){renderCal()},500)
+}else{
+opts[i].classList.add('wrong');
+setTimeout(function(){opts[day.a].classList.add('correct')},500);
+fb.className='feedback no show';
+fb.innerHTML='<div class="result">❌ 答错了</div>正确答案：'+String.fromCharCode(65+day.a)+'. '+day.o[day.a]+'<br><br>'+day.e;
+after.innerHTML='<button class="btn btn-outline" onclick="retry()">再试一次</button>';
+after.style.display='block'}}
+function retry(){openDay(curDay)}
+function closeModal(){document.getElementById('overlay').classList.remove('show');curDay=null}
+function flyStar(){for(var k=0;k<6;k++){var s=document.createElement('div');s.className='star-anim';s.textContent='⭐';s.style.left=(Math.random()*window.innerWidth)+'px';s.style.top=(window.innerHeight/2)+'px';s.style.animationDelay=(k*80)+'ms';document.body.appendChild(s);setTimeout(function(e){return function(){e.remove()}}(s),1200)}}
+function checkCert(){if(starCount()>=45){showCert()}}
+function showCert(){
+var html='<div class="cert">';
+html+='<div class="medal">🏅</div>';
+html+='<h2>暑期安全小卫士</h2>';
+html+='<div class="cert-sub">荣 誉 证 书</div>';
+if(state.name){html+='<div class="cert-name">'+state.name+'</div>'}else{
+html+='<p style="font-size:13px;color:#666;margin-bottom:8px">请输入学生姓名：</p>';
+html+='<input class="name-input" id="certName" placeholder="学生姓名" maxlength="10">';
+html+='<button class="btn btn-primary" style="margin-top:8px" onclick="saveCertName()">生成证书</button>';
+html+='</div>';
+document.getElementById('certContent').innerHTML=html;
+document.getElementById('certOverlay').classList.add('show');
+return}
+html+='<div class="cert-name">'+state.name+'</div>';
+html+='<div class="cert-text">在2026年暑假期间，与家长共同完成45天安全挑战<br>荣获"安全卫士家庭"称号</div>';
+html+='<div class="cert-stars">⭐⭐⭐⭐⭐</div>';
+html+='<div class="cert-text" style="font-size:12px;color:#999">完成日期：'+new Date().toLocaleDateString('zh-CN')+'</div>';
+html+='<div class="cert-seal">🏆 暑期安全卫士 · 完成认证</div>';
+html+='</div>';
+html+='<p style="text-align:center;font-size:12px;color:#999;margin-top:12px">📸 截图保存这份证书</p>';
+html+='<button class="btn btn-outline" onclick="document.getElementById(\'certOverlay\').classList.remove(\'show\')">关闭</button>';
+document.getElementById('certContent').innerHTML=html;
+document.getElementById('certOverlay').classList.add('show')}
+function saveCertName(){var n=document.getElementById('certName').value.trim();if(!n){alert('请输入姓名');return}state.name=n;save();showCert()}
+function toggleReset(){document.getElementById('rc').classList.toggle('show')}
+function doReset(){state={completed:{},name:''};save();renderCal();document.getElementById('rc').classList.remove('show');closeModal();document.getElementById('certOverlay').classList.remove('show')}
+load();renderCal();
+</script>
+</body>
+</html>
