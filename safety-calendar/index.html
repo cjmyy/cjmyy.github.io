@@ -171,7 +171,7 @@ var state={completed:{},name:''};
 var curDay=null;
 function load(){try{var d=localStorage.getItem(STORAGE_KEY);if(d){state=JSON.parse(d)}}catch(e){}}
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
-function todayStr(){var n=new Date(),t=n.getTimezoneOffset(),s=new Date(n.getTime()+(t+480)*60000);return s.getUTCFullYear()+String(s.getUTCMonth()+1).padStart(2,'0')+String(s.getUTCDate()).padStart(2,'0')}
+function todayStr(){var n=new Date(),b=new Date(n.getTime()+8*3600000);return b.getUTCFullYear()+String(b.getUTCMonth()+1).padStart(2,'0')+String(b.getUTCDate()).padStart(2,'0')}
 function isPreview(){return new URLSearchParams(location.search).get('preview')==='1'}
 function unlocked(d){return isPreview()||('2026'+d<=todayStr())}
 function isToday(d){return'2026'+d===todayStr()}
