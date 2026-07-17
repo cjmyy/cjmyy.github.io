@@ -320,7 +320,7 @@ async function attemptUnlock() {
     const fileOrder = ['data.js', 'app.js', 'report.js'];
     const decryptedCodes = [];
     for (const fname of fileOrder) {
-      const encryptedB64 = bundle[fname];
+      const encryptedB64 = bundle.files[fname];
       const decrypted = await decryptFile(encryptedB64, aesKey);
       decryptedCodes.push(decrypted);
     }
