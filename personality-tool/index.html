@@ -379,7 +379,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
         </select>
         <div id="customLngBox" style="display:none;margin-top:0.5rem;">
           <label style="font-size:0.8rem;color:var(--text-l);">出生地经度（东经为正，如汉中107.0、乌鲁木齐87.6、东京139.6、纽约-74.0）</label>
-          <input type="number" id="customLng" step="0.1" placeholder="如：139.6" style="width:100%;padding:0.5rem;margin-top:0.25rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;">
+          <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+            <input type="number" id="customLng" step="0.1" placeholder="如：107.0" style="flex:1;padding:0.5rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;">
+            <a href="https://www.baidu.com/s?wd=城市名+经度" target="_blank" style="white-space:nowrap;padding:0.5rem 0.8rem;border:1.5px solid var(--accent);border-radius:10px;font-size:0.8rem;font-weight:600;color:var(--accent);text-decoration:none;align-self:center;">🔍 查经度</a>
+          </div>
         </div>
       </div>
       <input type="hidden" id="mode" value="child">
