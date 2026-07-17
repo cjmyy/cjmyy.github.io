@@ -312,16 +312,16 @@ async function attemptUnlock() {
     // Step 1: Derive key from password
     const aesKey = await deriveKey(password);
 
-    // Step 2: Fetch and decrypt the 3 encrypted files
-    // Try to fetch them as separate files first
-    const files = ['data.js.encrypted', 'app.js.encrypted', 'report.js.encrypted'];
-    const decryptedCodes = [];
+    // Step 2: Fetch the encrypted bundle (single JSON file)
+    const resp = await fetch('encrypted_bundle.json');
+    if (!resp.ok) throw new Error('加密数据加载失败');
+    const bundle = await resp.json();
 
-    for (let i = 0; i < files.length; i++) {
-      const resp = await fetch(files[i]);
-      if (!resp.ok) throw new Error('文件加载失败: ' + files[i]);
-      const encryptedB64 = await resp.text();
-      const decrypted = await decryptFile(encryptedB64.trim(), aesKey);
+    const fileOrder = ['data.js', 'app.js', 'report.js'];
+    const decryptedCodes = [];
+    for (const fname of fileOrder) {
+      const encryptedB64 = bundle[fname];
+      const decrypted = await decryptFile(encryptedB64, aesKey);
       decryptedCodes.push(decrypted);
     }
 
