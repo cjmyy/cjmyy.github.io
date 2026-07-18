@@ -134,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <button class="lock-btn" id="unlockBtn" onclick="attemptUnlock()">进入</button>
     <div class="lock-spinner" id="lockSpinner"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v4.0</div>
+    <div class="lock-hint">核心数据已加密保护 · v4.1</div>
   </div>
 </div>
 
@@ -182,6 +182,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="card">
     <div class="card-title">📋 基本信息</div>
     <form id="form">
+      <div id="birthInfoSection">
       <div class="form-grid">
         <div class="form-group"><label>出生年</label><input type="number" id="year" placeholder="如2005" min="1940" max="2030" required></div>
         <div class="form-group"><label>出生月</label><input type="number" id="month" placeholder="1-12" min="1" max="12" required></div>
@@ -391,6 +392,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           </div>
         </div>
       </div>
+      </div>
       <input type="hidden" id="mode" value="child">
       <div class="card-title" style="margin-top:1.2rem">⚙️ 报告选项</div>
       <div class="form-group">
@@ -429,8 +431,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
         </div>
         <div class="form-group">
           <label>填写好的问卷内容（直接粘贴文本）</label>
-          <textarea id="questionnaireText" placeholder="将填好的问卷内容粘贴到这里，或点击上方下载问卷后填写再粘贴回来" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
-          <div class="hint">支持直接粘贴问卷文本，系统会自动解析答案</div>
+          <textarea id="questionnaireText" placeholder="将填好的问卷内容粘贴到这里，或点击上方下载问卷后填写再粘贴回来" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
+        <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
+          <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
+        </div>
+        <div id="fallbackLngBox" style="display:none;margin-top:0.5rem;padding:0.6rem;background:#fff3e0;border:1.5px solid #ff9800;border-radius:10px;">
+          <label style="font-size:0.8rem;color:#e65100;">问卷中的出生地无法自动识别，请手动输入出生地经度（东经为正，如汉中107.0）</label>
+          <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+            <input type="number" id="fallbackLng" step="0.1" placeholder="如：107.0" style="flex:1;padding:0.5rem;border:1.5px solid #ff9800;border-radius:10px;font-size:0.92rem;">
+            <a href="https://www.baidu.com/s?wd=城市名+经度" target="_blank" style="white-space:nowrap;padding:0.5rem 0.8rem;border:1.5px solid #ff9800;border-radius:10px;font-size:0.8rem;font-weight:600;color:#ff9800;text-decoration:none;align-self:center;">🔍 查经度</a>
+          </div>
+        </div>
         </div>
         <div style="display:flex;align-items:center;gap:0.4rem;margin:0.5rem 0">
           <input type="file" id="questionnaireFile" accept=".txt,.md" style="display:none" onchange="handleFileUpload(event)">
@@ -568,18 +580,61 @@ function selectMode(mode) {
   document.getElementById('modeSelect').style.display = 'none';
   document.getElementById('formPage').style.display = 'block';
 
-  // 诊断模式：显示问卷区，隐藏感统量表
   var diagSection = document.getElementById('diagnosticSection');
   var sensoryRow = document.getElementById('sensoryRow');
+  var birthInfoSection = document.getElementById('birthInfoSection');
   var versionGroup = document.getElementById('version') ? document.getElementById('version').parentElement : null;
 
   if (mode === 'diagnostic') {
     if (diagSection) diagSection.style.display = 'block';
     if (sensoryRow) sensoryRow.style.display = 'none';
+    if (birthInfoSection) birthInfoSection.style.display = 'none';
   } else {
     if (diagSection) diagSection.style.display = 'none';
+    if (birthInfoSection) birthInfoSection.style.display = 'block';
   }
   updateSensory();
+}
+
+// 诊断模式：问卷内容变化时自动提取出生信息
+function checkBirthInfo() {
+  var qText = document.getElementById('questionnaireText').value;
+  var hintBox = document.getElementById('birthInfoHint');
+  var fallbackBox = document.getElementById('fallbackLngBox');
+  var statusEl = document.getElementById('birthInfoStatus');
+  if (!qText || !qText.trim()) {
+    if (hintBox) hintBox.style.display = 'none';
+    if (fallbackBox) fallbackBox.style.display = 'none';
+    return;
+  }
+  var bi = extractBirthInfo(qText);
+  if (!hintBox) return;
+  hintBox.style.display = 'block';
+
+  var parts = [];
+  if (bi.year && bi.month && bi.day) parts.push('出生日期: ' + bi.year + '-' + bi.month + '-' + bi.day);
+  else parts.push('⚠ 出生年月日未识别');
+  if (bi.hour === -1) parts.push('时辰: 不详(按未知时辰处理)');
+  else if (bi.hour >= 0) parts.push('时辰: ' + bi.hour + '时');
+  else parts.push('⚠ 出生时间未识别');
+  if (bi.gender) parts.push('性别: ' + (bi.gender === 'male' ? '男' : '女'));
+  else parts.push('⚠ 性别未识别');
+
+  // 检查出生地是否匹配
+  var selectEl = document.getElementById('birthplace');
+  var matched = matchBirthplace(bi.birthplace, selectEl);
+  if (matched) {
+    parts.push('出生地: ' + matched + ' ✓');
+    if (fallbackBox) fallbackBox.style.display = 'none';
+  } else if (bi.birthplace) {
+    parts.push('出生地: "' + bi.birthplace + '" 无法自动匹配 ⚠');
+    if (fallbackBox) fallbackBox.style.display = 'block';
+  } else {
+    parts.push('⚠ 出生地未识别');
+    if (fallbackBox) fallbackBox.style.display = 'block';
+  }
+
+  if (statusEl) statusEl.innerHTML = parts.join('<br>');
 }
 
 function handleFileUpload(event) {
@@ -588,6 +643,7 @@ function handleFileUpload(event) {
   var reader = new FileReader();
   reader.onload = function(e) {
     document.getElementById('questionnaireText').value = e.target.result;
+    checkBirthInfo();
   };
   reader.readAsText(file, 'UTF-8');
 }
@@ -781,6 +837,40 @@ function initApp() {
         }
         var diagMode = document.getElementById('diagnosticMode').value;
 
+        // 从问卷自动提取出生信息
+        var bi = extractBirthInfo(qText);
+        if (!bi.year || !bi.month || !bi.day) {
+          throw new Error('无法从问卷中识别出生年月日，请检查问卷中"出生年月日（公历）"一栏是否填写完整');
+        }
+        if (!bi.gender) {
+          throw new Error('无法从问卷中识别性别，请检查问卷中性别一栏是否标记');
+        }
+        var dYear = bi.year;
+        var dMonth = bi.month;
+        var dDay = bi.day;
+        var dHour = bi.hour < 0 ? 0 : bi.hour;
+        var dGender = bi.gender;
+
+        // 匹配出生地
+        var selectEl = document.getElementById('birthplace');
+        var dBirthplace = matchBirthplace(bi.birthplace, selectEl);
+        if (!dBirthplace) {
+          // 检查是否手动填了经度
+          var flb = document.getElementById('fallbackLng');
+          if (flb && flb.value) {
+            var flng = parseFloat(flb.value);
+            if (!isNaN(flng)) {
+              if (typeof ANALYZER_CONSTANTS !== 'undefined' && ANALYZER_CONSTANTS.CITY_LONGITUDES) {
+                ANALYZER_CONSTANTS.CITY_LONGITUDES['__custom__'] = flng;
+              }
+              dBirthplace = '__custom__';
+            }
+          }
+          if (!dBirthplace) {
+            throw new Error('问卷中的出生地"' + bi.birthplace + '"无法识别，请在上方经度输入框中手动填写出生地经度');
+          }
+        }
+
         // 解析问卷
         var parsed = parseQuestionnaire(qText, diagMode);
         var qResult = scoreQuestionnaire(parsed);
@@ -789,9 +879,9 @@ function initApp() {
           throw new Error('问卷解析到的问题答案不足3个，请检查问卷格式是否正确（每题需标注A/B/C/D选项）');
         }
 
-        // 八字分析
+        // 八字分析（使用从问卷提取的信息）
         var analyzer = new PersonalityAnalyzer();
-        var baziAnalysis = analyzer.analyze(year, month, day, hour, minute, false, gender, birthplace, false);
+        var baziAnalysis = analyzer.analyze(dYear, dMonth, dDay, dHour, 0, false, dGender, dBirthplace, false);
         var dominantShishen = '';
         if (baziAnalysis && baziAnalysis.good_evil_ratio) {
           dominantShishen = baziAnalysis.good_evil_ratio.dominant || '';
@@ -811,7 +901,7 @@ function initApp() {
           crossValidation: cv,
           mode: diagMode,
           output: output,
-          birthInfo: { year: year, month: month, day: day, hour: hour, minute: minute, gender: gender, birthplace: birthplace }
+          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: 0, gender: dGender, birthplace: dBirthplace }
         });
 
         currentReport = reportText;
@@ -820,7 +910,7 @@ function initApp() {
         var tag = document.getElementById('resultTag');
         var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : '诊断·成人版';
         var verTxt = delivery ? '交付版' : '主人版';
-        tag.textContent = diagModeTxt + ' · ' + verTxt + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        tag.textContent = diagModeTxt + ' · ' + verTxt + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
       } else {
         // === 普通性格报告模式 ===
         var report = new PersonalityReport();
