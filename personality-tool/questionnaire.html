@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0">
+<title>诊断问卷</title>
+<style>
+:root{--primary:#1a365d;--primary-l:#2c5282;--accent:#0d9488;--bg:#f8fafc;--card:#fff;--text:#1a202c;--text-l:#64748b;--border:#e2e8f0;--error:#dc2626;--radius:14px;--shadow:0 4px 20px rgba(26,54,93,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.mode-select{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+.mode-select h1{font-size:1.6rem;color:var(--primary);margin-bottom:.3rem;letter-spacing:.1em}
+.mode-select p{color:var(--text-l);font-size:.9rem;margin-bottom:2rem;text-align:center}
+.mode-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;max-width:500px;width:100%}
+.mode-btn{flex:1;min-width:200px;background:var(--card);border:2px solid var(--border);border-radius:16px;padding:1.8rem 1.2rem;text-align:center;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.mode-btn:hover{border-color:var(--primary-l);transform:translateY(-3px)}
+.mode-btn .icon{font-size:2.5rem;margin-bottom:.5rem}
+.mode-btn h3{font-size:1.1rem;color:var(--primary);margin-bottom:.3rem}
+.mode-btn .desc{font-size:.8rem;color:var(--text-l)}
+.app{max-width:680px;margin:0 auto;padding:0 0 4rem}
+.app-header{background:var(--primary);color:#fff;padding:1.5rem 1rem 1.2rem;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.app-header h1{font-size:1.2rem;letter-spacing:.1em}
+.app-header .sub{font-size:.75rem;opacity:.7;margin-top:.2rem}
+.section{background:var(--card);margin:.8rem .8rem 0;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.section-title{background:#f1f5f9;padding:.7rem 1rem;font-size:.95rem;font-weight:700;color:var(--primary);border-bottom:2px solid var(--border)}
+.section-body{padding:.8rem 1rem}
+.q{margin-bottom:1.2rem}
+.q:last-child{margin-bottom:0}
+.q-text{font-size:.9rem;font-weight:600;margin-bottom:.5rem;line-height:1.5}
+.q-num{color:var(--accent);margin-right:.3rem}
+.q-hint{font-size:.75rem;color:#94a3b8;margin-bottom:.4rem}
+.choice{display:flex;align-items:center;padding:.5rem .6rem;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.4rem;cursor:pointer;transition:all .15s;user-select:none}
+.choice:hover{border-color:var(--primary-l)}
+.choice input{margin-right:.5rem;width:18px;height:18px;accent-color:var(--primary);flex-shrink:0}
+.choice input:checked + span{font-weight:700;color:var(--primary)}
+.choice.checked{border-color:var(--primary);background:rgba(26,54,93,.05)}
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.choice-row .choice{margin-bottom:0}
+.input-text{width:100%;padding:.5rem .6rem;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;background:#fdfdff;color:var(--text)}
+.input-text:focus{outline:none;border-color:var(--primary-l);box-shadow:0 0 0 2px rgba(44,82,130,.1)}
+textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-height:1.5}
+.input-row{display:flex;gap:.5rem;align-items:center}
+.input-row .input-text{flex:1}
+.input-row .unit{font-size:.85rem;color:var(--text-l);white-space:nowrap}
+.input-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+@media(max-width:400px){.input-grid{grid-template-columns:1fr 1fr}.choice-row{grid-template-columns:1fr}}
+.submit-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:.8rem;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.btn-submit{width:100%;padding:.8rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;color:#fff;background:var(--primary);cursor:pointer;box-shadow:0 4px 12px rgba(26,54,93,.15);transition:all .2s}
+.btn-submit:hover{background:var(--primary-l)}
+.btn-submit:disabled{opacity:.5}
+.result-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
+.result-overlay.show{display:flex}
+.result-box{background:#fff;width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:1.2rem;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.result-box h3{font-size:1.1rem;color:var(--primary);margin-bottom:.5rem}
+.result-box .info{font-size:.8rem;color:var(--text-l);margin-bottom:.8rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.5rem .7rem}
+.result-box textarea{width:100%;min-height:200px;border:1.5px solid var(--border);border-radius:8px;padding:.6rem;font-size:.78rem;font-family:monospace;line-height:1.5;resize:vertical;background:#fdfdff}
+.result-actions{display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}
+.result-actions button{flex:1;padding:.7rem;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;min-width:120px}
+.btn-copy{background:var(--accent);color:#fff}
+.btn-close{background:var(--border);color:var(--text)}
+.btn-link{background:#6366f1;color:#fff}
+.link-box{margin-top:.8rem;display:none}
+.link-box.show{display:block}
+.link-box input{width:100%;padding:.5rem;border:1.5px solid var(--accent);border-radius:8px;font-size:.78rem;background:#f0fdfa}
+.link-box .link-hint{font-size:.75rem;color:var(--text-l);margin-bottom:.4rem}
+.toast{position:fixed;bottom:30%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;z-index:10000;display:none}
+.toast.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.back-link{display:inline-block;margin:.8rem;color:var(--primary);font-size:.85rem;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div id="modePage" class="mode-select">
+<h1>📋 诊断问卷</h1>
+<p>选择问卷类型，在手机上直接填写<br>填完可生成链接发给老师</p>
+<div class="mode-btns">
+<div class="mode-btn" onclick="showForm('child')">
+<div class="icon">🌱</div>
+<h3>孩子版</h3>
+<p class="desc">家长填写<br>了解孩子性格与问题</p>
+</div>
+<div class="mode-btn" onclick="showForm('adult')">
+<div class="icon">🧭</div>
+<h3>成人版</h3>
+<p class="desc">本人填写<br>了解自己的性格与困惑</p>
+</div>
+</div>
+</div>
+
+<div id="formPage" class="app" style="display:none">
+<div class="app-header">
+<a class="back-link" href="javascript:backToMode()" style="color:rgba(255,255,255,.8)">← 重新选择</a>
+<h1 id="formTitle">家庭教育问题诊断问卷</h1>
+<div class="sub">越真实，诊断越准 · 填完点底部按钮生成结果</div>
+</div>
+<div id="questions"></div>
+<div class="submit-bar">
+<button class="btn-submit" id="genBtn" onclick="generateResult()">✅ 填完了，生成结果</button>
+</div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+<div class="result-box">
+<h3>✅ 问卷填写完成！</h3>
+<div class="info" id="resultInfo">📋 请点击「一键复制」把结果发给老师<br>或点击「生成链接」直接生成网址链接</div>
+<textarea id="resultText" readonly></textarea>
+<div class="result-actions">
+<button class="btn-close" onclick="closeResult()">返回修改</button>
+<button class="btn-copy" onclick="copyResult()">📋 一键复制</button>
+<button class="btn-link" onclick="generateLink()">🔗 生成链接</button>
+</div>
+<div class="link-box" id="linkBox">
+<div class="link-hint">👆 把下面这个链接发给老师，老师打开后输密码就能直接看到你的问卷结果</div>
+<input type="text" id="linkInput" readonly>
+<div class="result-actions" style="margin-top:.5rem">
+<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var currentMode='child';
+(function(){var p=new URLSearchParams(location.search);var m=p.get('mode');if(m==='child'||m==='adult')setTimeout(function(){showForm(m)},100)})();
+
+function showForm(mode){
+  currentMode=mode;
+  document.getElementById('modePage').style.display='none';
+  document.getElementById('formPage').style.display='block';
+  document.getElementById('formTitle').textContent=mode==='child'?'家庭教育问题诊断问卷':'成人性格诊断问卷';
+  renderQuestions();window.scrollTo(0,0);
+}
+function backToMode(){
+  document.getElementById('formPage').style.display='none';
+  document.getElementById('modePage').style.display='flex';
+}
+
+// ===== Render =====
+function renderQuestions(){
+  var c=document.getElementById('questions');var h='';
+  if(currentMode==='child'){
+    h+=section('基本信息',birthInfoBlock()+
+      q(1,'孩子年龄',inputRow('age','','岁'))+
+      q(2,'孩子性别',choiceRow('q2',[['男','男'],['女','女']]))+
+      q(3,'孩子年级',inputText('grade','如：小学三年级'))+
+      q(4,'是否独生子女',choiceRow('q4',[['是','是'],['否','否']])+inputText('q4_rank','排行第几（如有兄弟姐妹）'))+
+      q(5,'主要抚养人',choiceCol('q5',[['母亲','母亲'],['父亲','父亲'],['爷奶/外公外婆','爷爷奶奶/外公外婆'],['其他','其他']]))
+    );
+    h+=section('开窍状态自测','<div class="q-hint">根据孩子真实表现选择</div>'+
+      yesNoQ(6,'孩子是否明确知道学习对自己很重要？')+
+      yesNoQ(7,'孩子在不想写作业时，能否自己主动去写？')+
+      yesNoQ(8,'孩子是否能接纳学习的枯燥感，不被情绪打败？')+
+      yesNoQ(9,'孩子遇到困难时是否不轻易放弃？')+
+      yesNoQ(10,'孩子是否有"为家人做点什么"的意识？')+
+      yesNoQ(11,'孩子犯错后，能否接受批评并做出调整？')
+    );
+    h+=section('认知模式',
+      q(12,'别人指出问题时，孩子的第一反应',choiceCol('q12',[['否认或反驳','否认或反驳'],['接受并改正','接受并改正'],['看情况','看情况']]))+
+      q(13,'孩子是否知道学习重要，但不去做？',choiceCol('q13',[['是','是'],['否','否'],['不确定','不确定']]))+
+      q(14,'同样的错误，孩子是否会反复犯？',choiceCol('q14',[['是','是'],['否','否'],['不确定','不确定']]))
+    );
+    h+=section('性格特征','<div class="q-hint">每题选最符合孩子情况的：A=经常如此 B=有时如此 C=很少如此 D=几乎不</div>'+
+      abcdQ(15,'孩子是否特别懂事，经常替别人着想？')+
+      abcdQ(16,'孩子是否想很多、犹豫不决、容易焦虑？')+
+      abcdQ(17,'孩子是否特别听话、服从管教、很在意面子？')+
+      abcdQ(18,'孩子是否很不服管、越压越反抗、脾气倔？')+
+      abcdQ(19,'孩子是否胆子大、敢冒险、花钱大手大脚？')+
+      abcdQ(20,'孩子是否朋友特别多、离不开朋友、重情义？')+
+      abcdQ(21,'孩子是否鬼点子多、坐不住、自控力差、爱吹牛？')+
+      abcdQ(22,'孩子是否会吃会玩、心情好、有艺术细胞？')+
+      abcdQ(23,'孩子是否智商高、能言善辩、喜欢对着干？')+
+      abcdQ(24,'孩子是否谨慎本分、勤俭节约、重视家庭？')
+    );
+    h+=section('感统与发育',
+      q(25,'孩子是否有以下表现（可多选）',checkboxCol('q25',[
+        ['身体反应慢','身体反应慢（对指令反应迟钝）'],
+        ['思维反应慢','思维反应慢（理解力跟不上同龄人）'],
+        ['脾胃差、面色苍白','脾胃差、面色苍白'],
+        ['注意力极容易被外界打断','注意力极容易被外界打断'],
+        ['特别怕某种触感','特别怕某种触感（如衣服标签、沙子等）'],
+        ['坐不住、小动作多','坐不住、小动作多'],
+        ['写字歪歪扭扭、特别吃力','写字歪歪扭扭、特别吃力'],
+        ['怕高、怕摇晃','怕高、怕摇晃（不敢荡秋千等）'],
+        ['动作笨拙、经常摔跤','动作笨拙、经常摔跤'],
+        ['对声音特别敏感','对声音特别敏感'],
+        ['以上都没有','以上都没有']
+      ]))+
+      q(26,'孩子说话时间是否比同龄人晚？',choiceCol('q26',[['正常','正常'],['稍晚','稍晚'],['明显晚','明显晚'],['很晚/有过语言障碍','很晚/有过语言障碍']]))+
+      q(27,'孩子小时候（3岁前）是否经常看电视/手机？',choiceCol('q27',[['几乎没有','几乎没有'],['偶尔','偶尔'],['经常','经常'],['非常多','非常多']]))+
+      q(28,'孩子的精力水平如何？',choiceCol('q28',[['精力旺盛、停不下来','精力旺盛、停不下来'],['一般','一般'],['比较安静、容易累','比较安静、容易累']]))
+    );
+    h+=section('家庭环境',
+      q(29,'父母关系状态',choiceCol('q29',[['和谐','和谐'],['一般','一般'],['经常争吵','经常争吵'],['分居','分居'],['离异','离异']]))+
+      q(30,'家庭近期是否有重大变化？',choiceCol('q30',[['搬家/转学','搬家/转学'],['经济变故','经济变故'],['家人生病','家人生病'],['父母离异','父母离异'],['无','无']]))+
+      q(31,'父母教育方式是否一致？',choiceCol('q31',[['完全一致','完全一致'],['基本一致','基本一致'],['经常不一致','经常不一致'],['完全对立','完全对立']]))
+    );
+    h+=section('当前核心问题',
+      q(32,'你目前最担心孩子的问题是什么？（请详细描述，至少写3句话）',textarea('q32','例如：孩子最近两个月开始不想上学，每天早上都哭闹着不去。问他原因也不说，就把自己关在房间里玩手机。以前成绩还不错，现在作业也不写了……'))+
+      q(33,'这个问题持续多久了？',choiceCol('q33',[['不到1个月','不到1个月'],['1-3个月','1-3个月'],['3-6个月','3-6个月'],['半年以上','半年以上']]))+
+      q(34,'你目前用得最多的教育方式是：',choiceCol('q34',[['讲道理（反复跟他说）','讲道理（反复跟他说）'],['批评/吼（控制不住情绪）','批评/吼（控制不住情绪）'],['奖励/惩罚（物质刺激）','奖励/惩罚（物质刺激）'],['放任不管（管不了就不管了）','放任不管（管不了就不管了）']])+inputText('q34_other','其他方式'))+
+      q(35,'你和孩子的关系目前怎么样？',choiceCol('q35',[['很好，什么都聊','很好，什么都聊'],['一般，能沟通但不深入','一般，能沟通但不深入'],['不太好，经常吵架','不太好，经常吵架'],['很差，基本不说话','很差，基本不说话']]))
+    );
+  } else {
+    h+=section('基本信息',birthInfoBlock()+
+      q(1,'你的年龄',inputRow('age','','岁'))+
+      q(2,'你的性别',choiceRow('q2',[['男','男'],['女','女']]))+
+      q(3,'你的婚姻状况',choiceCol('q3',[['未婚','未婚'],['已婚','已婚'],['离异','离异'],['其他','其他']]))+
+      q(4,'你的职业类型',choiceCol('q4',[['上班族','上班族'],['自由职业','自由职业'],['个体经营','个体经营'],['管理层','管理层'],['待业/转型期','待业/转型期'],['其他','其他']])+inputText('q4_other','其他职业'))+
+      q(5,'你当前最大的压力来源是：',choiceCol('q5',[['工作/事业','工作/事业'],['家庭/婚姻','家庭/婚姻'],['经济','经济'],['人际关系','人际关系'],['自我认知/方向','自我认知/方向'],['其他','其他']]))
+    );
+    h+=section('童年与原生家庭',
+      q(6,'你小时候，主要照顾你的人是：',choiceCol('q6',[['母亲','母亲'],['父亲','父亲'],['爷爷奶奶/外公外婆','爷爷奶奶/外公外婆'],['其他','其他']]))+
+      q(7,'你小时候，父母之间的关系是：',choiceCol('q7',[['和谐','和谐'],['一般','一般'],['经常争吵','经常争吵'],['单亲/一方缺席','单亲/一方缺席']]))+
+      q(8,'父母对你的管教方式是：',choiceCol('q8',[['严格管教，规矩很多','严格管教，规矩很多'],['比较宽松，给我自由','比较宽松，给我自由'],['时严时松，看心情','时严时松，看心情'],['基本不管，自己长大','基本不管，自己长大']]))+
+      q(9,'你童年时的家庭氛围是：',choiceCol('q9',[['温暖有爱','温暖有爱'],['一般','一般'],['压抑','压抑'],['冷漠','冷漠']]))+
+      q(10,'童年时你是否感到被爱、被关注？',choiceCol('q10',[['经常感到','经常感到'],['有时感到','有时感到'],['很少感到','很少感到'],['几乎没有','几乎没有']]))+
+      q(11,'你现在与父母的关系：',choiceCol('q11',[['亲密','亲密'],['一般','一般'],['疏远','疏远'],['有矛盾/几乎不来往','有矛盾/几乎不来往']]))
+    );
+    h+=section('性格自评','<div class="q-hint">每题选最符合你的：A=经常如此 B=有时如此 C=很少如此 D=几乎不</div>'+
+      abcdQ(12,'你是否特别在意别人的感受，经常委屈自己成全别人，很难说"不"？')+
+      abcdQ(13,'你是否经常想很多、犹豫不决、容易陷入内耗，别人一句话你能琢磨半天？')+
+      abcdQ(14,'你是否做事特别有计划、重视规则和秩序，在意面子和名声，不喜欢出格？')+
+      abcdQ(15,'你是否骨子里不服管，越被施压越想反抗，别人越说你不行你越要证明给他看？')+
+      abcdQ(16,'你是否胆子大、喜欢尝试新东西、花钱大手大脚、赚钱动力强但存不住钱？')+
+      abcdQ(17,'你是否特别看重朋友和圈子，讲义气、重感情，一个人的时候觉得空落落的？')+
+      abcdQ(18,'你是否容易冲动、脾气来得快去得也快、争强好胜、事后又后悔？')+
+      abcdQ(19,'你是否心态好、会享受生活、有艺术爱好或特长、不喜欢太紧绷的状态？')+
+      abcdQ(20,'你是否聪明但不喜欢被约束、总觉得自己比领导/上司强、容易跟人抬杠、嘴上不服软？')+
+      abcdQ(21,'你是否踏实本分、勤俭节约、重视家庭稳定、不喜欢冒险、觉得安稳就是福？')
+    );
+    h+=section('当前状态',
+      q(22,'你目前最大的困惑或卡住的地方是什么？（请详细描述，至少写3句话）',textarea('q22','例如：工作五年了感觉没有晋升空间，每天重复同样的事。想跳槽又怕找不到更好的。家里人催着要二胎，但我觉得自己都顾不过来……'))+
+      q(23,'这个困惑持续多久了？',choiceCol('q23',[['不到半年','不到半年'],['半年到1年','半年到1年'],['1-3年','1-3年'],['3年以上','3年以上']]))+
+      q(24,'你目前应对这个困惑的方式主要是：',choiceCol('q24',[['硬扛着，觉得忍忍就过去了','硬扛着，觉得忍忍就过去了'],['反复想，但想不出结果','反复想，但想不出结果'],['跟朋友/家人倾诉','跟朋友/家人倾诉'],['尝试改变但总是半途而废','尝试改变但总是半途而废']])+inputText('q24_other','其他方式'))+
+      q(25,'你觉得自己的状态更接近哪种：',choiceCol('q25',[['精力充沛，想做很多事但不知道从哪开始','精力充沛，想做很多事但不知道从哪开始'],['还行，但总觉得少了点什么','还行，但总觉得少了点什么'],['经常觉得累，提不起劲','经常觉得累，提不起劲'],['很疲惫，感觉被生活推着走','很疲惫，感觉被生活推着走']]))+
+      q(26,'当你遇到困难时，你会：',choiceCol('q26',[['第一时间找人帮忙','第一时间找人帮忙'],['先自己扛，扛不住再说','先自己扛，扛不住再说'],['不想麻烦别人，自己消化','不想麻烦别人，自己消化'],['不知道该找谁','不知道该找谁']]))+
+      q(27,'你最近的情绪状态如何？',choiceCol('q27',[['稳定，偶有波动但能自我调节','稳定，偶有波动但能自我调节'],['容易焦虑、紧张','容易焦虑、紧张'],['容易低落、提不起兴趣','容易低落、提不起兴趣'],['情绪波动大，忽高忽低','情绪波动大，忽高忽低']]))
+    );
+  }
+  c.innerHTML=h;
+  document.querySelectorAll('.choice input[type="radio"], .choice input[type="checkbox"]').forEach(function(input){
+    input.addEventListener('change',function(){
+      if(input.type==='radio'){
+        var name=input.name;
+        document.querySelectorAll('input[name="'+name+'"]').forEach(function(r){
+          r.closest('.choice').classList.toggle('checked',r.checked);
+        });
+      } else {
+        input.closest('.choice').classList.toggle('checked',input.checked);
+      }
+    });
+  });
+}
+
+// ===== HTML generators =====
+function section(title,body){return '<div class="section"><div class="section-title">'+title+'</div><div class="section-body">'+body+'</div></div>'}
+function q(num,text,body){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div>'+body+'</div>'}
+function inputText(id,ph){return '<input type="text" class="input-text" id="'+id+'" placeholder="'+(ph||'')+'">'}
+function inputRow(id,ph,unit){return '<div class="input-row"><input type="text" class="input-text" id="'+id+'" placeholder="'+(ph||'')+'"><span class="unit">'+(unit||'')+'</span></div>'}
+function textarea(id,ph){return '<textarea class="input-text" id="'+id+'" placeholder="'+(ph||'')+'"></textarea>'}
+function choiceRow(name,opts){var h='<div class="choice-row">';opts.forEach(function(o){h+='<label class="choice"><input type="radio" name="'+name+'" value="'+o[0]+'"><span>'+o[1]+'</span></label>'});return h+'</div>'}
+function choiceCol(name,opts){var h='';opts.forEach(function(o){h+='<label class="choice"><input type="radio" name="'+name+'" value="'+o[0]+'"><span>'+o[1]+'</span></label>'});return h}
+function checkboxCol(name,opts){var h='';opts.forEach(function(o){h+='<label class="choice"><input type="checkbox" name="'+name+'" value="'+o[0]+'"><span>'+o[1]+'</span></label>'});return h}
+function abcdQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="A"><span>A 经常如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="B"><span>B 有时如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="C"><span>C 很少如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="D"><span>D 几乎不</span></label></div></div>'}
+function yesNoQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="是"><span>是</span></label><label class="choice"><input type="radio" name="q'+num+'" value="否"><span>否</span></label><label class="choice"><input type="radio" name="q'+num+'" value="不确定"><span>不确定</span></label></div></div>'}
+function birthInfoBlock(){
+  return '<div class="q"><div class="q-text">出生年月日（公历）</div><div class="input-grid"><div class="input-row"><input type="number" class="input-text" id="byear" placeholder="2015" min="1940" max="2030"></div><div class="input-row"><input type="number" class="input-text" id="bmonth" placeholder="8" min="1" max="12"></div><div class="input-row"><input type="number" class="input-text" id="bday" placeholder="16" min="1" max="31"></div></div></div>'+
+    '<div class="q"><div class="q-text">出生时间（24小时制，不知道填"不详"）</div><div class="input-row"><input type="number" class="input-text" id="bhour" placeholder="14" min="0" max="23"><span class="unit">时</span></div></div>'+
+    '<div class="q"><div class="q-text">出生地（填到地级市，如"陕西汉中"）</div>'+inputText('bplace','如：陕西汉中')+'</div>'+
+    '<div class="q"><div class="q-text">性别</div>'+choiceRow('gender',[['男','男'],['女','女']])+'</div>'
+}
+
+// ===== Get values =====
+function val(id){var el=document.getElementById(id);return el?el.value.trim():''}
+function radioVal(name){var c=document.querySelector('input[name="'+name+'"]:checked');return c?c.value:''}
+function checkboxVals(name){var c=document.querySelectorAll('input[name="'+name+'"]:checked');return Array.prototype.map.call(c,function(x){return x.value})}
+
+// ===== Format helpers =====
+function fmtAbcd(a){var o=['A','B','C','D'],p=[];o.forEach(function(x){p.push(x+(a===x?'■':'□'))});return p.join(' ')}
+function fmtYN(v){return (v==='是'?'■是':'□是')+' '+(v==='否'?'■否':'□否')+' '+(v==='不确定'?'■不确定':'□不确定')}
+function fmtSingle(val,opts){var p=[];opts.forEach(function(o){p.push((val===o[0]?'■':'□')+o[1])});return p.join(' ')}
+function fmtMulti(vals,opts){var p=[];opts.forEach(function(o){p.push((vals.indexOf(o[0])>=0?'■':'□')+o[1])});return p.join(' ')}
+
+// ===== Generate result text =====
+function generateResult(){
+  var m=currentMode,L=[];
+  L.push(m==='child'?'家庭教育问题诊断问卷':'成人性格诊断问卷');
+  L.push('');
+  L.push('【模块一：基本信息】');
+  L.push('');
+  L.push('出生年月日（公历）：'+val('byear')+'年'+val('bmonth')+'月'+val('bday')+'日');
+  var bh=val('bhour');L.push('出生时间（24小时制，不知道填"不详"）：'+(bh?bh+'时':'不详'));
+  L.push('出生地（填到地级市，如"陕西汉中"）：'+val('bplace'));
+  var g=radioVal('gender');L.push('性别：'+(g==='男'?'■男 □女':g==='女'?'□男 ■女':'□男 □女'));
+  L.push('');
+
+  if(m==='child'){
+    L.push('1. 孩子年龄：'+val('age')+' 岁');
+    var g2=radioVal('q2');L.push('2. 孩子性别：'+(g2==='男'?'■男 □女':g2==='女'?'□男 ■女':'□男 □女'));
+    L.push('3. 孩子年级：'+val('grade'));
+    var q4=radioVal('q4'),q4r=val('q4_rank');var q4s=q4==='是'?'■是 □否':q4==='否'?'□是 ■否':'□是 □否';if(q4r)q4s+='（排行第'+q4r+'）';L.push('4. 孩子是否独生子女：'+q4s);
+    L.push('5. 主要抚养人：'+fmtSingle(radioVal('q5'),[['母亲','母亲'],['父亲','父亲'],['爷奶/外公外婆','爷爷奶奶/外公外婆'],['其他','其他']]));
+    L.push('');
+    L.push('【模块二：开窍状态自测】');
+    L.push('（根据孩子真实表现选择：□是 □否 □不确定）');
+    L.push('');
+    var awQ=[[6,'孩子是否明确知道学习对自己很重要？'],[7,'孩子在不想写作业时，能否自己主动去写？'],[8,'孩子是否能接纳学习的枯燥感，不被情绪打败？'],[9,'孩子遇到困难时是否不轻易放弃？'],[10,'孩子是否有"为家人做点什么"的意识？'],[11,'孩子犯错后，能否接受批评并做出调整？']];
+    awQ.forEach(function(a){L.push(a[0]+'. '+a[1]);L.push('   '+fmtYN(radioVal('q'+a[0])));L.push('')});
+    L.push('【模块三：认知模式】');
+    L.push('');
+    L.push('12. 别人指出问题时，孩子的第一反应：');
+    L.push('   '+fmtSingle(radioVal('q12'),[['否认或反驳','否认或反驳'],['接受并改正','接受并改正'],['看情况','看情况']]));
+    L.push('');
+    L.push('13. 孩子是否知道学习重要，但不去做？');
+    L.push('   '+fmtYN(radioVal('q13')));
+    L.push('');
+    L.push('14. 同样的错误，孩子是否会反复犯？');
+    L.push('   '+fmtYN(radioVal('q14')));
+    L.push('');
+    L.push('【模块四：性格特征】');
+    L.push('（每题选最符合的：A=经常如此 B=有时如此 C=很少如此 D=几乎不）');
+    L.push('');
+    var chQ=[[15,'孩子是否特别懂事，经常替别人着想？'],[16,'孩子是否想很多、犹豫不决、容易焦虑？'],[17,'孩子是否特别听话、服从管教、很在意面子？'],[18,'孩子是否很不服管、越压越反抗、脾气倔？'],[19,'孩子是否胆子大、敢冒险、花钱大手大脚？'],[20,'孩子是否朋友特别多、离不开朋友、重情义？'],[21,'孩子是否鬼点子多、坐不住、自控力差、爱吹牛？'],[22,'孩子是否会吃会玩、心情好、有艺术细胞？'],[23,'孩子是否智商高、能言善辩、喜欢对着干？'],[24,'孩子是否谨慎本分、勤俭节约、重视家庭？']];
+    chQ.forEach(function(a){L.push(a[0]+'. '+a[1]);L.push('   '+fmtAbcd(radioVal('q'+a[0])));L.push('')});
+    L.push('【模块五：感统与发育】');
+    L.push('');
+    var s25opts=[['身体反应慢','身体反应慢（对指令反应迟钝）'],['思维反应慢','思维反应慢（理解力跟不上同龄人）'],['脾胃差、面色苍白','脾胃差、面色苍白'],['注意力极容易被外界打断','注意力极容易被外界打断'],['特别怕某种触感','特别怕某种触感（如衣服标签、沙子等）'],['坐不住、小动作多','坐不住、小动作多'],['写字歪歪扭扭、特别吃力','写字歪歪扭扭、特别吃力'],['怕高、怕摇晃','怕高、怕摇晃（不敢荡秋千等）'],['动作笨拙、经常摔跤','动作笨拙、经常摔跤'],['对声音特别敏感','对声音特别敏感'],['以上都没有','以上都没有']];
+    L.push('25. 孩子是否有以下表现（可多选）：');
+    L.push('   '+fmtMulti(checkboxVals('q25'),s25opts));
+    L.push('');
+    L.push('26. 孩子说话时间是否比同龄人晚？');
+    L.push('   '+fmtSingle(radioVal('q26'),[['正常','正常'],['稍晚','稍晚'],['明显晚','明显晚'],['很晚/有过语言障碍','很晚/有过语言障碍']]));
+    L.push('');
+    L.push('27. 孩子小时候（3岁前）是否经常看电视/手机？');
+    L.push('   '+fmtSingle(radioVal('q27'),[['几乎没有','几乎没有'],['偶尔','偶尔'],['经常','经常'],['非常多','非常多']]));
+    L.push('');
+    L.push('28. 孩子的精力水平如何？');
+    L.push('   '+fmtSingle(radioVal('q28'),[['精力旺盛、停不下来','精力旺盛、停不下来'],['一般','一般'],['比较安静、容易累','比较安静、容易累']]));
+    L.push('');
+    L.push('【模块六：家庭环境】');
+    L.push('');
+    L.push('29. 父母关系状态：');
+    L.push('   '+fmtSingle(radioVal('q29'),[['和谐','和谐'],['一般','一般'],['经常争吵','经常争吵'],['分居','分居'],['离异','离异']]));
+    L.push('');
+    L.push('30. 家庭近期是否有重大变化？');
+    L.push('   '+fmtSingle(radioVal('q30'),[['搬家/转学','搬家/转学'],['经济变故','经济变故'],['家人生病','家人生病'],['父母离异','父母离异'],['无','无']]));
+    L.push('');
+    L.push('31. 父母教育方式是否一致？');
+    L.push('   '+fmtSingle(radioVal('q31'),[['完全一致','完全一致'],['基本一致','基本一致'],['经常不一致','经常不一致'],['完全对立','完全对立']]));
+    L.push('');
+    L.push('【模块七：当前核心问题】');
+    L.push('');
+    L.push('32. 你目前最担心孩子的问题是什么？');
+    L.push('    '+val('q32'));
+    L.push('');
+    L.push('33. 这个问题持续多久了？');
+    L.push('   '+fmtSingle(radioVal('q33'),[['不到1个月','不到1个月'],['1-3个月','1-3个月'],['3-6个月','3-6个月'],['半年以上','半年以上']]));
+    L.push('');
+    var q34=radioVal('q34'),q34o=val('q34_other');
+    L.push('34. 你目前用得最多的教育方式是：');
+    L.push('   '+fmtSingle(q34,[['讲道理（反复跟他说）','讲道理（反复跟他说）'],['批评/吼（控制不住情绪）','批评/吼（控制不住情绪）'],['奖励/惩罚（物质刺激）','奖励/惩罚（物质刺激）'],['放任不管（管不了就不管了）','放任不管（管不了就不管了）']])+(q34o?' 其他：'+q34o:''));
+    L.push('');
+    L.push('35. 你和孩子的关系目前怎么样？');
+    L.push('   '+fmtSingle(radioVal('q35'),[['很好，什么都聊','很好，什么都聊'],['一般，能沟通但不深入','一般，能沟通但不深入'],['不太好，经常吵架','不太好，经常吵架'],['很差，基本不说话','很差，基本不说话']]));
+  } else {
+    L.push('1. 你的年龄：'+val('age')+' 岁');
+    var g2=radioVal('q2');L.push('2. 你的性别：'+(g2==='男'?'■男 □女':g2==='女'?'□男 ■女':'□男 □女'));
+    L.push('3. 你的婚姻状况：'+fmtSingle(radioVal('q3'),[['未婚','未婚'],['已婚','已婚'],['离异','离异'],['其他','其他']]));
+    var q4=radioVal('q4'),q4o=val('q4_other');
+    L.push('4. 你的职业类型：'+fmtSingle(q4,[['上班族','上班族'],['自由职业','自由职业'],['个体经营','个体经营'],['管理层','管理层'],['待业/转型期','待业/转型期'],['其他','其他']])+(q4o?' '+q4o:''));
+    L.push('5. 你当前最大的压力来源是：'+fmtSingle(radioVal('q5'),[['工作/事业','工作/事业'],['家庭/婚姻','家庭/婚姻'],['经济','经济'],['人际关系','人际关系'],['自我认知/方向','自我认知/方向'],['其他','其他']]));
+    L.push('');
+    L.push('【模块二：童年与原生家庭】');
+    L.push('');
+    L.push('6. 你小时候，主要照顾你的人是：');
+    L.push('   '+fmtSingle(radioVal('q6'),[['母亲','母亲'],['父亲','父亲'],['爷爷奶奶/外公外婆','爷爷奶奶/外公外婆'],['其他','其他']]));
+    L.push('');
+    L.push('7. 你小时候，父母之间的关系是：');
+    L.push('   '+fmtSingle(radioVal('q7'),[['和谐','和谐'],['一般','一般'],['经常争吵','经常争吵'],['单亲/一方缺席','单亲/一方缺席']]));
+    L.push('');
+    L.push('8. 父母对你的管教方式是：');
+    L.push('   '+fmtSingle(radioVal('q8'),[['严格管教，规矩很多','严格管教，规矩很多'],['比较宽松，给我自由','比较宽松，给我自由'],['时严时松，看心情','时严时松，看心情'],['基本不管，自己长大','基本不管，自己长大']]));
+    L.push('');
+    L.push('9. 你童年时的家庭氛围是：');
+    L.push('   '+fmtSingle(radioVal('q9'),[['温暖有爱','温暖有爱'],['一般','一般'],['压抑','压抑'],['冷漠','冷漠']]));
+    L.push('');
+    L.push('10. 童年时你是否感到被爱、被关注？');
+    L.push('   '+fmtSingle(radioVal('q10'),[['经常感到','经常感到'],['有时感到','有时感到'],['很少感到','很少感到'],['几乎没有','几乎没有']]));
+    L.push('');
+    L.push('11. 你现在与父母的关系：');
+    L.push('   '+fmtSingle(radioVal('q11'),[['亲密','亲密'],['一般','一般'],['疏远','疏远'],['有矛盾/几乎不来往','有矛盾/几乎不来往']]));
+    L.push('');
+    L.push('【模块三：性格自评】');
+    L.push('（每题选最符合你的：A=经常如此 B=有时如此 C=很少如此 D=几乎不）');
+    L.push('');
+    var adQ=[[12,'你是否特别在意别人的感受，经常委屈自己成全别人，很难说"不"？'],[13,'你是否经常想很多、犹豫不决、容易陷入内耗，别人一句话你能琢磨半天？'],[14,'你是否做事特别有计划、重视规则和秩序，在意面子和名声，不喜欢出格？'],[15,'你是否骨子里不服管，越被施压越想反抗，别人越说你不行你越要证明给他看？'],[16,'你是否胆子大、喜欢尝试新东西、花钱大手大脚、赚钱动力强但存不住钱？'],[17,'你是否特别看重朋友和圈子，讲义气、重感情，一个人的时候觉得空落落的？'],[18,'你是否容易冲动、脾气来得快去得也快、争强好胜、事后又后悔？'],[19,'你是否心态好、会享受生活、有艺术爱好或特长、不喜欢太紧绷的状态？'],[20,'你是否聪明但不喜欢被约束、总觉得自己比领导/上司强、容易跟人抬杠、嘴上不服软？'],[21,'你是否踏实本分、勤俭节约、重视家庭稳定、不喜欢冒险、觉得安稳就是福？']];
+    adQ.forEach(function(a){L.push(a[0]+'. '+a[1]);L.push('   '+fmtAbcd(radioVal('q'+a[0])));L.push('')});
+    L.push('【模块四：当前状态】');
+    L.push('');
+    L.push('22. 你目前最大的困惑或卡住的地方是什么？');
+    L.push('    '+val('q22'));
+    L.push('');
+    L.push('23. 这个困惑持续多久了？');
+    L.push('   '+fmtSingle(radioVal('q23'),[['不到半年','不到半年'],['半年到1年','半年到1年'],['1-3年','1-3年'],['3年以上','3年以上']]));
+    L.push('');
+    var q24=radioVal('q24'),q24o=val('q24_other');
+    L.push('24. 你目前应对这个困惑的方式主要是：');
+    L.push('   '+fmtSingle(q24,[['硬扛着，觉得忍忍就过去了','硬扛着，觉得忍忍就过去了'],['反复想，但想不出结果','反复想，但想不出结果'],['跟朋友/家人倾诉','跟朋友/家人倾诉'],['尝试改变但总是半途而废','尝试改变但总是半途而废']])+(q24o?' 其他：'+q24o:''));
+    L.push('');
+    L.push('25. 你觉得自己的状态更接近哪种：');
+    L.push('   '+fmtSingle(radioVal('q25'),[['精力充沛，想做很多事但不知道从哪开始','精力充沛，想做很多事但不知道从哪开始'],['还行，但总觉得少了点什么','还行，但总觉得少了点什么'],['经常觉得累，提不起劲','经常觉得累，提不起劲'],['很疲惫，感觉被生活推着走','很疲惫，感觉被生活推着走']]));
+    L.push('');
+    L.push('26. 当你遇到困难时，你会：');
+    L.push('   '+fmtSingle(radioVal('q26'),[['第一时间找人帮忙','第一时间找人帮忙'],['先自己扛，扛不住再说','先自己扛，扛不住再说'],['不想麻烦别人，自己消化','不想麻烦别人，自己消化'],['不知道该找谁','不知道该找谁']]));
+    L.push('');
+    L.push('27. 你最近的情绪状态如何？');
+    L.push('   '+fmtSingle(radioVal('q27'),[['稳定，偶有波动但能自我调节','稳定，偶有波动但能自我调节'],['容易焦虑、紧张','容易焦虑、紧张'],['容易低落、提不起兴趣','容易低落、提不起兴趣'],['情绪波动大，忽高忽低','情绪波动大，忽高忽低']]));
+  }
+
+  var result=L.join('\n');
+  document.getElementById('resultText').value=result;
+  document.getElementById('linkBox').classList.remove('show');
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+// ===== URL hash encoding =====
+function generateLink(){
+  var result=document.getElementById('resultText').value;
+  if(!result){showToast('请先生成结果');return}
+  var utf8=unescape(encodeURIComponent(result));
+  var b64;try{b64=btoa(utf8)}catch(e){showToast('编码失败');return}
+  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'');
+  if(!base.endsWith('/'))base+='/';
+  var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
+  var input=document.getElementById('linkInput');
+  input.value=link;
+  input.select();
+  document.getElementById('linkBox').classList.add('show');
+  showToast('链接已生成，请复制发给老师');
+}
+
+function copyLink(){
+  var input=document.getElementById('linkInput');
+  input.select();input.setSelectionRange(0,99999);
+  var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  if(!ok){try{navigator.clipboard.writeText(input.value).then(function(){showToast('链接已复制！')}).catch(function(){showToast('复制失败，请手动选中复制')});return}catch(e){}}
+  showToast('链接已复制！请发给老师');
+}
+
+function closeResult(){document.getElementById('resultOverlay').classList.remove('show')}
+
+function copyResult(){
+  var ta=document.getElementById('resultText');
+  ta.select();ta.setSelectionRange(0,99999);
+  var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  if(!ok){try{navigator.clipboard.writeText(ta.value).then(function(){showToast('已复制！请粘贴发给老师')}).catch(function(){showToast('复制失败，请手动选中复制')});return}catch(e){}}
+  showToast('已复制！请粘贴发给老师');
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+</script>
+</body>
+</html>
