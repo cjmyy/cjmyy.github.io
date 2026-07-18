@@ -504,7 +504,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <script>
 // Public crypto parameters
 const CRYPTO_SALT = "3IFm9OOrarCdhJOmNo5j+Q==";
-const CRYPTO_ITERATIONS = 100000;
+const CRYPTO_ITERATIONS = 50000;
 
 // Base64 → Uint8Array
 function b64ToU8(b64) {
@@ -866,6 +866,15 @@ function loadPastedLink() {
   }
 }
 
+// ===== Pre-fetch encrypted bundle on page load =====
+var _preFetchedBundle = null;
+(function() {
+  fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(b) { _preFetchedBundle = b; })
+    .catch(function() {});
+})();
+
 // ===== Unlock =====
 async function attemptUnlock() {
   var pwdInput = document.getElementById('pwdInput');
@@ -881,25 +890,28 @@ async function attemptUnlock() {
   lockSpinner.classList.add('show');
   if (lockProgress) { lockProgress.style.display = 'block'; lockProgress.textContent = '正在验证密码…'; }
   try {
-    await new Promise(function(r){ setTimeout(r, 10); });
+    // Step 1: Derive AES key (PBKDF2)
     var aesKey = await deriveKey(password);
     _storedAesKey = aesKey;
-    if (lockProgress) lockProgress.textContent = '正在下载核心数据…';
-    await new Promise(function(r){ setTimeout(r, 10); });
-    var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!resp.ok) throw new Error('核心数据加载失败');
-    var bundle = await resp.json();
-    var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
-    var decryptedCodes = [];
-    for (var i = 0; i < fileOrder.length; i++) {
-      if (lockProgress) lockProgress.textContent = '正在解密 (' + (i + 1) + '/' + fileOrder.length + ')…';
-      await new Promise(function(r){ setTimeout(r, 10); });
-      var encryptedB64 = bundle.files[fileOrder[i]];
-      var decrypted = await decryptFile(encryptedB64, aesKey);
-      decryptedCodes.push(decrypted);
+    // Step 2: Get bundle (pre-fetched or fetch now)
+    if (lockProgress) lockProgress.textContent = '正在加载核心数据…';
+    var bundle;
+    if (_preFetchedBundle) {
+      bundle = _preFetchedBundle;
+    } else {
+      var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) throw new Error('核心数据加载失败');
+      bundle = await resp.json();
     }
-    if (lockProgress) lockProgress.textContent = '正在加载分析引擎…';
-    await new Promise(function(r){ setTimeout(r, 10); });
+    // Step 3: Parallel decryption
+    if (lockProgress) lockProgress.textContent = '正在解密数据…';
+    var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
+    var decryptPromises = fileOrder.map(function(fname) {
+      return decryptFile(bundle.files[fname], aesKey);
+    });
+    var decryptedCodes = await Promise.all(decryptPromises);
+    // Step 4: Execute all code
+    if (lockProgress) lockProgress.textContent = '正在加载引擎…';
     for (var i = 0; i < decryptedCodes.length; i++) {
       executeJS(decryptedCodes[i]);
     }
