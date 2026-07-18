@@ -473,7 +473,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    心境 v4.0
+    心境 v4.1
   </div>
 </div>
 </div>
@@ -715,7 +715,7 @@ async function attemptUnlock() {
   lockSpinner.classList.add('show');
   try {
     var aesKey = await deriveKey(password);
-    var resp = await fetch('encrypted_bundle.json');
+    var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
     if (!resp.ok) throw new Error('加密数据加载失败');
     var bundle = await resp.json();
     var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-data.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
