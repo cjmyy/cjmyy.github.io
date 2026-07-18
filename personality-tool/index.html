@@ -184,6 +184,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="card-title">📋 基本信息</div>
     <form id="form">
       <div id="birthInfoSection">
+      <div class="form-group"><label>姓名（选填）</label><input type="text" id="personName" placeholder="如：张小明" style="width:100%;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem"></div>
       <div class="form-grid">
         <div class="form-group"><label>出生年</label><input type="number" id="year" placeholder="如2005" min="1940" max="2030" required></div>
         <div class="form-group"><label>出生月</label><input type="number" id="month" placeholder="1-12" min="1" max="12" required></div>
@@ -682,6 +683,7 @@ function checkBirthInfo() {
   hintBox.style.display = 'block';
 
   var parts = [];
+  if (bi.name) parts.push('姓名: ' + bi.name);
   if (bi.year && bi.month && bi.day) parts.push('出生日期: ' + bi.year + '-' + bi.month + '-' + bi.day);
   else parts.push('⚠ 出生年月日未识别');
   if (bi.hour === -1) parts.push('时辰: 不详(按未知时辰处理)');
@@ -996,7 +998,7 @@ function initApp() {
           crossValidation: cv,
           mode: diagMode,
           output: output,
-          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: 0, gender: dGender, birthplace: dBirthplace }
+          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: bi.minute || 0, gender: dGender, birthplace: dBirthplace, name: bi.name || '' }
         });
 
         currentReport = reportText;
@@ -1005,7 +1007,8 @@ function initApp() {
         var tag = document.getElementById('resultTag');
         var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : '诊断·成人版';
         var verTxt = delivery ? '交付版' : '主人版';
-        tag.textContent = diagModeTxt + ' · ' + verTxt + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        var nameTag = bi.name ? ' · ' + bi.name : '';
+        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
       } else {
         // === 普通性格报告模式 ===
         var report = new PersonalityReport();
