@@ -97,26 +97,26 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 </div>
 <div id="questions"></div>
 <div class="submit-bar">
-<button class="btn-submit" id="genBtn" onclick="generateResult()">✅ 填完了，生成结果</button>
+<button class="btn-submit" id="genBtn" onclick="generateResult()">✅ 填完了，提交问卷</button>
 </div>
 </div>
 
 <div class="result-overlay" id="resultOverlay">
 <div class="result-box">
-<h3>✅ 问卷填写完成！</h3>
-<div class="info" id="resultInfo">📋 请点击「一键复制」把结果发给老师<br>或点击「生成链接」直接生成网址链接</div>
-<textarea id="resultText" readonly></textarea>
-<div class="result-actions">
-<button class="btn-close" onclick="closeResult()">返回修改</button>
-<button class="btn-copy" onclick="copyResult()">📋 一键复制</button>
-<button class="btn-link" onclick="generateLink()">🔗 生成链接</button>
-</div>
-<div class="link-box" id="linkBox">
-<div class="link-hint">👆 把下面这个链接发给老师，老师打开后输密码就能直接看到你的问卷结果</div>
-<input type="text" id="linkInput" readonly>
+<h3>✅ 提交成功！</h3>
+<div class="info" id="resultInfo">👇 复制下面这个链接，发给老师<br>老师打开后输密码就能看到你的问卷结果</div>
+<div class="link-box" id="linkBox" style="display:block">
+<input type="text" id="linkInput" readonly style="font-size:.8rem">
 <div class="result-actions" style="margin-top:.5rem">
-<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接</button>
+<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接，发给老师</button>
 </div>
+</div>
+<details style="margin-top:.8rem">
+<summary style="font-size:.8rem;color:var(--accent);cursor:pointer;padding:.3rem">查看填写内容</summary>
+<textarea id="resultText" readonly style="margin-top:.5rem;font-size:.7rem;height:200px"></textarea>
+</details>
+<div class="result-actions" style="margin-top:.5rem">
+<button class="btn-close" onclick="closeResult()">返回修改</button>
 </div>
 </div>
 </div>
@@ -268,7 +268,8 @@ function checkboxCol(name,opts){var h='';opts.forEach(function(o){h+='<label cla
 function abcdQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="A"><span>A 经常如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="B"><span>B 有时如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="C"><span>C 很少如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="D"><span>D 几乎不</span></label></div></div>'}
 function yesNoQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="是"><span>是</span></label><label class="choice"><input type="radio" name="q'+num+'" value="否"><span>否</span></label><label class="choice"><input type="radio" name="q'+num+'" value="不确定"><span>不确定</span></label></div></div>'}
 function birthInfoBlock(){
-  return '<div class="q"><div class="q-text">出生年月日（公历）</div><div class="input-grid"><div class="input-row"><input type="number" class="input-text" id="byear" placeholder="2015" min="1940" max="2030"></div><div class="input-row"><input type="number" class="input-text" id="bmonth" placeholder="8" min="1" max="12"></div><div class="input-row"><input type="number" class="input-text" id="bday" placeholder="16" min="1" max="31"></div></div></div>'+
+  return '<div class="q"><div class="q-text">姓名</div>'+inputText('bname','填写姓名')+'</div>'+
+    '<div class="q"><div class="q-text">出生年月日（公历）</div><div class="input-grid"><div class="input-row"><input type="number" class="input-text" id="byear" placeholder="2015" min="1940" max="2030"></div><div class="input-row"><input type="number" class="input-text" id="bmonth" placeholder="8" min="1" max="12"></div><div class="input-row"><input type="number" class="input-text" id="bday" placeholder="16" min="1" max="31"></div></div></div>'+
     '<div class="q"><div class="q-text">出生时间（24小时制，精确到分，不确定填"不详"）</div><div class="input-row"><input type="number" class="input-text" id="bhour" placeholder="14" min="0" max="23"><span class="unit">时</span><input type="number" class="input-text" id="bminute" placeholder="30" min="0" max="59"><span class="unit">分</span></div><div class="q-hint">尽量填准确，关系到性格分析精准度。不知道填"不详"即可</div></div>'+
     '<div class="q"><div class="q-text">出生地（填到地级市，如"陕西汉中"）</div>'+inputText('bplace','如：陕西汉中')+'</div>'
 }
@@ -291,6 +292,7 @@ function generateResult(){
   L.push('');
   L.push('【模块一：基本信息】');
   L.push('');
+  L.push('姓名：'+val('bname'));
   L.push('出生年月日（公历）：'+val('byear')+'年'+val('bmonth')+'月'+val('bday')+'日');
   var bh=val('bhour'),bm=val('bminute');L.push('出生时间（24小时制，精确到分，不确定填"不详"）：'+(bh?bh+'时'+(bm?bm+'分':''):'不详'));
   L.push('出生地（填到地级市，如"陕西汉中"）：'+val('bplace'));
@@ -421,7 +423,12 @@ function generateResult(){
 
   var result=L.join('\n');
   document.getElementById('resultText').value=result;
-  document.getElementById('linkBox').classList.remove('show');
+  var utf8=unescape(encodeURIComponent(result));
+  var b64;try{b64=btoa(utf8)}catch(e){b64=''}
+  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'');
+  if(!base.endsWith('/'))base+='/';
+  var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
+  document.getElementById('linkInput').value=link;
   document.getElementById('resultOverlay').classList.add('show');
 }
 
