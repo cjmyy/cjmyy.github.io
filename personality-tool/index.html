@@ -135,7 +135,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="lock-spinner" id="lockSpinner"></div>
     <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v4.2</div>
+    <div class="lock-hint">核心数据已加密保护 · v5.0</div>
   </div>
 </div>
 
@@ -427,12 +427,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           </select>
         </div>
         <div style="display:flex;gap:0.5rem;margin:0.5rem 0">
-          <button type="button" class="btn-sm" onclick="downloadQuestionnaire('child')" style="flex:1">📥 下载孩子版问卷</button>
-          <button type="button" class="btn-sm" onclick="downloadQuestionnaire('adult')" style="flex:1">📥 下载成人版问卷</button>
+          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=child','_blank')" style="flex:1">📝 填写孩子版问卷</button>
+          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=adult','_blank')" style="flex:1">📝 填写成人版问卷</button>
         </div>
         <div class="form-group">
           <label>填写好的问卷内容（直接粘贴文本）</label>
-          <textarea id="questionnaireText" placeholder="将填好的问卷内容粘贴到这里，或点击上方下载问卷后填写再粘贴回来" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <textarea id="questionnaireText" placeholder="家长通过链接填写的问卷会自动加载到此处，也可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
           <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
         <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
           <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
@@ -474,7 +474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    心境 v4.2
+    心境 v5.0
   </div>
 </div>
 </div>
@@ -542,6 +542,24 @@ var currentReport = '';
 var unlocked = false;
 var diagnosticDataLoaded = false;
 var _storedAesKey = null;
+var _pendingQuestionnaire = null;
+
+// ===== URL hash questionnaire data detection =====
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('q=') >= 0) {
+    try {
+      var params = new URLSearchParams(hash.substring(1));
+      var b64 = params.get('q');
+      var mode = params.get('mode');
+      if (b64 && mode) {
+        var utf8 = atob(decodeURIComponent(b64));
+        var text = decodeURIComponent(escape(utf8));
+        _pendingQuestionnaire = { text: text, mode: mode };
+      }
+    } catch(e) { console.error('Questionnaire hash parse error', e); }
+  }
+})();
 
 // ===== Helper =====
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -795,6 +813,27 @@ async function attemptUnlock() {
     document.getElementById('mainApp').classList.add('show');
     document.getElementById('modeSelect').style.display = 'flex';
     initApp();
+    // Auto-fill questionnaire if data was passed via URL hash
+    if (_pendingQuestionnaire) {
+      selectMode('diagnostic');
+      var fillAttempts = 0;
+      var fillInterval = setInterval(function() {
+        fillAttempts++;
+        var qText = document.getElementById('questionnaireText');
+        if (qText && document.getElementById('formPage').style.display === 'block') {
+          clearInterval(fillInterval);
+          var pq = _pendingQuestionnaire;
+          _pendingQuestionnaire = null;
+          document.getElementById('diagnosticMode').value = pq.mode;
+          qText.value = pq.text;
+          if (typeof checkBirthInfo === 'function') checkBirthInfo();
+          var tag = document.getElementById('resultTag');
+          if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
+        } else if (fillAttempts > 30) {
+          clearInterval(fillInterval);
+        }
+      }, 500);
+    }
   } catch (err) {
     console.error('Unlock error:', err);
     lockError.textContent = '错误: ' + (err.message || err) + ' (请截图此信息发给安安)';
