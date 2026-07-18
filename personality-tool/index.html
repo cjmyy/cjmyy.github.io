@@ -133,6 +133,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <input type="password" class="lock-input" id="pwdInput" placeholder="请输入访问密码" autocomplete="off" autofocus>
     <button class="lock-btn" id="unlockBtn" onclick="attemptUnlock()">进入</button>
     <div class="lock-spinner" id="lockSpinner"></div>
+    <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
     <div class="lock-hint">核心数据已加密保护 · v4.1</div>
   </div>
@@ -707,24 +708,33 @@ async function attemptUnlock() {
   var unlockBtn = document.getElementById('unlockBtn');
   var lockError = document.getElementById('lockError');
   var lockSpinner = document.getElementById('lockSpinner');
+  var lockProgress = document.getElementById('lockProgress');
   var password = pwdInput.value.trim();
   if (!password) { pwdInput.focus(); return; }
   unlockBtn.disabled = true;
   unlockBtn.textContent = '进入中…';
   lockError.classList.remove('show');
   lockSpinner.classList.add('show');
+  if (lockProgress) { lockProgress.style.display = 'block'; lockProgress.textContent = '正在验证密码…'; }
   try {
+    await new Promise(function(r){ setTimeout(r, 10); });
     var aesKey = await deriveKey(password);
+    if (lockProgress) lockProgress.textContent = '正在下载加密数据…';
+    await new Promise(function(r){ setTimeout(r, 10); });
     var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
     if (!resp.ok) throw new Error('加密数据加载失败');
     var bundle = await resp.json();
     var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-data.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
     var decryptedCodes = [];
     for (var i = 0; i < fileOrder.length; i++) {
+      if (lockProgress) lockProgress.textContent = '正在解密数据 (' + (i + 1) + '/' + fileOrder.length + ')…';
+      await new Promise(function(r){ setTimeout(r, 10); });
       var encryptedB64 = bundle.files[fileOrder[i]];
       var decrypted = await decryptFile(encryptedB64, aesKey);
       decryptedCodes.push(decrypted);
     }
+    if (lockProgress) lockProgress.textContent = '正在加载分析引擎…';
+    await new Promise(function(r){ setTimeout(r, 10); });
     for (var i = 0; i < decryptedCodes.length; i++) {
       executeJS(decryptedCodes[i]);
     }
@@ -743,6 +753,7 @@ async function attemptUnlock() {
     unlockBtn.disabled = false;
     unlockBtn.textContent = '进入';
     lockSpinner.classList.remove('show');
+    if (lockProgress) lockProgress.style.display = 'none';
   }
 }
 
