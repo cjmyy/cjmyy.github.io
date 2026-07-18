@@ -893,14 +893,7 @@ function initApp() {
         // 八字分析（使用从问卷提取的信息）
         var analyzer = new PersonalityAnalyzer();
         var baziAnalysis = analyzer.analyze(dYear, dMonth, dDay, dHour, 0, false, dGender, dBirthplace, false);
-        var dominantShishen = '';
-        if (baziAnalysis && baziAnalysis.good_evil_ratio) {
-          dominantShishen = baziAnalysis.good_evil_ratio.dominant || '';
-        }
-        var baziType = {
-          primaryType: SHISHEN_TYPE_MAP[dominantShishen] || '',
-          primaryShishen: dominantShishen
-        };
+        var baziType = extractBaziType(baziAnalysis);
 
         // 交叉验证
         var cv = crossValidate(baziType, qResult);
