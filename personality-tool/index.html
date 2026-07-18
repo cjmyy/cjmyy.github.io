@@ -135,7 +135,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="lock-spinner" id="lockSpinner"></div>
     <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v4.1</div>
+    <div class="lock-hint">核心数据已加密保护 · v4.2</div>
   </div>
 </div>
 
@@ -474,7 +474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    心境 v4.1
+    心境 v4.2
   </div>
 </div>
 </div>
@@ -540,6 +540,8 @@ function executeJS(code) {
 // ===== Global state =====
 var currentReport = '';
 var unlocked = false;
+var diagnosticDataLoaded = false;
+var _storedAesKey = null;
 
 // ===== Helper =====
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -573,18 +575,67 @@ function updateSensory() {
 }
 
 // ===== Mode selection =====
+async function loadDiagnosticData() {
+  if (diagnosticDataLoaded) return true;
+  if (!_storedAesKey) return false;
+  try {
+    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var bundle = await resp.json();
+    var encryptedB64 = bundle.files['diagnostic-data.js'];
+    if (!encryptedB64) throw new Error('诊断数据缺失');
+    var decrypted = await decryptFile(encryptedB64, _storedAesKey);
+    executeJS(decrypted);
+    diagnosticDataLoaded = true;
+    return true;
+  } catch (err) {
+    console.error('Diagnostic data load error:', err);
+    return false;
+  }
+}
+
 function selectMode(mode) {
   document.getElementById('mode').value = mode;
   var badge = document.getElementById('modeBadge');
   var modeLabels = {'child':'🌱 孩子版','adult':'🧭 成人版','diagnostic':'📋 诊断报告'};
   if (badge) badge.textContent = modeLabels[mode] || mode;
+
+  // 诊断模式需要按需加载诊断数据库（约2MB，只在首次进入时加载）
+  if (mode === 'diagnostic' && !diagnosticDataLoaded) {
+    var modePage = document.getElementById('modeSelect');
+    var loadingDiv = document.createElement('div');
+    loadingDiv.id = 'diagLoading';
+    loadingDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;';
+    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-20秒，请勿离开</p>';
+    var oldContent = modePage.querySelector('.mode-cards');
+    var oldTitle = modePage.querySelector('.mode-title');
+    var oldSub = modePage.querySelector('.mode-subtitle');
+    if (oldContent) oldContent.style.display = 'none';
+    if (oldTitle) oldTitle.style.display = 'none';
+    if (oldSub) oldSub.style.display = 'none';
+    modePage.appendChild(loadingDiv);
+
+    loadDiagnosticData().then(function(success) {
+      var ld = document.getElementById('diagLoading');
+      if (ld) ld.remove();
+      if (oldContent) oldContent.style.display = 'flex';
+      if (oldTitle) oldTitle.style.display = 'block';
+      if (oldSub) oldSub.style.display = 'block';
+      if (success) {
+        selectMode('diagnostic');
+      } else {
+        alert('诊断数据库加载失败，请检查网络连接后重试');
+      }
+    });
+    return;
+  }
+
   document.getElementById('modeSelect').style.display = 'none';
   document.getElementById('formPage').style.display = 'block';
 
   var diagSection = document.getElementById('diagnosticSection');
   var sensoryRow = document.getElementById('sensoryRow');
   var birthInfoSection = document.getElementById('birthInfoSection');
-  var versionGroup = document.getElementById('version') ? document.getElementById('version').parentElement : null;
 
   if (mode === 'diagnostic') {
     if (diagSection) diagSection.style.display = 'block';
@@ -719,15 +770,16 @@ async function attemptUnlock() {
   try {
     await new Promise(function(r){ setTimeout(r, 10); });
     var aesKey = await deriveKey(password);
-    if (lockProgress) lockProgress.textContent = '正在下载加密数据…';
+    _storedAesKey = aesKey;
+    if (lockProgress) lockProgress.textContent = '正在下载核心数据…';
     await new Promise(function(r){ setTimeout(r, 10); });
     var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!resp.ok) throw new Error('加密数据加载失败');
+    if (!resp.ok) throw new Error('核心数据加载失败');
     var bundle = await resp.json();
-    var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-data.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
+    var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
     var decryptedCodes = [];
     for (var i = 0; i < fileOrder.length; i++) {
-      if (lockProgress) lockProgress.textContent = '正在解密数据 (' + (i + 1) + '/' + fileOrder.length + ')…';
+      if (lockProgress) lockProgress.textContent = '正在解密 (' + (i + 1) + '/' + fileOrder.length + ')…';
       await new Promise(function(r){ setTimeout(r, 10); });
       var encryptedB64 = bundle.files[fileOrder[i]];
       var decrypted = await decryptFile(encryptedB64, aesKey);
