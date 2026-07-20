@@ -125,6 +125,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 </head>
 <body>
 
+<!-- ===== In-App Browser Detection ===== -->
+<script>
+(function(){
+  var ua=navigator.userAgent.toLowerCase();
+  var isWeChat=ua.indexOf('micromessenger')>-1;
+  var isQQMail=ua.indexOf('qqmail')>-1;
+  var isQQBrowser=ua.indexOf('mqqbrowser')>-1 && ua.indexOf('qq/')>-1;
+  if(isWeChat||isQQMail){
+    var overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#f8fafc;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;font-family:sans-serif';
+    var msg=isWeChat
+      ?'<div><div style="font-size:3rem;margin-bottom:1rem">🔗</div><h2 style="color:#1a365d;font-size:1.3rem;margin-bottom:1rem">请在浏览器中打开</h2><p style="color:#64748b;font-size:0.95rem;line-height:1.8">微信内置浏览器无法加载核心数据<br><br>请点击右上角 <span style="font-size:1.5rem">⋯</span> 按钮<br>选择「在浏览器打开」或「在Safari中打开」</p></div>'
+      :'<div><div style="font-size:3rem;margin-bottom:1rem">🔗</div><h2 style="color:#1a365d;font-size:1.3rem;margin-bottom:1rem">请在浏览器中打开</h2><p style="color:#64748b;font-size:0.95rem;line-height:1.8">邮箱内置浏览器无法加载核心数据<br><br>请复制下方链接<br>打开手机浏览器粘贴打开</p><div style="margin-top:1rem;padding:0.8rem;background:#fff;border:1px solid #e2e8f0;border-radius:8px;word-break:break-all;font-size:0.8rem;color:#64748b">'+location.href+'</div></div>';
+    overlay.innerHTML=msg;
+    document.body.appendChild(overlay);
+  }
+})();
+</script>
+
 <!-- ===== Lock Screen ===== -->
 <div id="lockScreen">
   <div class="lock-card">
@@ -135,7 +154,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="lock-spinner" id="lockSpinner"></div>
     <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v5.1</div>
+    <div class="lock-hint">核心数据已加密保护 · v4.2</div>
   </div>
 </div>
 
@@ -146,22 +165,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <div id="modeSelect" class="mode-page" style="display:none">
   <h1 class="mode-title">心境</h1>
   <p class="mode-subtitle">照见真实的性格 · 请选择评估类型</p>
-  <!-- Questionnaire workflow -->
-  <div style="margin:1rem auto 1.5rem auto;max-width:420px;padding:1rem;background:rgba(13,148,136,.06);border-radius:12px;border:1.5px dashed var(--accent);">
-    <!-- Step 1: Send questionnaire -->
-    <p style="font-size:.85rem;color:var(--text-l);margin:0 0 .6rem 0;text-align:center">① 发送问卷（复制链接发微信）</p>
-    <div style="display:flex;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap">
-      <button onclick="copyQuestionnaireLink('child')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 孩子版</button>
-      <button onclick="copyQuestionnaireLink('adult')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 成人版</button>
-      <button onclick="copyQuestionnaireLink('teacher')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 教师版</button>
-    </div>
-    <!-- Step 2: Paste returned link -->
-    <p style="font-size:.85rem;color:var(--text-l);margin:0 0 .6rem 0;text-align:center">② 收到家长回传的链接？粘贴加载</p>
-    <div style="display:flex;gap:.5rem">
-      <input type="text" id="pasteLinkInput" placeholder="粘贴问卷链接..." style="flex:1;padding:.6rem;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem">
-      <button onclick="loadPastedLink()" style="padding:.6rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.85rem;cursor:pointer;white-space:nowrap;font-weight:600">加载</button>
-    </div>
-  </div>
   <div class="mode-cards">
     <div class="mode-card" onclick="selectMode('child')">
       <div class="mode-icon">🌱</div>
@@ -174,12 +177,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       <h3>成人版</h3>
       <p class="mode-label">人格特质画像</p>
       <p class="mode-desc">深入解析成人性格特质<br>与人生发展轨迹</p>
-    </div>
-    <div class="mode-card" onclick="selectMode('teacher')">
-      <div class="mode-icon">📚</div>
-      <h3>教师版</h3>
-      <p class="mode-label">教师性格画像</p>
-      <p class="mode-desc">教学风格与压力应对<br>职业发展专业解读</p>
     </div>
     <div class="mode-card" onclick="selectMode('diagnostic')">
       <div class="mode-icon">📋</div>
@@ -206,7 +203,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="card-title">📋 基本信息</div>
     <form id="form">
       <div id="birthInfoSection">
-      <div class="form-group"><label>姓名（选填）</label><input type="text" id="personName" placeholder="如：张小明" style="width:100%;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem"></div>
       <div class="form-grid">
         <div class="form-group"><label>出生年</label><input type="number" id="year" placeholder="如2005" min="1940" max="2030" required></div>
         <div class="form-group"><label>出生月</label><input type="number" id="month" placeholder="1-12" min="1" max="12" required></div>
@@ -447,17 +443,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           <select id="diagnosticMode">
             <option value="child">孩子版（家长填写）</option>
             <option value="adult">成人版（本人填写）</option>
-            <option value="teacher">教师版（教师填写）</option>
           </select>
         </div>
-        <div style="display:flex;gap:0.5rem;margin:0.5rem 0;flex-wrap:wrap">
-          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=child','_blank')" style="flex:1;min-width:45%">📝 孩子版</button>
-          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=adult','_blank')" style="flex:1;min-width:45%">📝 成人版</button>
-          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=teacher','_blank')" style="flex:1;min-width:45%">📝 教师版</button>
+        <div style="display:flex;gap:0.5rem;margin:0.5rem 0">
+          <button type="button" class="btn-sm" onclick="downloadQuestionnaire('child')" style="flex:1">📥 下载孩子版问卷</button>
+          <button type="button" class="btn-sm" onclick="downloadQuestionnaire('adult')" style="flex:1">📥 下载成人版问卷</button>
         </div>
         <div class="form-group">
           <label>填写好的问卷内容（直接粘贴文本）</label>
-          <textarea id="questionnaireText" placeholder="家长通过链接填写的问卷会自动加载到此处，也可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <textarea id="questionnaireText" placeholder="将填好的问卷内容粘贴到这里，或点击上方下载问卷后填写再粘贴回来" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
           <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
         <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
           <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
@@ -499,7 +493,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    心境 v5.1
+    心境 v4.2
   </div>
 </div>
 </div>
@@ -513,7 +507,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <script>
 // Public crypto parameters
 const CRYPTO_SALT = "3IFm9OOrarCdhJOmNo5j+Q==";
-const CRYPTO_ITERATIONS = 50000;
+const CRYPTO_ITERATIONS = 100000;
 
 // Base64 → Uint8Array
 function b64ToU8(b64) {
@@ -567,24 +561,6 @@ var currentReport = '';
 var unlocked = false;
 var diagnosticDataLoaded = false;
 var _storedAesKey = null;
-var _pendingQuestionnaire = null;
-
-// ===== URL hash questionnaire data detection =====
-(function() {
-  var hash = window.location.hash;
-  if (hash && hash.indexOf('q=') >= 0) {
-    try {
-      var params = new URLSearchParams(hash.substring(1));
-      var b64 = params.get('q');
-      var mode = params.get('mode');
-      if (b64 && mode) {
-        var utf8 = atob(decodeURIComponent(b64));
-        var text = decodeURIComponent(escape(utf8));
-        _pendingQuestionnaire = { text: text, mode: mode };
-      }
-    } catch(e) { console.error('Questionnaire hash parse error', e); }
-  }
-})();
 
 // ===== Helper =====
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -640,7 +616,7 @@ async function loadDiagnosticData() {
 function selectMode(mode) {
   document.getElementById('mode').value = mode;
   var badge = document.getElementById('modeBadge');
-  var modeLabels = {'child':'🌱 孩子版','adult':'🧭 成人版','teacher':'📚 教师版','diagnostic':'📋 诊断报告'};
+  var modeLabels = {'child':'🌱 孩子版','adult':'🧭 成人版','diagnostic':'📋 诊断报告'};
   if (badge) badge.textContent = modeLabels[mode] || mode;
 
   // 诊断模式需要按需加载诊断数据库（约2MB，只在首次进入时加载）
@@ -707,7 +683,6 @@ function checkBirthInfo() {
   hintBox.style.display = 'block';
 
   var parts = [];
-  if (bi.name) parts.push('姓名: ' + bi.name);
   if (bi.year && bi.month && bi.day) parts.push('出生日期: ' + bi.year + '-' + bi.month + '-' + bi.day);
   else parts.push('⚠ 出生年月日未识别');
   if (bi.hour === -1) parts.push('时辰: 不详(按未知时辰处理)');
@@ -797,93 +772,6 @@ function reportToWordHtml(text) {
   return html;
 }
 
-// ===== Auto-fill questionnaire from URL hash or pasted link =====
-function autoFillQuestionnaire(text, mode) {
-  selectMode('diagnostic');
-  var fillAttempts = 0;
-  var fillInterval = setInterval(function() {
-    fillAttempts++;
-    var qText = document.getElementById('questionnaireText');
-    if (qText && document.getElementById('formPage').style.display === 'block') {
-      clearInterval(fillInterval);
-      document.getElementById('diagnosticMode').value = mode;
-      qText.value = text;
-      if (typeof checkBirthInfo === 'function') checkBirthInfo();
-      var tag = document.getElementById('resultTag');
-      if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
-    } else if (fillAttempts > 30) {
-      clearInterval(fillInterval);
-    }
-  }, 500);
-}
-
-// ===== Copy questionnaire link to clipboard =====
-function copyQuestionnaireLink(mode) {
-  var url = 'https://cjmyy.github.io/personality-tool/questionnaire.html?mode=' + mode;
-  var label = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(function() {
-      alert(label + '问卷链接已复制！直接粘贴发到微信即可');
-    }).catch(function() {
-      fallbackCopy(url, label);
-    });
-  } else {
-    fallbackCopy(url, label);
-  }
-}
-function fallbackCopy(text, label) {
-  var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); alert(label + '问卷链接已复制！直接粘贴发到微信即可'); }
-  catch(e) { alert('复制失败，请手动复制：\n' + text); }
-  document.body.removeChild(ta);
-}
-
-// ===== Load pasted questionnaire link =====
-function loadPastedLink() {
-  var input = document.getElementById('pasteLinkInput');
-  var url = input.value.trim();
-  if (!url) { input.focus(); return; }
-  var hashIdx = url.indexOf('#');
-  if (hashIdx < 0) {
-    alert('链接格式不正确，请确认粘贴的是完整的问卷链接');
-    return;
-  }
-  var hash = url.substring(hashIdx);
-  if (hash.indexOf('q=') < 0) {
-    alert('链接中没有找到问卷数据，请确认链接是否完整');
-    return;
-  }
-  try {
-    var params = new URLSearchParams(hash.substring(1));
-    var b64 = params.get('q');
-    var mode = params.get('mode');
-    if (b64 && mode) {
-      var utf8 = atob(decodeURIComponent(b64));
-      var text = decodeURIComponent(escape(utf8));
-      input.value = '';
-      autoFillQuestionnaire(text, mode);
-    } else {
-      alert('链接数据不完整，请确认链接是否完整');
-    }
-  } catch(e) {
-    alert('解析链接失败：' + e.message);
-  }
-}
-
-// ===== Pre-fetch encrypted bundle on page load =====
-var _preFetchedBundle = null;
-(function() {
-  fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' })
-    .then(function(r) { return r.json(); })
-    .then(function(b) { _preFetchedBundle = b; })
-    .catch(function() {});
-})();
-
 // ===== Unlock =====
 async function attemptUnlock() {
   var pwdInput = document.getElementById('pwdInput');
@@ -899,28 +787,25 @@ async function attemptUnlock() {
   lockSpinner.classList.add('show');
   if (lockProgress) { lockProgress.style.display = 'block'; lockProgress.textContent = '正在验证密码…'; }
   try {
-    // Step 1: Derive AES key (PBKDF2)
+    await new Promise(function(r){ setTimeout(r, 10); });
     var aesKey = await deriveKey(password);
     _storedAesKey = aesKey;
-    // Step 2: Get bundle (pre-fetched or fetch now)
-    if (lockProgress) lockProgress.textContent = '正在加载核心数据…';
-    var bundle;
-    if (_preFetchedBundle) {
-      bundle = _preFetchedBundle;
-    } else {
-      var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
-      if (!resp.ok) throw new Error('核心数据加载失败');
-      bundle = await resp.json();
-    }
-    // Step 3: Parallel decryption
-    if (lockProgress) lockProgress.textContent = '正在解密数据…';
+    if (lockProgress) lockProgress.textContent = '正在下载核心数据…';
+    await new Promise(function(r){ setTimeout(r, 10); });
+    var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('核心数据加载失败');
+    var bundle = await resp.json();
     var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
-    var decryptPromises = fileOrder.map(function(fname) {
-      return decryptFile(bundle.files[fname], aesKey);
-    });
-    var decryptedCodes = await Promise.all(decryptPromises);
-    // Step 4: Execute all code
-    if (lockProgress) lockProgress.textContent = '正在加载引擎…';
+    var decryptedCodes = [];
+    for (var i = 0; i < fileOrder.length; i++) {
+      if (lockProgress) lockProgress.textContent = '正在解密 (' + (i + 1) + '/' + fileOrder.length + ')…';
+      await new Promise(function(r){ setTimeout(r, 10); });
+      var encryptedB64 = bundle.files[fileOrder[i]];
+      var decrypted = await decryptFile(encryptedB64, aesKey);
+      decryptedCodes.push(decrypted);
+    }
+    if (lockProgress) lockProgress.textContent = '正在加载分析引擎…';
+    await new Promise(function(r){ setTimeout(r, 10); });
     for (var i = 0; i < decryptedCodes.length; i++) {
       executeJS(decryptedCodes[i]);
     }
@@ -929,12 +814,6 @@ async function attemptUnlock() {
     document.getElementById('mainApp').classList.add('show');
     document.getElementById('modeSelect').style.display = 'flex';
     initApp();
-    // Auto-fill questionnaire if data was passed via URL hash
-    if (_pendingQuestionnaire) {
-      var pq = _pendingQuestionnaire;
-      _pendingQuestionnaire = null;
-      autoFillQuestionnaire(pq.text, pq.mode);
-    }
   } catch (err) {
     console.error('Unlock error:', err);
     lockError.textContent = '错误: ' + (err.message || err) + ' (请截图此信息发给安安)';
@@ -1097,17 +976,16 @@ function initApp() {
           crossValidation: cv,
           mode: diagMode,
           output: output,
-          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: bi.minute || 0, gender: dGender, birthplace: dBirthplace, name: bi.name || '' }
+          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: 0, gender: dGender, birthplace: dBirthplace }
         });
 
         currentReport = reportText;
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
-        var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : diagMode === 'teacher' ? '诊断·教师版' : '诊断·成人版';
+        var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : '诊断·成人版';
         var verTxt = delivery ? '交付版' : '主人版';
-        var nameTag = bi.name ? ' · ' + bi.name : '';
-        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        tag.textContent = diagModeTxt + ' · ' + verTxt + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
       } else {
         // === 普通性格报告模式 ===
         var report = new PersonalityReport();
@@ -1117,7 +995,7 @@ function initApp() {
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
-        var modeTxt = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
+        var modeTxt = mode === 'child' ? '孩子版' : '成人版';
         var verTxt = delivery ? '交付版' : '主人版';
         tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
       }
