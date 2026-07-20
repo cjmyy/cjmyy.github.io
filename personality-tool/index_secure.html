@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>心境 · 照见真实的性格</title>
+<style>
+:root{
+  --primary:#1a365d;--primary-l:#2c5282;--primary-d:#0f2540;
+  --accent:#0d9488;--accent-l:#14b8a6;
+  --bg:#f8fafc;--card:#fff;--text:#1a202c;--text-l:#64748b;
+  --border:#e2e8f0;--success:#059669;--error:#dc2626;
+  --radius:16px;--shadow:0 4px 20px rgba(26,54,93,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ===== Lock Screen ===== */
+#lockScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden}
+.lock-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:3rem 2rem;width:90%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.06)}
+.lock-title{color:var(--primary);font-size:2.2rem;font-weight:700;letter-spacing:0.3em;margin-bottom:0.3rem;padding-left:0.3em}
+.lock-subtitle{color:var(--text-l);font-size:0.9rem;margin-bottom:2rem;font-weight:400}
+.lock-input{width:100%;padding:0.8rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;background:#f8fafc;transition:all .2s;letter-spacing:.05em;color:var(--text);text-align:center}
+.lock-input::placeholder{color:#94a3b8}
+.lock-input:focus{outline:none;border-color:var(--primary-l);box-shadow:0 0 0 3px rgba(44,82,130,.1);background:#fff}
+.lock-btn{width:100%;margin-top:1rem;padding:0.85rem;border:none;border-radius:10px;font-size:1rem;font-weight:600;color:#fff;cursor:pointer;background:var(--primary);box-shadow:0 4px 12px rgba(26,54,93,.15);transition:all .25s;letter-spacing:.1em}
+.lock-btn:hover:not(:disabled){background:var(--primary-l);transform:translateY(-1px);box-shadow:0 6px 16px rgba(26,54,93,.2)}
+.lock-btn:active:not(:disabled){transform:translateY(0)}
+.lock-btn:disabled{opacity:.6;cursor:wait}
+.lock-error{color:var(--error);font-size:0.85rem;margin-top:0.8rem;min-height:1.2rem;display:none;animation:shake .4s ease}
+.lock-error.show{display:block}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.lock-hint{color:#94a3b8;font-size:0.72rem;margin-top:1.5rem;line-height:1.5}
+.lock-spinner{display:none;width:36px;height:36px;margin:1rem auto 0;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+.lock-spinner.show{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== Main App ===== */
+#mainApp{display:none}
+#mainApp.show{display:block}
+
+/* ===== Mode Selection ===== */
+.mode-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--bg)}
+.mode-title{font-size:2.2rem;font-weight:700;color:var(--primary);letter-spacing:0.3em;margin-bottom:0.3rem;padding-left:0.3em}
+.mode-subtitle{color:var(--text-l);font-size:0.95rem;margin-bottom:3rem;font-weight:400}
+.mode-cards{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;max-width:600px;width:100%}
+.mode-card{flex:1;min-width:240px;max-width:280px;background:var(--card);border:2px solid var(--border);border-radius:20px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all .25s;box-shadow:var(--shadow)}
+.mode-card:hover{border-color:var(--primary-l);transform:translateY(-4px);box-shadow:0 8px 30px rgba(26,54,93,.1)}
+.mode-card:active{transform:translateY(0)}
+.mode-icon{font-size:3rem;margin-bottom:1rem}
+.mode-card h3{font-size:1.3rem;font-weight:700;color:var(--primary);margin-bottom:0.3rem}
+.mode-card .mode-label{font-size:0.85rem;color:var(--accent);margin-bottom:1rem;font-weight:600}
+.mode-card .mode-desc{font-size:0.8rem;color:var(--text-l);line-height:1.5}
+
+/* ===== Header ===== */
+.header{background:var(--primary);color:#fff;padding:2.5rem 1rem 2rem;text-align:center}
+.header h1{font-size:1.8rem;font-weight:700;letter-spacing:0.2em;padding-left:0.2em}
+.header .subtitle{margin-top:0.4rem;font-size:0.85rem;opacity:0.7;font-weight:300}
+.header .badge{display:inline-block;margin-top:0.8rem;padding:0.25rem 0.9rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:99px;font-size:0.72rem;letter-spacing:0.1em}
+
+/* ===== Container & Form ===== */
+.container{max-width:820px;margin:0 auto;padding:0 1rem 3rem;position:relative;z-index:2}
+.card{background:var(--card);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-title{font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:0.4rem}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem}
+.form-group{margin-bottom:0.7rem}
+.form-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-l);margin-bottom:0.25rem;letter-spacing:0.02em}
+.form-group input,.form-group select{width:100%;padding:0.65rem 0.7rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;background:#fdfdff;transition:all .2s;color:var(--text)}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary-l);box-shadow:0 0 0 3px rgba(44,82,130,.1)}
+@media(max-width:560px){.form-grid,.form-grid-2{grid-template-columns:1fr 1fr}}
+.chk-row{display:flex;align-items:center;gap:0.4rem;margin:0.6rem 0;cursor:pointer;user-select:none}
+.chk-row input{width:18px;height:18px;accent-color:var(--primary)}
+.chk-row label{font-size:0.85rem;font-weight:600;color:var(--text-l);cursor:pointer}
+.collapse{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.collapse.open{max-height:600px}
+.collapse-inner{padding-top:0.5rem}
+.collapse textarea{width:100%;padding:0.6rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.82rem;font-family:monospace;min-height:120px;resize:vertical;background:#fdfdff;line-height:1.5}
+.hint{font-size:0.72rem;color:#9ca3af;margin-top:0.2rem}
+.btn-generate{width:100%;padding:0.95rem;border:none;border-radius:12px;font-size:1.05rem;font-weight:700;color:#fff;cursor:pointer;background:var(--primary);box-shadow:0 6px 20px rgba(26,54,93,.15);transition:all .25s;letter-spacing:0.05em}
+.btn-generate:hover:not(:disabled){transform:translateY(-2px);background:var(--primary-l);box-shadow:0 8px 28px rgba(26,54,93,.25)}
+.btn-generate:active:not(:disabled){transform:translateY(0)}
+.btn-generate:disabled{opacity:0.6;cursor:wait}
+.btn-back{display:block;margin:0 auto 1rem;padding:0.45rem 1.2rem;border:1px solid var(--border);background:var(--card);color:var(--text-l);border-radius:8px;font-size:0.82rem;cursor:pointer;transition:all .2s;font-weight:600}
+.btn-back:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ===== Loading & Result ===== */
+.loading{display:none;text-align:center;padding:2.5rem 1rem}
+.loading.show{display:block}
+.spinner{width:44px;height:44px;margin:0 auto 1rem;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+.loading p{color:var(--text-l);font-size:0.9rem}
+.error-box{display:none;background:#fef2f2;border:1px solid #fecaca;color:var(--error);padding:0.9rem 1rem;border-radius:10px;margin-top:1rem;font-size:0.88rem}
+.error-box.show{display:block}
+.result{display:none;animation:fadeUp .5s ease}
+.result.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.result-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--border)}
+.result-toolbar{display:flex;gap:0.4rem;padding:0.8rem 1rem;background:#f8fafc;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.result-toolbar .tag{flex:1;font-size:0.78rem;color:var(--text-l);font-weight:600}
+.btn-sm{padding:0.45rem 0.9rem;border:1px solid var(--border);background:#fff;color:var(--text-l);border-radius:8px;font-size:0.8rem;cursor:pointer;transition:all .2s;font-weight:600}
+.btn-sm:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.report-body{padding:1.2rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.report-body pre{font-family:"SF Mono","Consolas","Courier New",monospace;font-size:0.78rem;line-height:1.65;white-space:pre-wrap;word-break:break-all;color:var(--text)}
+@media(min-width:768px){.report-body pre{font-size:0.85rem}}
+.hl-section{color:var(--primary);font-weight:700}
+.hl-divider{color:#cbd5e0}
+.hl-bullet-star{color:#d97706;font-weight:700}
+.hl-bullet-warn{color:#ea580c;font-weight:700}
+.hl-bullet-ok{color:var(--success);font-weight:700}
+.hl-bullet-no{color:var(--error);font-weight:700}
+.hl-bullet-talk{color:#2563eb;font-weight:700}
+.hl-arrow{color:var(--primary);font-weight:700}
+.hl-num{color:var(--primary);font-weight:700;background:rgba(44,82,130,.1);padding:0 2px;border-radius:4px}
+.footer{text-align:center;padding:2rem 1rem;color:#94a3b8;font-size:0.72rem;line-height:1.6}
+
+@media print{
+  #lockScreen,#modeSelect,.header,.card,.footer,.result-toolbar,.btn-back,.form-top-bar{display:none!important}
+  #mainApp{display:block!important}
+  #formPage{display:block!important}
+  .result{display:block!important}
+  .result-card{box-shadow:none;border:none}
+  .report-body{padding:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Lock Screen ===== -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <h1 class="lock-title">心境</h1>
+    <p class="lock-subtitle">照见真实的性格</p>
+    <input type="password" class="lock-input" id="pwdInput" placeholder="请输入访问密码" autocomplete="off" autofocus>
+    <button class="lock-btn" id="unlockBtn" onclick="attemptUnlock()">进入</button>
+    <div class="lock-spinner" id="lockSpinner"></div>
+    <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
+    <div class="lock-error" id="lockError">密码错误，请重新输入</div>
+    <div class="lock-hint">核心数据已加密保护 · v5.0</div>
+  </div>
+</div>
+
+<!-- ===== Main App ===== -->
+<div id="mainApp">
+
+<!-- Mode Selection Page -->
+<div id="modeSelect" class="mode-page" style="display:none">
+  <h1 class="mode-title">心境</h1>
+  <p class="mode-subtitle">照见真实的性格 · 请选择评估类型</p>
+  <!-- Questionnaire workflow -->
+  <div style="margin:1rem auto 1.5rem auto;max-width:420px;padding:1rem;background:rgba(13,148,136,.06);border-radius:12px;border:1.5px dashed var(--accent);">
+    <!-- Step 1: Send questionnaire -->
+    <p style="font-size:.85rem;color:var(--text-l);margin:0 0 .6rem 0;text-align:center">① 发送问卷（复制链接发微信）</p>
+    <div style="display:flex;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap">
+      <button onclick="copyQuestionnaireLink('child')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 孩子版</button>
+      <button onclick="copyQuestionnaireLink('adult')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 成人版</button>
+      <button onclick="copyQuestionnaireLink('teacher')" style="flex:1;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-width:45%">📋 教师版</button>
+    </div>
+    <!-- Step 2: Paste returned link -->
+    <p style="font-size:.85rem;color:var(--text-l);margin:0 0 .6rem 0;text-align:center">② 收到家长回传的链接？粘贴加载</p>
+    <div style="display:flex;gap:.5rem">
+      <input type="text" id="pasteLinkInput" placeholder="粘贴问卷链接..." style="flex:1;padding:.6rem;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem">
+      <button onclick="loadPastedLink()" style="padding:.6rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.85rem;cursor:pointer;white-space:nowrap;font-weight:600">加载</button>
+    </div>
+  </div>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="selectMode('child')">
+      <div class="mode-icon">🌱</div>
+      <h3>孩子版</h3>
+      <p class="mode-label">成长心理画像</p>
+      <p class="mode-desc">了解孩子的先天特质<br>发展倾向与成长方向</p>
+    </div>
+    <div class="mode-card" onclick="selectMode('adult')">
+      <div class="mode-icon">🧭</div>
+      <h3>成人版</h3>
+      <p class="mode-label">人格特质画像</p>
+      <p class="mode-desc">深入解析成人性格特质<br>与人生发展轨迹</p>
+    </div>
+    <div class="mode-card" onclick="selectMode('teacher')">
+      <div class="mode-icon">📚</div>
+      <h3>教师版</h3>
+      <p class="mode-label">教师性格画像</p>
+      <p class="mode-desc">教学风格与压力应对<br>职业发展专业解读</p>
+    </div>
+    <div class="mode-card" onclick="selectMode('diagnostic')">
+      <div class="mode-icon">📋</div>
+      <h3>诊断报告</h3>
+      <p class="mode-label">完整诊断分析</p>
+      <p class="mode-desc">问卷+先天特质双重分析<br>生成针对性诊断报告</p>
+    </div>
+  </div>
+</div>
+
+<!-- Form Page -->
+<div id="formPage" style="display:none">
+<div class="header">
+  <h1>心境</h1>
+  <div class="subtitle">照见真实的性格</div>
+  <div class="badge">基于30年一线教育经验 · 心理学框架</div>
+</div>
+<div class="container">
+  <div class="form-top-bar" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+    <button class="btn-back" style="margin:0" onclick="backToModeSelect()">← 返回选择</button>
+    <span id="modeBadge" style="font-size:0.8rem;font-weight:600;color:var(--accent);background:rgba(13,148,136,.1);padding:0.3rem 0.8rem;border-radius:99px"></span>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 基本信息</div>
+    <form id="form">
+      <div id="birthInfoSection">
+      <div class="form-group"><label>姓名（选填）</label><input type="text" id="personName" placeholder="如：张小明" style="width:100%;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem"></div>
+      <div class="form-grid">
+        <div class="form-group"><label>出生年</label><input type="number" id="year" placeholder="如2005" min="1940" max="2030" required></div>
+        <div class="form-group"><label>出生月</label><input type="number" id="month" placeholder="1-12" min="1" max="12" required></div>
+        <div class="form-group"><label>出生日</label><input type="number" id="day" placeholder="1-31" min="1" max="31" required></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>时（24h制）</label><input type="number" id="hour" placeholder="0-23" min="0" max="23" required></div>
+        <div class="form-group"><label>分</label><input type="number" id="minute" placeholder="0-59" min="0" max="59" required></div>
+        <div class="form-group"><label>性别</label><select id="gender"><option value="male">男</option><option value="female">女</option></select></div>
+      </div>
+      <div class="form-group"><label>出生地</label>
+        <select id="birthplace" onchange="toggleCustomLng()">
+          <optgroup label="直辖市">
+            <option value="北京">北京</option>
+            <option value="上海">上海</option>
+            <option value="天津">天津</option>
+            <option value="重庆">重庆</option>
+          </optgroup>
+          <optgroup label="陕西">
+            <option value="汉中">汉中</option>
+            <option value="西安">西安</option>
+            <option value="宝鸡">宝鸡</option>
+            <option value="咸阳">咸阳</option>
+            <option value="渭南">渭南</option>
+            <option value="延安">延安</option>
+            <option value="榆林">榆林</option>
+          </optgroup>
+          <optgroup label="广东">
+            <option value="广州">广州</option>
+            <option value="深圳">深圳</option>
+            <option value="珠海">珠海</option>
+            <option value="佛山">佛山</option>
+            <option value="东莞">东莞</option>
+            <option value="中山">中山</option>
+            <option value="汕头">汕头</option>
+            <option value="湛江">湛江</option>
+          </optgroup>
+          <optgroup label="江苏">
+            <option value="南京">南京</option>
+            <option value="无锡">无锡</option>
+            <option value="苏州">苏州</option>
+            <option value="扬州">扬州</option>
+            <option value="徐州">徐州</option>
+          </optgroup>
+          <optgroup label="浙江">
+            <option value="杭州">杭州</option>
+            <option value="宁波">宁波</option>
+            <option value="温州">温州</option>
+            <option value="台州">台州</option>
+            <option value="绍兴">绍兴</option>
+            <option value="金华">金华</option>
+            <option value="嘉兴">嘉兴</option>
+            <option value="湖州">湖州</option>
+            <option value="衢州">衢州</option>
+            <option value="丽水">丽水</option>
+            <option value="舟山">舟山</option>
+          </optgroup>
+          <optgroup label="山东">
+            <option value="济南">济南</option>
+            <option value="青岛">青岛</option>
+            <option value="烟台">烟台</option>
+            <option value="威海">威海</option>
+            <option value="淄博">淄博</option>
+            <option value="潍坊">潍坊</option>
+            <option value="临沂">临沂</option>
+            <option value="泰安">泰安</option>
+          </optgroup>
+          <optgroup label="湖北">
+            <option value="武汉">武汉</option>
+            <option value="宜昌">宜昌</option>
+            <option value="襄阳">襄阳</option>
+          </optgroup>
+          <optgroup label="湖南">
+            <option value="长沙">长沙</option>
+            <option value="株洲">株洲</option>
+            <option value="湘潭">湘潭</option>
+            <option value="衡阳">衡阳</option>
+          </optgroup>
+          <optgroup label="河南">
+            <option value="郑州">郑州</option>
+            <option value="洛阳">洛阳</option>
+            <option value="开封">开封</option>
+            <option value="新乡">新乡</option>
+            <option value="信阳">信阳</option>
+          </optgroup>
+          <optgroup label="四川">
+            <option value="成都">成都</option>
+            <option value="绵阳">绵阳</option>
+            <option value="南充">南充</option>
+          </optgroup>
+          <optgroup label="福建">
+            <option value="福州">福州</option>
+            <option value="厦门">厦门</option>
+            <option value="泉州">泉州</option>
+          </optgroup>
+          <optgroup label="辽宁">
+            <option value="沈阳">沈阳</option>
+            <option value="大连">大连</option>
+            <option value="鞍山">鞍山</option>
+            <option value="抚顺">抚顺</option>
+            <option value="锦州">锦州</option>
+            <option value="营口">营口</option>
+          </optgroup>
+          <optgroup label="吉林">
+            <option value="长春">长春</option>
+            <option value="吉林">吉林</option>
+            <option value="通化">通化</option>
+          </optgroup>
+          <optgroup label="黑龙江">
+            <option value="哈尔滨">哈尔滨</option>
+            <option value="齐齐哈尔">齐齐哈尔</option>
+            <option value="大庆">大庆</option>
+            <option value="牡丹江">牡丹江</option>
+            <option value="佳木斯">佳木斯</option>
+          </optgroup>
+          <optgroup label="河北">
+            <option value="石家庄">石家庄</option>
+            <option value="唐山">唐山</option>
+          </optgroup>
+          <optgroup label="山西">
+            <option value="太原">太原</option>
+            <option value="大同">大同</option>
+            <option value="阳泉">阳泉</option>
+            <option value="长治">长治</option>
+            <option value="晋城">晋城</option>
+            <option value="临汾">临汾</option>
+          </optgroup>
+          <optgroup label="内蒙古">
+            <option value="呼和浩特">呼和浩特</option>
+            <option value="包头">包头</option>
+            <option value="赤峰">赤峰</option>
+          </optgroup>
+          <optgroup label="安徽">
+            <option value="合肥">合肥</option>
+          </optgroup>
+          <optgroup label="江西">
+            <option value="南昌">南昌</option>
+          </optgroup>
+          <optgroup label="广西">
+            <option value="南宁">南宁</option>
+            <option value="北海">北海</option>
+            <option value="桂林">桂林</option>
+            <option value="柳州">柳州</option>
+          </optgroup>
+          <optgroup label="海南">
+            <option value="海口">海口</option>
+            <option value="三亚">三亚</option>
+          </optgroup>
+          <optgroup label="贵州">
+            <option value="贵阳">贵阳</option>
+            <option value="遵义">遵义</option>
+            <option value="六盘水">六盘水</option>
+            <option value="铜仁">铜仁</option>
+            <option value="安顺">安顺</option>
+            <option value="都匀">都匀</option>
+            <option value="凯里">凯里</option>
+            <option value="兴义">兴义</option>
+            <option value="毕节">毕节</option>
+          </optgroup>
+          <optgroup label="云南">
+            <option value="昆明">昆明</option>
+            <option value="大理">大理</option>
+            <option value="丽江">丽江</option>
+          </optgroup>
+          <optgroup label="甘肃">
+            <option value="兰州">兰州</option>
+            <option value="天水">天水</option>
+            <option value="酒泉">酒泉</option>
+            <option value="武威">武威</option>
+            <option value="张掖">张掖</option>
+          </optgroup>
+          <optgroup label="新疆">
+            <option value="乌鲁木齐">乌鲁木齐</option>
+            <option value="克拉玛依">克拉玛依</option>
+            <option value="喀什">喀什</option>
+            <option value="伊宁">伊宁</option>
+            <option value="阿克苏">阿克苏</option>
+            <option value="和田">和田</option>
+            <option value="吐鲁番">吐鲁番</option>
+            <option value="哈密">哈密</option>
+            <option value="库尔勒">库尔勒</option>
+          </optgroup>
+          <optgroup label="宁夏">
+            <option value="银川">银川</option>
+          </optgroup>
+          <optgroup label="青海">
+            <option value="西宁">西宁</option>
+            <option value="格尔木">格尔木</option>
+            <option value="玉树">玉树</option>
+          </optgroup>
+          <optgroup label="西藏">
+            <option value="拉萨">拉萨</option>
+            <option value="日喀则">日喀则</option>
+            <option value="林芝">林芝</option>
+          </optgroup>
+          <optgroup label="港澳">
+            <option value="香港">香港</option>
+            <option value="澳门">澳门</option>
+          </optgroup>
+          <option value="__custom__">其他城市（手动输入经度）</option>
+        </select>
+        <div id="customLngBox" style="display:none;margin-top:0.5rem;">
+          <label style="font-size:0.8rem;color:var(--text-l);">出生地经度（东经为正，如汉中107.0、乌鲁木齐87.6、东京139.6、纽约-74.0）</label>
+          <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+            <input type="number" id="customLng" step="0.1" placeholder="如：107.0" style="flex:1;padding:0.5rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.92rem;">
+            <a href="https://www.baidu.com/s?wd=城市名+经度" target="_blank" style="white-space:nowrap;padding:0.5rem 0.8rem;border:1.5px solid var(--accent);border-radius:10px;font-size:0.8rem;font-weight:600;color:var(--accent);text-decoration:none;align-self:center;">🔍 查经度</a>
+          </div>
+        </div>
+      </div>
+      </div>
+      <input type="hidden" id="mode" value="child">
+      <div class="card-title" style="margin-top:1.2rem">⚙️ 报告选项</div>
+      <div class="form-group">
+        <label>报告版本</label>
+        <select id="version">
+          <option value="original">主人版（含术语）</option>
+          <option value="delivery">交付版（心理学包装）</option>
+        </select>
+      </div>
+      <div class="chk-row" id="sensoryRow">
+        <input type="checkbox" id="useSensory">
+        <label for="useSensory">附加感统量表评估（仅孩子版可用）</label>
+      </div>
+      <div class="collapse" id="sensoryCollapse">
+        <div class="collapse-inner">
+          <div class="form-group">
+            <label>感统量表答案（55题，每行一个数字1-5）</label>
+            <textarea id="sensoryAnswers" placeholder="5&#10;4&#10;3&#10;5&#10;2&#10;…（共55行）"></textarea>
+            <div class="hint">评分：从不=5 · 很少=4 · 偶尔=3 · 经常=2 · 总是=1</div>
+          </div>
+        </div>
+      </div>
+      <!-- 诊断模式问卷区域 -->
+      <div id="diagnosticSection" style="display:none">
+        <div class="card-title" style="margin-top:1.2rem">📋 问卷分析</div>
+        <div class="form-group">
+          <label>问卷类型</label>
+          <select id="diagnosticMode">
+            <option value="child">孩子版（家长填写）</option>
+            <option value="adult">成人版（本人填写）</option>
+            <option value="teacher">教师版（教师填写）</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.5rem;margin:0.5rem 0;flex-wrap:wrap">
+          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=child','_blank')" style="flex:1;min-width:45%">📝 孩子版</button>
+          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=adult','_blank')" style="flex:1;min-width:45%">📝 成人版</button>
+          <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=teacher','_blank')" style="flex:1;min-width:45%">📝 教师版</button>
+        </div>
+        <div class="form-group">
+          <label>填写好的问卷内容（直接粘贴文本）</label>
+          <textarea id="questionnaireText" placeholder="家长通过链接填写的问卷会自动加载到此处，也可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
+        <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
+          <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
+        </div>
+        <div id="fallbackLngBox" style="display:none;margin-top:0.5rem;padding:0.6rem;background:#fff3e0;border:1.5px solid #ff9800;border-radius:10px;">
+          <label style="font-size:0.8rem;color:#e65100;">问卷中的出生地无法自动识别，请手动输入出生地经度（东经为正，如汉中107.0）</label>
+          <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+            <input type="number" id="fallbackLng" step="0.1" placeholder="如：107.0" style="flex:1;padding:0.5rem;border:1.5px solid #ff9800;border-radius:10px;font-size:0.92rem;">
+            <a href="https://www.baidu.com/s?wd=城市名+经度" target="_blank" style="white-space:nowrap;padding:0.5rem 0.8rem;border:1.5px solid #ff9800;border-radius:10px;font-size:0.8rem;font-weight:600;color:#ff9800;text-decoration:none;align-self:center;">🔍 查经度</a>
+          </div>
+        </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.4rem;margin:0.5rem 0">
+          <input type="file" id="questionnaireFile" accept=".txt,.md" style="display:none" onchange="handleFileUpload(event)">
+          <button type="button" class="btn-sm" onclick="document.getElementById('questionnaireFile').click()" style="flex:1">📂 上传问卷文件</button>
+        </div>
+      </div>
+      <button type="submit" class="btn-generate" id="btnGen" style="margin-top:0.8rem">🔮 生成报告</button>
+    </form>
+  </div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>正在排盘分析，生成报告中…</p>
+  </div>
+  <div class="error-box" id="errorBox"></div>
+  <div class="result" id="result">
+    <div class="result-card">
+      <div class="result-toolbar">
+        <span class="tag" id="resultTag"></span>
+        <button class="btn-sm" onclick="copyReport()">📋 复制</button>
+        <button class="btn-sm" onclick="downloadReport()">📥 下载Word</button>
+        <button class="btn-sm" onclick="window.print()">🖨️ 打印</button>
+      </div>
+      <div class="report-body">
+        <pre id="reportHtml"></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
+    仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
+    心境 v5.0
+  </div>
+</div>
+</div>
+
+</div><!-- /mainApp -->
+
+<!-- ===== Lunar.js (public library, not encrypted) ===== -->
+<script src="lunar.js"></script>
+
+<!-- ===== Encrypted Data & Unlock Logic ===== -->
+<script>
+// Public crypto parameters
+const CRYPTO_SALT = "3IFm9OOrarCdhJOmNo5j+Q==";
+const CRYPTO_ITERATIONS = 50000;
+
+// Base64 → Uint8Array
+function b64ToU8(b64) {
+  const raw = atob(b64);
+  const u8 = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
+  return u8;
+}
+
+// Derive AES-GCM key from password via PBKDF2
+async function deriveKey(password) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: b64ToU8(CRYPTO_SALT), iterations: CRYPTO_ITERATIONS, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+}
+
+// Decrypt one encrypted file (base64 string) → plaintext string
+async function decryptFile(encryptedB64, aesKey) {
+  const combined = b64ToU8(encryptedB64);
+  const iv = combined.slice(0, 12);
+  const authTag = combined.slice(12, 28);
+  const ciphertext = combined.slice(28);
+  const cipherWithTag = new Uint8Array(ciphertext.length + authTag.length);
+  cipherWithTag.set(ciphertext, 0);
+  cipherWithTag.set(authTag, ciphertext.length);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv },
+    aesKey,
+    cipherWithTag
+  );
+  return new TextDecoder().decode(decrypted);
+}
+
+// Execute decrypted JS in global scope via dynamic <script> tag
+function executeJS(code) {
+  var script = document.createElement('script');
+  script.textContent = code;
+  document.head.appendChild(script);
+}
+
+// ===== Global state =====
+var currentReport = '';
+var unlocked = false;
+var diagnosticDataLoaded = false;
+var _storedAesKey = null;
+var _pendingQuestionnaire = null;
+
+// ===== URL hash questionnaire data detection =====
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('q=') >= 0) {
+    try {
+      var params = new URLSearchParams(hash.substring(1));
+      var b64 = params.get('q');
+      var mode = params.get('mode');
+      if (b64 && mode) {
+        var utf8 = atob(decodeURIComponent(b64));
+        var text = decodeURIComponent(escape(utf8));
+        _pendingQuestionnaire = { text: text, mode: mode };
+      }
+    } catch(e) { console.error('Questionnaire hash parse error', e); }
+  }
+})();
+
+// ===== Helper =====
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// ===== Birthplace custom longitude toggle =====
+function toggleCustomLng() {
+  var select = document.getElementById('birthplace');
+  var box = document.getElementById('customLngBox');
+  if (select.value === '__custom__') {
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+// ===== Sensory checkbox toggle =====
+function updateSensory() {
+  var sensoryChk = document.getElementById('useSensory');
+  var sensoryCol = document.getElementById('sensoryCollapse');
+  var sensoryRow = document.getElementById('sensoryRow');
+  var modeVal = document.getElementById('mode').value;
+  var childMode = modeVal === 'child';
+  if (sensoryRow) sensoryRow.style.display = childMode ? 'flex' : 'none';
+  var checked = sensoryChk.checked;
+  if (childMode && checked) {
+    sensoryCol.classList.add('open');
+  } else {
+    sensoryCol.classList.remove('open');
+    if (!childMode) sensoryChk.checked = false;
+  }
+}
+
+// ===== Mode selection =====
+async function loadDiagnosticData() {
+  if (diagnosticDataLoaded) return true;
+  if (!_storedAesKey) return false;
+  try {
+    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var bundle = await resp.json();
+    var encryptedB64 = bundle.files['diagnostic-data.js'];
+    if (!encryptedB64) throw new Error('诊断数据缺失');
+    var decrypted = await decryptFile(encryptedB64, _storedAesKey);
+    executeJS(decrypted);
+    diagnosticDataLoaded = true;
+    return true;
+  } catch (err) {
+    console.error('Diagnostic data load error:', err);
+    return false;
+  }
+}
+
+function selectMode(mode) {
+  document.getElementById('mode').value = mode;
+  var badge = document.getElementById('modeBadge');
+  var modeLabels = {'child':'🌱 孩子版','adult':'🧭 成人版','teacher':'📚 教师版','diagnostic':'📋 诊断报告'};
+  if (badge) badge.textContent = modeLabels[mode] || mode;
+
+  // 诊断模式需要按需加载诊断数据库（约2MB，只在首次进入时加载）
+  if (mode === 'diagnostic' && !diagnosticDataLoaded) {
+    var modePage = document.getElementById('modeSelect');
+    var loadingDiv = document.createElement('div');
+    loadingDiv.id = 'diagLoading';
+    loadingDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;';
+    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-20秒，请勿离开</p>';
+    var oldContent = modePage.querySelector('.mode-cards');
+    var oldTitle = modePage.querySelector('.mode-title');
+    var oldSub = modePage.querySelector('.mode-subtitle');
+    if (oldContent) oldContent.style.display = 'none';
+    if (oldTitle) oldTitle.style.display = 'none';
+    if (oldSub) oldSub.style.display = 'none';
+    modePage.appendChild(loadingDiv);
+
+    loadDiagnosticData().then(function(success) {
+      var ld = document.getElementById('diagLoading');
+      if (ld) ld.remove();
+      if (oldContent) oldContent.style.display = 'flex';
+      if (oldTitle) oldTitle.style.display = 'block';
+      if (oldSub) oldSub.style.display = 'block';
+      if (success) {
+        selectMode('diagnostic');
+      } else {
+        alert('诊断数据库加载失败，请检查网络连接后重试');
+      }
+    });
+    return;
+  }
+
+  document.getElementById('modeSelect').style.display = 'none';
+  document.getElementById('formPage').style.display = 'block';
+
+  var diagSection = document.getElementById('diagnosticSection');
+  var sensoryRow = document.getElementById('sensoryRow');
+  var birthInfoSection = document.getElementById('birthInfoSection');
+
+  if (mode === 'diagnostic') {
+    if (diagSection) diagSection.style.display = 'block';
+    if (sensoryRow) sensoryRow.style.display = 'none';
+    if (birthInfoSection) birthInfoSection.style.display = 'none';
+  } else {
+    if (diagSection) diagSection.style.display = 'none';
+    if (birthInfoSection) birthInfoSection.style.display = 'block';
+  }
+  updateSensory();
+}
+
+// 诊断模式：问卷内容变化时自动提取出生信息
+function checkBirthInfo() {
+  var qText = document.getElementById('questionnaireText').value;
+  var hintBox = document.getElementById('birthInfoHint');
+  var fallbackBox = document.getElementById('fallbackLngBox');
+  var statusEl = document.getElementById('birthInfoStatus');
+  if (!qText || !qText.trim()) {
+    if (hintBox) hintBox.style.display = 'none';
+    if (fallbackBox) fallbackBox.style.display = 'none';
+    return;
+  }
+  var bi = extractBirthInfo(qText);
+  if (!hintBox) return;
+  hintBox.style.display = 'block';
+
+  var parts = [];
+  if (bi.name) parts.push('姓名: ' + bi.name);
+  if (bi.year && bi.month && bi.day) parts.push('出生日期: ' + bi.year + '-' + bi.month + '-' + bi.day);
+  else parts.push('⚠ 出生年月日未识别');
+  if (bi.hour === -1) parts.push('时辰: 不详(按未知时辰处理)');
+  else if (bi.hour >= 0) parts.push('时辰: ' + bi.hour + '时');
+  else parts.push('⚠ 出生时间未识别');
+  if (bi.gender) parts.push('性别: ' + (bi.gender === 'male' ? '男' : '女'));
+  else parts.push('⚠ 性别未识别');
+
+  // 检查出生地是否匹配
+  var selectEl = document.getElementById('birthplace');
+  var matched = matchBirthplace(bi.birthplace, selectEl);
+  if (matched) {
+    parts.push('出生地: ' + matched + ' ✓');
+    if (fallbackBox) fallbackBox.style.display = 'none';
+  } else if (bi.birthplace) {
+    parts.push('出生地: "' + bi.birthplace + '" 无法自动匹配 ⚠');
+    if (fallbackBox) fallbackBox.style.display = 'block';
+  } else {
+    parts.push('⚠ 出生地未识别');
+    if (fallbackBox) fallbackBox.style.display = 'block';
+  }
+
+  if (statusEl) statusEl.innerHTML = parts.join('<br>');
+}
+
+function handleFileUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('questionnaireText').value = e.target.result;
+    checkBirthInfo();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function backToModeSelect() {
+  document.getElementById('formPage').style.display = 'none';
+  document.getElementById('modeSelect').style.display = 'flex';
+  document.getElementById('result').classList.remove('show');
+}
+
+// ===== Report to Word HTML =====
+function reportToWordHtml(text) {
+  var html = '';
+  var lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var t = line.replace(/\s+$/, '');
+    if (!t.trim()) { html += '<p style="margin:2pt 0">&nbsp;</p>'; continue; }
+    if (/═{10,}/.test(t) || /─{15,}/.test(t)) {
+      html += '<hr style="border:none;border-top:1pt solid #cbd5e0;margin:8pt 0">';
+      continue;
+    }
+    var secMatch = t.match(/^\s*([一二三四五六七八九十]+、)(.+)$/);
+    if (secMatch) {
+      html += '<h2 style="font-size:13pt;color:#1a365d;margin-top:14pt;margin-bottom:4pt">' + esc(secMatch[1]) + esc(secMatch[2]) + '</h2>';
+      continue;
+    }
+    if (t.indexOf('发展倾向速览') >= 0 || t.indexOf('性格速览') >= 0 || t.indexOf('报告说明') >= 0 || t.indexOf('评估基础信息') >= 0) {
+      html += '<h2 style="font-size:13pt;color:#1a365d;margin-top:14pt;margin-bottom:4pt">' + esc(t) + '</h2>';
+      continue;
+    }
+    var trimmed = t.replace(/^\s+/, '');
+    if (trimmed.indexOf('★') === 0) {
+      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#d97706;font-weight:bold">★</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+      continue;
+    }
+    if (trimmed.indexOf('⚠') === 0) {
+      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#ea580c;font-weight:bold">⚠</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+      continue;
+    }
+    if (trimmed.indexOf('✓') === 0) {
+      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#059669;font-weight:bold">✓</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+      continue;
+    }
+    if (trimmed.indexOf('✗') === 0) {
+      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#dc2626;font-weight:bold">✗</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+      continue;
+    }
+    if (trimmed.indexOf('💬') === 0) {
+      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#2563eb;font-weight:bold">💬</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+      continue;
+    }
+    html += '<p style="margin:3pt 0">' + esc(t) + '</p>';
+  }
+  return html;
+}
+
+// ===== Auto-fill questionnaire from URL hash or pasted link =====
+function autoFillQuestionnaire(text, mode) {
+  selectMode('diagnostic');
+  var fillAttempts = 0;
+  var fillInterval = setInterval(function() {
+    fillAttempts++;
+    var qText = document.getElementById('questionnaireText');
+    if (qText && document.getElementById('formPage').style.display === 'block') {
+      clearInterval(fillInterval);
+      document.getElementById('diagnosticMode').value = mode;
+      qText.value = text;
+      if (typeof checkBirthInfo === 'function') checkBirthInfo();
+      var tag = document.getElementById('resultTag');
+      if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
+    } else if (fillAttempts > 30) {
+      clearInterval(fillInterval);
+    }
+  }, 500);
+}
+
+// ===== Copy questionnaire link to clipboard =====
+function copyQuestionnaireLink(mode) {
+  var url = 'https://cjmyy.github.io/personality-tool/questionnaire.html?mode=' + mode;
+  var label = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function() {
+      alert(label + '问卷链接已复制！直接粘贴发到微信即可');
+    }).catch(function() {
+      fallbackCopy(url, label);
+    });
+  } else {
+    fallbackCopy(url, label);
+  }
+}
+function fallbackCopy(text, label) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); alert(label + '问卷链接已复制！直接粘贴发到微信即可'); }
+  catch(e) { alert('复制失败，请手动复制：\n' + text); }
+  document.body.removeChild(ta);
+}
+
+// ===== Load pasted questionnaire link =====
+function loadPastedLink() {
+  var input = document.getElementById('pasteLinkInput');
+  var url = input.value.trim();
+  if (!url) { input.focus(); return; }
+  var hashIdx = url.indexOf('#');
+  if (hashIdx < 0) {
+    alert('链接格式不正确，请确认粘贴的是完整的问卷链接');
+    return;
+  }
+  var hash = url.substring(hashIdx);
+  if (hash.indexOf('q=') < 0) {
+    alert('链接中没有找到问卷数据，请确认链接是否完整');
+    return;
+  }
+  try {
+    var params = new URLSearchParams(hash.substring(1));
+    var b64 = params.get('q');
+    var mode = params.get('mode');
+    if (b64 && mode) {
+      var utf8 = atob(decodeURIComponent(b64));
+      var text = decodeURIComponent(escape(utf8));
+      input.value = '';
+      autoFillQuestionnaire(text, mode);
+    } else {
+      alert('链接数据不完整，请确认链接是否完整');
+    }
+  } catch(e) {
+    alert('解析链接失败：' + e.message);
+  }
+}
+
+// ===== Pre-fetch encrypted bundle on page load =====
+var _preFetchedBundle = null;
+(function() {
+  fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(b) { _preFetchedBundle = b; })
+    .catch(function() {});
+})();
+
+// ===== Unlock =====
+async function attemptUnlock() {
+  var pwdInput = document.getElementById('pwdInput');
+  var unlockBtn = document.getElementById('unlockBtn');
+  var lockError = document.getElementById('lockError');
+  var lockSpinner = document.getElementById('lockSpinner');
+  var lockProgress = document.getElementById('lockProgress');
+  var password = pwdInput.value.trim();
+  if (!password) { pwdInput.focus(); return; }
+  unlockBtn.disabled = true;
+  unlockBtn.textContent = '进入中…';
+  lockError.classList.remove('show');
+  lockSpinner.classList.add('show');
+  if (lockProgress) { lockProgress.style.display = 'block'; lockProgress.textContent = '正在验证密码…'; }
+  try {
+    // Step 1: Derive AES key (PBKDF2)
+    var aesKey = await deriveKey(password);
+    _storedAesKey = aesKey;
+    // Step 2: Get bundle (pre-fetched or fetch now)
+    if (lockProgress) lockProgress.textContent = '正在加载核心数据…';
+    var bundle;
+    if (_preFetchedBundle) {
+      bundle = _preFetchedBundle;
+    } else {
+      var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) throw new Error('核心数据加载失败');
+      bundle = await resp.json();
+    }
+    // Step 3: Parallel decryption
+    if (lockProgress) lockProgress.textContent = '正在解密数据…';
+    var fileOrder = ['data.js', 'app.js', 'report.js', 'diagnostic-engine.js', 'diagnostic-report.js'];
+    var decryptPromises = fileOrder.map(function(fname) {
+      return decryptFile(bundle.files[fname], aesKey);
+    });
+    var decryptedCodes = await Promise.all(decryptPromises);
+    // Step 4: Execute all code
+    if (lockProgress) lockProgress.textContent = '正在加载引擎…';
+    for (var i = 0; i < decryptedCodes.length; i++) {
+      executeJS(decryptedCodes[i]);
+    }
+    unlocked = true;
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainApp').classList.add('show');
+    document.getElementById('modeSelect').style.display = 'flex';
+    initApp();
+    // Auto-fill questionnaire if data was passed via URL hash
+    if (_pendingQuestionnaire) {
+      var pq = _pendingQuestionnaire;
+      _pendingQuestionnaire = null;
+      autoFillQuestionnaire(pq.text, pq.mode);
+    }
+  } catch (err) {
+    console.error('Unlock error:', err);
+    lockError.textContent = '错误: ' + (err.message || err) + ' (请截图此信息发给安安)';
+    lockError.classList.add('show');
+    pwdInput.value = '';
+    pwdInput.focus();
+  } finally {
+    unlockBtn.disabled = false;
+    unlockBtn.textContent = '进入';
+    lockSpinner.classList.remove('show');
+    if (lockProgress) lockProgress.style.display = 'none';
+  }
+}
+
+// Enter key support
+document.getElementById('pwdInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); attemptUnlock(); }
+});
+
+// ===== Init App =====
+function initApp() {
+  var sensoryChk = document.getElementById('useSensory');
+  sensoryChk.addEventListener('change', updateSensory);
+
+  function formatReport(text) {
+    var lines = text.split('\n');
+    var out = '';
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var e = esc(line);
+      if (/═{10,}/.test(line)) { out += '<span class="hl-divider">' + e + '</span>\n'; continue; }
+      if (/─{15,}/.test(line)) { out += '<span class="hl-divider">' + e + '</span>\n'; continue; }
+      var secMatch = line.match(/^(\s*)([一二三四五六七八九十]+、)(.+)$/);
+      if (secMatch) { out += secMatch[1] + '<span class="hl-section">' + esc(secMatch[2] + secMatch[3]) + '</span>\n'; continue; }
+      if (line.indexOf('发展倾向速览') >= 0 || line.indexOf('性格速览') >= 0 || line.indexOf('报告说明') >= 0 || line.indexOf('评估基础信息') >= 0) {
+        out += '<span class="hl-section">' + e + '</span>\n'; continue;
+      }
+      if (/^\s*★/.test(line)) { out += '<span class="hl-bullet-star">' + e + '</span>\n'; continue; }
+      if (/^\s*⚠/.test(line)) { out += '<span class="hl-bullet-warn">' + e + '</span>\n'; continue; }
+      if (/^\s*✓/.test(line)) { out += '<span class="hl-bullet-ok">' + e + '</span>\n'; continue; }
+      if (/^\s*✗/.test(line)) { out += '<span class="hl-bullet-no">' + e + '</span>\n'; continue; }
+      if (/^\s*💬/.test(line)) { out += '<span class="hl-bullet-talk">' + e + '</span>\n'; continue; }
+      e = e.replace(/→/g, '<span class="hl-arrow">→</span>');
+      e = e.replace(/([①②③④⑤⑥⑦⑧⑨⑩])/g, '<span class="hl-num">$1</span>');
+      e = e.replace(/(✓)/g, '<span class="hl-bullet-ok">$1</span>');
+      e = e.replace(/(✗)/g, '<span class="hl-bullet-no">$1</span>');
+      e = e.replace(/(★)/g, '<span class="hl-bullet-star">$1</span>');
+      e = e.replace(/(⚠)/g, '<span class="hl-bullet-warn">$1</span>');
+      e = e.replace(/(💬)/g, '<span class="hl-bullet-talk">$1</span>');
+      out += e + '\n';
+    }
+    return out;
+  }
+
+  document.getElementById('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btnGen');
+    var loading = document.getElementById('loading');
+    var errorBox = document.getElementById('errorBox');
+    var result = document.getElementById('result');
+    btn.disabled = true;
+    btn.textContent = '⏳ 分析中…';
+    loading.classList.add('show');
+    errorBox.classList.remove('show');
+    result.classList.remove('show');
+    try {
+      var year = +document.getElementById('year').value;
+      var month = +document.getElementById('month').value;
+      var day = +document.getElementById('day').value;
+      var hour = +document.getElementById('hour').value;
+      var minute = +document.getElementById('minute').value;
+      var gender = document.getElementById('gender').value;
+      var birthplace = document.getElementById('birthplace').value;
+      var mode = document.getElementById('mode').value;
+      var delivery = document.getElementById('version').value === 'delivery';
+      var useSensory = document.getElementById('useSensory').checked;
+      var sensoryRaw = document.getElementById('sensoryAnswers').value;
+
+      // Handle custom longitude for overseas/other
+      if (birthplace === '__custom__') {
+        var customLng = parseFloat(document.getElementById('customLng').value);
+        if (isNaN(customLng)) {
+          throw new Error('请输入出生地经度（海外/其他地区需要手动填写）');
+        }
+        if (typeof ANALYZER_CONSTANTS !== 'undefined' && ANALYZER_CONSTANTS.CITY_LONGITUDES) {
+          ANALYZER_CONSTANTS.CITY_LONGITUDES['__custom__'] = customLng;
+        }
+      }
+
+      var sensoryAnswers = null;
+      if (useSensory && mode === 'child' && sensoryRaw.trim()) {
+        sensoryAnswers = sensoryRaw.trim().split('\n').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); });
+      }
+
+      var output = delivery ? 'delivery' : 'full';
+      var reportText = '';
+
+      if (mode === 'diagnostic') {
+        // === 诊断报告模式 ===
+        var qText = document.getElementById('questionnaireText').value;
+        if (!qText || !qText.trim()) {
+          throw new Error('请粘贴或上传填写好的问卷内容');
+        }
+        var diagMode = document.getElementById('diagnosticMode').value;
+
+        // 从问卷自动提取出生信息
+        var bi = extractBirthInfo(qText);
+        if (!bi.year || !bi.month || !bi.day) {
+          throw new Error('无法从问卷中识别出生年月日，请检查问卷中"出生年月日（公历）"一栏是否填写完整');
+        }
+        if (!bi.gender) {
+          throw new Error('无法从问卷中识别性别，请检查问卷中性别一栏是否标记');
+        }
+        var dYear = bi.year;
+        var dMonth = bi.month;
+        var dDay = bi.day;
+        var dHour = bi.hour < 0 ? 0 : bi.hour;
+        var dGender = bi.gender;
+
+        // 匹配出生地
+        var selectEl = document.getElementById('birthplace');
+        var dBirthplace = matchBirthplace(bi.birthplace, selectEl);
+        if (!dBirthplace) {
+          // 检查是否手动填了经度
+          var flb = document.getElementById('fallbackLng');
+          if (flb && flb.value) {
+            var flng = parseFloat(flb.value);
+            if (!isNaN(flng)) {
+              if (typeof ANALYZER_CONSTANTS !== 'undefined' && ANALYZER_CONSTANTS.CITY_LONGITUDES) {
+                ANALYZER_CONSTANTS.CITY_LONGITUDES['__custom__'] = flng;
+              }
+              dBirthplace = '__custom__';
+            }
+          }
+          if (!dBirthplace) {
+            throw new Error('问卷中的出生地"' + bi.birthplace + '"无法识别，请在上方经度输入框中手动填写出生地经度');
+          }
+        }
+
+        // 解析问卷
+        var parsed = parseQuestionnaire(qText, diagMode);
+        var qResult = scoreQuestionnaire(parsed);
+
+        if (qResult.answered < 3) {
+          throw new Error('问卷解析到的问题答案不足3个，请检查问卷格式是否正确（每题需标注A/B/C/D选项）');
+        }
+
+        // 八字分析（使用从问卷提取的信息）
+        var analyzer = new PersonalityAnalyzer();
+        var baziAnalysis = analyzer.analyze(dYear, dMonth, dDay, dHour, 0, false, dGender, dBirthplace, false);
+        var baziType = extractBaziType(baziAnalysis);
+
+        // 交叉验证
+        var cv = crossValidate(baziType, qResult);
+
+        // 生成诊断报告
+        reportText = DiagnosticReport.generate({
+          baziResult: baziAnalysis,
+          questionnaireResult: qResult,
+          crossValidation: cv,
+          mode: diagMode,
+          output: output,
+          birthInfo: { year: dYear, month: dMonth, day: dDay, hour: dHour, minute: bi.minute || 0, gender: dGender, birthplace: dBirthplace, name: bi.name || '' }
+        });
+
+        currentReport = reportText;
+        document.getElementById('reportHtml').innerHTML = formatReport(reportText);
+
+        var tag = document.getElementById('resultTag');
+        var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : diagMode === 'teacher' ? '诊断·教师版' : '诊断·成人版';
+        var verTxt = delivery ? '交付版' : '主人版';
+        var nameTag = bi.name ? ' · ' + bi.name : '';
+        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+      } else {
+        // === 普通性格报告模式 ===
+        var report = new PersonalityReport();
+        reportText = report.generate(year, month, day, hour, minute, false, gender, birthplace, false, mode, output, sensoryAnswers);
+
+        currentReport = reportText;
+        document.getElementById('reportHtml').innerHTML = formatReport(reportText);
+
+        var tag = document.getElementById('resultTag');
+        var modeTxt = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
+        var verTxt = delivery ? '交付版' : '主人版';
+        tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      }
+
+      result.classList.add('show');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      errorBox.textContent = '❌ ' + (err.message || err);
+      errorBox.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔮 生成报告';
+      loading.classList.remove('show');
+    }
+  });
+
+  window.copyReport = function() {
+    navigator.clipboard.writeText(currentReport).then(function() {
+      alert('✅ 报告已复制到剪贴板');
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = currentReport;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('✅ 报告已复制到剪贴板');
+    });
+  };
+
+  window.downloadReport = function() {
+    var tag = document.getElementById('resultTag').textContent;
+    var htmlContent = '';
+    htmlContent += '<h1 style="font-size:22pt;color:#1a365d;text-align:center;letter-spacing:0.3em;margin-bottom:2pt">心 境</h1>';
+    htmlContent += '<p style="text-align:center;color:#64748b;font-size:10pt;margin-bottom:2pt">照见真实的性格</p>';
+    htmlContent += '<p style="text-align:center;color:#64748b;font-size:9pt;margin-bottom:8pt">' + esc(tag) + '</p>';
+    htmlContent += '<hr style="border:none;border-top:1.5pt solid #1a365d;margin:8pt 0 16pt 0">';
+    htmlContent += reportToWordHtml(currentReport);
+    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>心境 · 性格报告</title><style>body{font-family:"PingFang SC","Microsoft YaHei","SimSun",sans-serif;font-size:11pt;line-height:1.8;color:#1a202c;margin:40px}p{margin:3pt 0}</style></head><body>' + htmlContent + '</body></html>';
+    var blob = new Blob(['\ufeff' + wordHtml], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '心境_性格报告.doc';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+}
+</script>
+</body>
+</html>
