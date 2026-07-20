@@ -1001,6 +1001,8 @@ function initApp() {
     loading.classList.add('show');
     errorBox.classList.remove('show');
     result.classList.remove('show');
+    // 滚动到加载区域，确保用户能看到反馈
+    loading.scrollIntoView({behavior:'smooth',block:'center'});
     try {
       var year = +document.getElementById('year').value;
       var month = +document.getElementById('month').value;
@@ -1092,6 +1094,9 @@ function initApp() {
         var cv = crossValidate(baziType, qResult);
 
         // 生成诊断报告
+        if (typeof DiagnosticReport === 'undefined') {
+          throw new Error('诊断数据库未加载成功，请刷新页面重新进入。如果反复出现此问题，请换用Chrome浏览器打开链接');
+        }
         reportText = DiagnosticReport.generate({
           baziResult: baziAnalysis,
           questionnaireResult: qResult,
@@ -1126,8 +1131,10 @@ function initApp() {
       result.classList.add('show');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      errorBox.textContent = '❌ ' + (err.message || err);
+      var errMsg = '❌ ' + (err.message || err);
+      errorBox.textContent = errMsg;
       errorBox.classList.add('show');
+      alert(errMsg + '\n\n请截图此信息发给老师');
     } finally {
       btn.disabled = false;
       btn.textContent = '🔮 生成报告';
