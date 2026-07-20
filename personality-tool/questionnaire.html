@@ -108,16 +108,18 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 
 <div class="result-overlay" id="resultOverlay">
 <div class="result-box">
-<h3>⚠️ 提交超时</h3>
-<div class="info">网络较慢，自动提交未完成。<br>请手动操作：复制下方链接 → 发送邮件到 121781953@qq.com</div>
+<h3>✅ 问卷已生成</h3>
+<div class="info">请将下方链接发送给老师<br>老师审阅后将发送你的性格分析报告（1-3个工作日）</div>
 <div class="link-box" id="linkBox" style="display:block">
 <input type="text" id="linkInput" readonly style="font-size:.8rem">
 <div class="result-actions" style="margin-top:.5rem">
 <button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接</button>
+<button class="btn-link" onclick="sendByEmail()" style="flex:1">📧 发邮件</button>
 </div>
 </div>
 <div class="result-actions" style="margin-top:.5rem">
 <button class="btn-close" onclick="closeResult()">返回修改</button>
+<button class="btn-submit" onclick="location.href='success.html'" style="background:var(--accent);color:#fff">已完成分享</button>
 </div>
 </div>
 </div>
@@ -543,12 +545,13 @@ function generateResult(){
   document.getElementById('form_content').value=result;
   document.getElementById('linkInput').value=link;
   var btn=document.getElementById('genBtn');
-  btn.textContent='提交中…';btn.disabled=true;
-  document.getElementById('submitForm').submit();
-  setTimeout(function(){
-    btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
+  btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
+  document.getElementById('linkInput').value=link;
+  if(navigator.share){
+    navigator.share({title:'性格问卷提交',text:'老师您好，我已完成性格诊断问卷，请查看：',url:link}).then(function(){location.href='success.html'}).catch(function(){document.getElementById('resultOverlay').classList.add('show')});
+  }else{
     document.getElementById('resultOverlay').classList.add('show');
-  },10000);
+  }
 }
 
 // ===== URL hash encoding =====
@@ -586,6 +589,12 @@ function copyResult(){
 }
 
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+function sendByEmail(){
+  var link=document.getElementById('linkInput').value;
+  var subject='性格问卷提交';
+  var body='老师您好，我已完成性格诊断问卷，请查看：\n\n'+link;
+  window.location.href='mailto:121781953@qq.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
 </script>
 </body>
 </html>
