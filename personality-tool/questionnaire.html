@@ -44,8 +44,10 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 .input-row .unit{font-size:.85rem;color:var(--text-l);white-space:nowrap}
 .input-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
 @media(max-width:400px){.input-grid{grid-template-columns:1fr 1fr}.choice-row{grid-template-columns:1fr}}
-.submit-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:.8rem;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
-.btn-submit{width:100%;padding:.8rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;color:#fff;background:var(--primary);cursor:pointer;box-shadow:0 4px 12px rgba(26,54,93,.15);transition:all .2s}
+.submit-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:.8rem;box-shadow:0 -2px 12px rgba(0,0,0,.06);display:flex;gap:.5rem}
+.btn-back-top{padding:.8rem 1.2rem;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;font-weight:600;color:var(--text-l);background:#fff;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-back-top:hover{border-color:var(--primary-l);color:var(--primary)}
+.btn-submit{flex:1;padding:.8rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;color:#fff;background:var(--primary);cursor:pointer;box-shadow:0 4px 12px rgba(26,54,93,.15);transition:all .2s}
 .btn-submit:hover{background:var(--primary-l)}
 .btn-submit:disabled{opacity:.5}
 .result-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
@@ -102,6 +104,7 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 </div>
 <div id="questions"></div>
 <div class="submit-bar">
+<button class="btn-back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️ 返回修改</button>
 <button class="btn-submit" id="genBtn" onclick="generateResult()">✅ 填完了，提交问卷</button>
 </div>
 </div>
