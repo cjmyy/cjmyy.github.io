@@ -74,7 +74,7 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 
 <div id="modePage" class="mode-select">
 <h1>📋 诊断问卷</h1>
-<p>选择问卷类型，在手机上直接填写<br>填完可生成链接发给老师</p>
+<p>选择问卷类型，在手机上直接填写<br>填完提交，老师审阅后发送报告</p>
 <div class="mode-btns">
 <div class="mode-btn" onclick="showForm('child')">
 <div class="icon">🌱</div>
@@ -108,23 +108,31 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 
 <div class="result-overlay" id="resultOverlay">
 <div class="result-box">
-<h3>✅ 提交成功！</h3>
-<div class="info" id="resultInfo">👇 复制下面这个链接，发给老师<br>老师打开后输密码就能看到你的问卷结果</div>
+<h3>⚠️ 提交超时</h3>
+<div class="info">网络较慢，自动提交未完成。<br>请手动操作：复制下方链接 → 发送邮件到 121781953@qq.com</div>
 <div class="link-box" id="linkBox" style="display:block">
 <input type="text" id="linkInput" readonly style="font-size:.8rem">
 <div class="result-actions" style="margin-top:.5rem">
-<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接，发给老师</button>
+<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接</button>
 </div>
 </div>
-<details style="margin-top:.8rem">
-<summary style="font-size:.8rem;color:var(--accent);cursor:pointer;padding:.3rem">查看填写内容</summary>
-<textarea id="resultText" readonly style="margin-top:.5rem;font-size:.7rem;height:200px"></textarea>
-</details>
 <div class="result-actions" style="margin-top:.5rem">
 <button class="btn-close" onclick="closeResult()">返回修改</button>
 </div>
 </div>
 </div>
+
+<form id="submitForm" action="https://formsubmit.co/121781953@qq.com" method="POST" style="display:none">
+<input type="hidden" name="_subject" id="form_subject">
+<input type="hidden" name="_template" value="table">
+<input type="hidden" name="_captcha" value="false">
+<input type="hidden" name="_next" value="https://cjmyy.github.io/personality-tool/success.html">
+<input type="hidden" name="email" id="form_email">
+<input type="hidden" name="问卷类型" id="form_mode">
+<input type="hidden" name="姓名" id="form_bname">
+<input type="hidden" name="工具链接" id="form_link">
+<input type="hidden" name="问卷内容" id="form_content">
+</form>
 
 <div class="toast" id="toast"></div>
 
