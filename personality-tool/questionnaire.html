@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script>
+if(location.hostname==='cjmyy.github.io'){
+  location.replace('https://cdn.jsdelivr.net/gh/cjmyy/cjmyy.github.io@main'+location.pathname+location.search+location.hash);
+}
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0">
 <title>诊断问卷</title>
@@ -532,7 +537,7 @@ function generateResult(){
   if(!email){showToast('请填写联系邮箱');return}
   var utf8=unescape(encodeURIComponent(result));
   var b64;try{b64=btoa(utf8)}catch(e){b64=''}
-  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'');
+  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
   if(!base.endsWith('/'))base+='/';
   var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
@@ -555,7 +560,7 @@ function generateLink(){
   if(!result){showToast('请先生成结果');return}
   var utf8=unescape(encodeURIComponent(result));
   var b64;try{b64=btoa(utf8)}catch(e){showToast('编码失败');return}
-  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'');
+  var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
   if(!base.endsWith('/'))base+='/';
   var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var input=document.getElementById('linkInput');
