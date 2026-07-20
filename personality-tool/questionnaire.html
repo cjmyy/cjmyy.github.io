@@ -533,7 +533,7 @@ function generateResult(){
   var utf8=unescape(encodeURIComponent(result));
   var b64;try{b64=btoa(utf8)}catch(e){b64=''}
   var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
-  var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
+  var link=base+'?v=5.2#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
   document.getElementById('form_subject').value='性格问卷提交 - '+name+' - '+modeText;
   document.getElementById('form_email').value=email;
@@ -555,7 +555,7 @@ function generateLink(){
   var utf8=unescape(encodeURIComponent(result));
   var b64;try{b64=btoa(utf8)}catch(e){showToast('编码失败');return}
   var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
-  var link=base+'#q='+encodeURIComponent(b64)+'&mode='+currentMode;
+  var link=base+'?v=5.2#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var input=document.getElementById('linkInput');
   input.value=link;
   input.select();
