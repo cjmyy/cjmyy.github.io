@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>(function(){var s=location.search,h=location.hash;if(s.indexOf('cb=')===-1){location.replace(location.pathname+'?cb='+Date.now()+h);}})();</script>
+<script>(function(){var s=location.search,h=location.hash;if(s.indexOf('cb=')===-1){var sep=s?'&':'?';location.replace(location.pathname+s+sep+'cb='+Date.now()+h);}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
