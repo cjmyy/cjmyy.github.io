@@ -109,17 +109,16 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 <div class="result-overlay" id="resultOverlay">
 <div class="result-box">
 <h3>✅ 问卷已生成</h3>
-<div class="info">请选择以下任一方式发送给老师：<br>① 点「📧 发邮件」直接发送（链接已自动包含，无需先复制）<br>② 点「📋 复制链接」后粘贴到微信/QQ发送<br>老师审阅后将发送你的性格分析报告（1-3个工作日）</div>
+<div class="info" style="font-size:1rem;line-height:1.8">链接已自动复制！<br><br>请打开<span style="color:var(--accent);font-weight:700">微信</span>→找到老师→粘贴发送<br><br>老师审阅后将发送你的性格分析报告<br>（1-3个工作日）</div>
 <div class="link-box" id="linkBox" style="display:block">
-<input type="text" id="linkInput" readonly style="font-size:.8rem">
-<div class="result-actions" style="margin-top:.5rem">
-<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 复制链接</button>
-<button class="btn-link" onclick="sendByEmail()" style="flex:1">📧 发邮件</button>
+<input type="text" id="linkInput" readonly style="font-size:.7rem;opacity:.6">
 </div>
+<div class="result-actions" style="margin-top:.8rem">
+<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 再复制一次</button>
+<button class="btn-submit" onclick="location.href='success.html'" style="flex:1;background:var(--accent);color:#fff">✅ 已发送，完成</button>
 </div>
-<div class="result-actions" style="margin-top:.5rem">
-<button class="btn-close" onclick="closeResult()">返回修改</button>
-<button class="btn-submit" onclick="location.href='success.html'" style="background:var(--accent);color:#fff">已完成分享</button>
+<div style="margin-top:.5rem;text-align:center">
+<a href="javascript:void(0)" onclick="sendByEmail()" style="font-size:.8rem;color:var(--text-l);text-decoration:underline">或通过邮件发送</a>
 </div>
 </div>
 </div>
@@ -546,12 +545,8 @@ function generateResult(){
   document.getElementById('linkInput').value=link;
   var btn=document.getElementById('genBtn');
   btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
-  document.getElementById('linkInput').value=link;
-  if(navigator.share){
-    navigator.share({title:'性格问卷提交',text:'老师您好，我已完成性格诊断问卷，请查看：',url:link}).then(function(){location.href='success.html'}).catch(function(){document.getElementById('resultOverlay').classList.add('show')});
-  }else{
-    document.getElementById('resultOverlay').classList.add('show');
-  }
+  document.getElementById('resultOverlay').classList.add('show');
+  autoCopyLink(link);
 }
 
 // ===== URL hash encoding =====
@@ -568,6 +563,19 @@ function generateLink(){
   input.select();
   document.getElementById('linkBox').classList.add('show');
   showToast('链接已生成，请复制发给老师');
+}
+
+function autoCopyLink(link){
+  var ok=false;
+  var ta=document.createElement('textarea');
+  ta.value=link;
+  ta.style.position='fixed';ta.style.left='-9999px';
+  document.body.appendChild(ta);ta.select();
+  try{ok=document.execCommand('copy')}catch(e){}
+  document.body.removeChild(ta);
+  if(!ok){
+    try{navigator.clipboard.writeText(link)}catch(e){}
+  }
 }
 
 function copyLink(){
