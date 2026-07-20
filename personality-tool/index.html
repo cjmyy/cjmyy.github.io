@@ -672,7 +672,10 @@ function selectMode(mode) {
       if (success) {
         selectMode('diagnostic');
       } else {
-        alert('诊断数据库加载失败，请检查网络连接后重试');
+        var errDiv = document.createElement('div');
+        errDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;margin:1rem auto;';
+        errDiv.innerHTML = '<p style="color:#dc2626;font-size:0.95rem;font-weight:600;margin-bottom:0.8rem">❌ 诊断数据库加载失败</p><p style="color:#991b1b;font-size:0.85rem;margin-bottom:1rem">请检查网络连接，然后重新点击"诊断"按钮</p><button onclick="this.parentElement.remove()" style="padding:0.5rem 1.2rem;border:1.5px solid #fca5a5;border-radius:8px;background:#fff;color:#dc2626;font-weight:600;cursor:pointer">关闭</button>';
+        modePage.appendChild(errDiv);
       }
     });
     return;
