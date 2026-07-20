@@ -475,6 +475,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           <button type="button" class="btn-sm" onclick="document.getElementById('questionnaireFile').click()" style="flex:1">📂 上传问卷文件</button>
         </div>
       </div>
+      <div id="inlineError" style="display:none;margin-top:0.8rem;padding:1rem 1.2rem;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;font-size:0.92rem;color:#dc2626;font-weight:600;line-height:1.6;text-align:center;"></div>
       <button type="submit" class="btn-generate" id="btnGen" style="margin-top:0.8rem">🔮 生成报告</button>
     </form>
   </div>
@@ -996,13 +997,15 @@ function initApp() {
     var loading = document.getElementById('loading');
     var errorBox = document.getElementById('errorBox');
     var result = document.getElementById('result');
-    btn.disabled = true;
-    btn.textContent = '⏳ 分析中…';
-    loading.classList.add('show');
+    var inlineError = document.getElementById('inlineError');
+    // 重置状态
+    inlineError.style.display = 'none';
+    inlineError.textContent = '';
     errorBox.classList.remove('show');
     result.classList.remove('show');
-    // 滚动到加载区域，确保用户能看到反馈
-    loading.scrollIntoView({behavior:'smooth',block:'center'});
+    btn.disabled = true;
+    btn.textContent = '⏳ 分析中…';
+    btn.style.background = '#94a3b8';
     try {
       var year = +document.getElementById('year').value;
       var month = +document.getElementById('month').value;
@@ -1034,6 +1037,7 @@ function initApp() {
 
       var output = delivery ? 'delivery' : 'full';
       var reportText = '';
+      loading.classList.add('show');
 
       if (mode === 'diagnostic') {
         // === 诊断报告模式 ===
@@ -1132,12 +1136,17 @@ function initApp() {
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       var errMsg = '❌ ' + (err.message || err);
+      // 在按钮上方显示错误（手机端可见）
+      inlineError.innerHTML = errMsg + '<br><br><span style="font-size:0.8rem;color:#991b1b;">请检查上方提示信息，修正后重新点击生成报告</span>';
+      inlineError.style.display = 'block';
+      inlineError.scrollIntoView({behavior:'smooth',block:'center'});
+      // 同时更新errorBox（备用）
       errorBox.textContent = errMsg;
       errorBox.classList.add('show');
-      alert(errMsg + '\n\n请截图此信息发给老师');
     } finally {
       btn.disabled = false;
       btn.textContent = '🔮 生成报告';
+      btn.style.background = '';
       loading.classList.remove('show');
     }
   });
