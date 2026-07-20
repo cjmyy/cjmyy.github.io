@@ -627,7 +627,10 @@ async function loadDiagnosticData() {
   if (diagnosticDataLoaded) return true;
   if (!_storedAesKey) return false;
   try {
-    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store' });
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
+    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store', signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var bundle = await resp.json();
     var encryptedB64 = bundle.files['diagnostic-data.js'];
@@ -650,11 +653,13 @@ function selectMode(mode) {
 
   // 诊断模式需要按需加载诊断数据库（约2MB，只在首次进入时加载）
   if (mode === 'diagnostic' && !diagnosticDataLoaded) {
+    // 防止重复点击导致多次并发加载
+    if (document.getElementById('diagLoading')) return;
     var modePage = document.getElementById('modeSelect');
     var loadingDiv = document.createElement('div');
     loadingDiv.id = 'diagLoading';
     loadingDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;';
-    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-20秒，请勿离开</p>';
+    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-30秒，请勿离开</p>';
     var oldContent = modePage.querySelector('.mode-cards');
     var oldTitle = modePage.querySelector('.mode-title');
     var oldSub = modePage.querySelector('.mode-subtitle');
@@ -673,9 +678,11 @@ function selectMode(mode) {
         selectMode('diagnostic');
       } else {
         var errDiv = document.createElement('div');
+        errDiv.id = 'diagError';
         errDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;margin:1rem auto;';
-        errDiv.innerHTML = '<p style="color:#dc2626;font-size:0.95rem;font-weight:600;margin-bottom:0.8rem">❌ 诊断数据库加载失败</p><p style="color:#991b1b;font-size:0.85rem;margin-bottom:1rem">请检查网络连接，然后重新点击"诊断"按钮</p><button onclick="this.parentElement.remove()" style="padding:0.5rem 1.2rem;border:1.5px solid #fca5a5;border-radius:8px;background:#fff;color:#dc2626;font-weight:600;cursor:pointer">关闭</button>';
+        errDiv.innerHTML = '<p style="color:#dc2626;font-size:0.95rem;font-weight:600;margin-bottom:0.8rem">❌ 诊断数据库加载失败</p><p style="color:#991b1b;font-size:0.85rem;margin-bottom:1rem">可能是网络较慢，请点击下方按钮重试</p><button onclick="document.getElementById(\'diagError\').remove();selectMode(\'diagnostic\')" style="padding:0.6rem 1.5rem;border:none;border-radius:8px;background:#1a365d;color:#fff;font-weight:600;cursor:pointer">🔄 重新加载</button>';
         modePage.appendChild(errDiv);
+        errDiv.scrollIntoView({behavior:'smooth',block:'center'});
       }
     });
     return;
