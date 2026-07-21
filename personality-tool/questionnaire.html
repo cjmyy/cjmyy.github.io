@@ -540,11 +540,13 @@ function generateResult(){
   var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
   var link=base+'?v=5.2#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
+  var gender=radioVal('q2');
+  var place=val('bplace');
   var btn=document.getElementById('genBtn');
   btn.textContent='⏳ 正在提交…';btn.disabled=true;
   // AJAX自动提交到老师邮箱（URLSearchParams避免CORS预检，字段名用英文避免编码问题）
   var params=new URLSearchParams();
-  params.append('_subject','性格问卷提交 - '+name+' - '+modeText);
+  params.append('_subject','性格问卷 - '+name+' - '+gender+' - '+place+' - '+modeText);
   params.append('_captcha','false');
   params.append('client_email',email);
   params.append('questionnaire_type',modeText);
