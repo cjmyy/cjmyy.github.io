@@ -542,20 +542,19 @@ function generateResult(){
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
   var btn=document.getElementById('genBtn');
   btn.textContent='⏳ 正在提交…';btn.disabled=true;
-  // AJAX自动提交到老师邮箱
+  // AJAX自动提交到老师邮箱（URLSearchParams避免CORS预检）
+  var params=new URLSearchParams();
+  params.append('_subject','性格问卷提交 - '+name+' - '+modeText);
+  params.append('_template','table');
+  params.append('_captcha','false');
+  params.append('email',email);
+  params.append('问卷类型',modeText);
+  params.append('姓名',name);
+  params.append('工具链接',link);
+  params.append('问卷内容',result);
   fetch('https://formsubmit.co/ajax/121781953@qq.com',{
     method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify({
-      _subject:'性格问卷提交 - '+name+' - '+modeText,
-      _template:'table',
-      _captcha:'false',
-      email:email,
-      问卷类型:modeText,
-      姓名:name,
-      工具链接:link,
-      问卷内容:result
-    })
+    body:params
   }).then(function(r){return r.json()})
   .then(function(d){
     btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
