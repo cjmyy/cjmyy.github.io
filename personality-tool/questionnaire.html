@@ -241,7 +241,7 @@ function renderQuestions(){
   } else if(currentMode==='teacher'){
     h+=section('基本信息',birthInfoBlock()+
       q(1,'你的教龄',inputRow('age','','年'))+
-      q(2,'你的性别',choiceRow('q2',[['男','男'],['女','女']]))+
+      q(2,'你的性别 <span style="color:#dc2626">*</span>',choiceRow('q2',[['男','男'],['女','女']]))+
       q(3,'任教学科',choiceCol('q3',[['语文','语文'],['数学','数学'],['英语','英语'],['理科(物化生)','理科(物化生)'],['文科(政史地)','文科(政史地)'],['体音美','体音美'],['信息技术','信息技术'],['其他','其他']])+inputText('q3_other','其他学科'))+
       q(4,'目前是否担任班主任',choiceCol('q4',[['是','是'],['否','否'],['曾经担任','曾经担任']]))+
       q(5,'任教年级',choiceCol('q5',[['幼儿园','幼儿园'],['小学低段(1-3年级)','小学低段(1-3年级)'],['小学高段(4-6年级)','小学高段(4-6年级)'],['初中','初中'],['高中','高中'],['其他','其他']]))
@@ -277,7 +277,7 @@ function renderQuestions(){
   } else {
     h+=section('基本信息',birthInfoBlock()+
       q(1,'你的年龄',inputRow('age','','岁'))+
-      q(2,'你的性别',choiceRow('q2',[['男','男'],['女','女']]))+
+      q(2,'你的性别 <span style="color:#dc2626">*</span>',choiceRow('q2',[['男','男'],['女','女']]))+
       q(3,'你的婚姻状况',choiceCol('q3',[['未婚','未婚'],['已婚','已婚'],['离异','离异'],['其他','其他']]))+
       q(4,'你的职业类型',choiceCol('q4',[['上班族','上班族'],['自由职业','自由职业'],['个体经营','个体经营'],['管理层','管理层'],['待业/转型期','待业/转型期'],['其他','其他']])+inputText('q4_other','其他职业'))+
       q(5,'你当前最大的压力来源是：',choiceCol('q5',[['工作/事业','工作/事业'],['家庭/婚姻','家庭/婚姻'],['经济','经济'],['人际关系','人际关系'],['自我认知/方向','自我认知/方向'],['其他','其他']]))
@@ -365,6 +365,73 @@ function fmtAbcd(a){var o=['A','B','C','D'],p=[];o.forEach(function(x){p.push(x+
 function fmtYN(v){return (v==='是'?'■是':'□是')+' '+(v==='否'?'■否':'□否')+' '+(v==='不确定'?'■不确定':'□不确定')}
 function fmtSingle(val,opts){var p=[];opts.forEach(function(o){p.push((val===o[0]?'■':'□')+o[1])});return p.join(' ')}
 function fmtMulti(vals,opts){var p=[];opts.forEach(function(o){p.push((vals.indexOf(o[0])>=0?'■':'□')+o[1])});return p.join(' ')}
+
+// ===== Validation =====
+function validateRequired(){
+  document.querySelectorAll('.input-text').forEach(function(el){el.style.borderColor='';});
+  var missing=[];
+  var firstMissing=null;
+  function checkInput(id,label){
+    var el=document.getElementById(id);
+    if(!el||!el.value.trim()){missing.push(label);if(el&&!firstMissing)firstMissing=el;}
+  }
+  function checkRadio(name){
+    var c=document.querySelector('input[name="'+name+'"]:checked');
+    if(!c){
+      var first=document.querySelector('input[name="'+name+'"]');
+      var qDiv=first?first.closest('.q'):null;
+      var txt=qDiv?qDiv.querySelector('.q-text').textContent.replace(/[*\s]+$/,'').trim():name;
+      missing.push(txt);
+      if(first&&!firstMissing)firstMissing=first;
+    }
+  }
+  function checkCheckbox(name){
+    var checked=document.querySelectorAll('input[name="'+name+'"]:checked');
+    if(checked.length===0){
+      var first=document.querySelector('input[name="'+name+'"]');
+      var qDiv=first?first.closest('.q'):null;
+      var txt=qDiv?qDiv.querySelector('.q-text').textContent.replace(/[*\s]+$/,'').trim():name;
+      missing.push(txt);
+      if(first&&!firstMissing)firstMissing=first;
+    }
+  }
+  checkInput('bname','姓名');
+  checkInput('bemail','联系邮箱');
+  checkInput('byear','出生年');
+  checkInput('bmonth','出生月');
+  checkInput('bday','出生日');
+  checkInput('bplace','出生地');
+  checkInput('age',currentMode==='teacher'?'教龄':'年龄');
+  checkRadio('q2');
+  var rn=[];
+  document.querySelectorAll('input[type="radio"]').forEach(function(r){if(r.name!=='q2'&&rn.indexOf(r.name)<0)rn.push(r.name)});
+  rn.forEach(function(n){checkRadio(n)});
+  document.querySelectorAll('textarea.input-text').forEach(function(el){
+    if(!el.value.trim()){
+      var qDiv=el.closest('.q');
+      var txt=qDiv?qDiv.querySelector('.q-text').textContent.replace(/[*\s]+$/,'').trim():el.id;
+      missing.push(txt);
+      if(!firstMissing)firstMissing=el;
+    }
+  });
+  var cn=[];
+  document.querySelectorAll('input[type="checkbox"]').forEach(function(c){if(cn.indexOf(c.name)<0)cn.push(c.name)});
+  cn.forEach(function(n){checkCheckbox(n)});
+  ['bname','bemail','byear','bmonth','bday','bplace','age'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&!el.value.trim())el.style.borderColor='#dc2626';
+  });
+  document.querySelectorAll('textarea.input-text').forEach(function(el){
+    if(!el.value.trim())el.style.borderColor='#dc2626';
+  });
+  if(missing.length>0){
+    var msg=missing.length<=3?'请填写：'+missing.join('、'):'还有'+missing.length+'项未填写，请检查标红项';
+    showToast(msg);
+    if(firstMissing)firstMissing.scrollIntoView({behavior:'smooth',block:'center'});
+    return false;
+  }
+  return true;
+}
 
 // ===== Generate result text =====
 function generateResult(){
@@ -557,9 +624,8 @@ function generateResult(){
   }
 
   var result=L.join('\n');
+  if(!validateRequired())return;
   var name=val('bname'),email=val('bemail');
-  if(!name){showToast('请填写姓名');return}
-  if(!email){showToast('请填写联系邮箱');return}
   var fileInput=document.getElementById('paymentScreenshot');
   if(!fileInput||!fileInput.files[0]){showToast('请上传付款截图');return}
   var utf8=unescape(encodeURIComponent(result));
