@@ -586,6 +586,7 @@ function executeJS(code) {
 
 // ===== Global state =====
 var currentReport = '';
+var currentReportMeta = { delivery: false, name: '', dateStr: '', mode: '' };
 var unlocked = false;
 var diagnosticDataLoaded = false;
 var _storedAesKey = null;
@@ -1256,6 +1257,7 @@ function initApp() {
         });
 
         currentReport = reportText;
+        currentReportMeta = { delivery: delivery, name: bi.name || '', dateStr: dYear + String(dMonth).padStart(2,'0') + String(dDay).padStart(2,'0'), mode: diagMode };
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
@@ -1285,6 +1287,7 @@ function initApp() {
         reportText = report.generate(year, month, day, hour, minute, false, gender, birthplace, false, mode, output, sensoryAnswers);
 
         currentReport = reportText;
+        currentReportMeta = { delivery: delivery, name: '', dateStr: year + String(month).padStart(2,'0') + String(day).padStart(2,'0'), mode: mode };
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
@@ -1346,12 +1349,14 @@ function initApp() {
     htmlContent += '<p style="text-align:center;color:#64748b;font-size:9pt;margin-bottom:4pt">' + esc(tag) + '</p>';
     htmlContent += '<hr style="border:none;border-top:1.5pt solid #1a365d;margin:2pt 0 10pt 0">';
     htmlContent += reportToWordHtml(currentReport);
-    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>心境 · 性格报告</title><style>body{font-family:"PingFang SC","Microsoft YaHei","SimSun",sans-serif;font-size:10.5pt;line-height:1.5;color:#1a202c;margin:22px 28px}p{margin:1.5pt 0}h2{font-size:12.5pt;color:#1a365d;margin-top:14pt;margin-bottom:3pt;padding-bottom:2pt;border-bottom:1pt solid #1a365d}table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt}td{border:0.5pt solid #94a3b8;padding:2pt 4pt;text-align:center}hr{border:none;margin:4pt 0}</style></head><body>' + htmlContent + '</body></html>';
+    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + (currentReportMeta.delivery ? '交付版' : '主任版') + '_性格报告</title><style>body{font-family:"PingFang SC","Microsoft YaHei","SimSun",sans-serif;font-size:10.5pt;line-height:1.5;color:#1a202c;margin:22px 28px}p{margin:1.5pt 0}h2{font-size:12.5pt;color:#1a365d;margin-top:14pt;margin-bottom:3pt;padding-bottom:2pt;border-bottom:1pt solid #1a365d}table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt}td{border:0.5pt solid #94a3b8;padding:2pt 4pt;text-align:center}hr{border:none;margin:4pt 0}</style></head><body>' + htmlContent + '</body></html>';
     var blob = new Blob(['\ufeff' + wordHtml], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = '心境_性格报告.doc';
+    var verPrefix = currentReportMeta.delivery ? '交付版' : '主任版';
+    var namePart = currentReportMeta.name ? '_' + currentReportMeta.name : '';
+    a.download = verPrefix + namePart + '_' + currentReportMeta.dateStr + '.doc';
     a.click();
     URL.revokeObjectURL(url);
   };
