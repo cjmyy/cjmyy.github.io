@@ -786,46 +786,109 @@ function backToModeSelect() {
 function reportToWordHtml(text) {
   var html = '';
   var lines = text.split('\n');
+  var prevEmpty = false;
+  var inTable = false;
+  var tableRows = [];
+  function flushTable() {
+    if (!tableRows.length) return '';
+    var s = '<table style="border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt">';
+    for (var r = 0; r < tableRows.length; r++) {
+      s += '<tr>';
+      for (var c = 0; c < tableRows[r].length; c++) {
+        var isH = r === 0;
+        var st = 'border:0.5pt solid #94a3b8;padding:2pt 4pt;text-align:center;';
+        if (isH) st += 'background:#1e293b;color:#fff;font-weight:bold;';
+        s += '<td style="'+st+'">' + esc(tableRows[r][c]) + '</td>';
+      }
+      s += '</tr>';
+    }
+    s += '</table>';
+    return s;
+  }
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
     var t = line.replace(/\s+$/, '');
-    if (!t.trim()) { html += '<p style="margin:2pt 0">&nbsp;</p>'; continue; }
-    if (/═{10,}/.test(t) || /─{15,}/.test(t)) {
-      html += '<hr style="border:none;border-top:1pt solid #cbd5e0;margin:8pt 0">';
+    var trimmed = t.replace(/^\s+/, '');
+    // 空行：折叠连续空行
+    if (!trimmed) {
+      if (inTable) { html += flushTable(); tableRows = []; inTable = false; }
+      if (!prevEmpty) { html += '<p style="margin:3pt 0">&nbsp;</p>'; }
+      prevEmpty = true;
       continue;
     }
+    prevEmpty = false;
+    // 表格边框行：跳过
+    if (/^[┌└├]/.test(trimmed)) { inTable = true; continue; }
+    // 表格数据行
+    if (inTable && trimmed.indexOf('│') >= 0) {
+      var cells = trimmed.split('│').map(function(s){return s.trim();}).filter(function(s){return s!=='';});
+      if (cells.length >= 2) { tableRows.push(cells); continue; }
+    }
+    // 非表格行但之前在表格中：先输出表格
+    if (inTable) { html += flushTable(); tableRows = []; inTable = false; }
+    // 粗分隔线
+    if (/═{10,}/.test(t)) {
+      html += '<hr style="border:none;border-top:2pt solid #1a365d;margin:10pt 0 6pt 0">';
+      continue;
+    }
+    // 细分隔线
+    if (/─{15,}/.test(t)) {
+      html += '<hr style="border:none;border-top:0.5pt solid #cbd5e0;margin:4pt 0">';
+      continue;
+    }
+    // 章节标题
     var secMatch = t.match(/^\s*([一二三四五六七八九十]+、)(.+)$/);
     if (secMatch) {
-      html += '<h2 style="font-size:13pt;color:#1a365d;margin-top:14pt;margin-bottom:4pt">' + esc(secMatch[1]) + esc(secMatch[2]) + '</h2>';
+      html += '<h2 style="font-size:12.5pt;color:#1a365d;margin-top:14pt;margin-bottom:3pt;padding-bottom:2pt;border-bottom:1pt solid #1a365d">' + esc(secMatch[1]) + esc(secMatch[2]) + '</h2>';
       continue;
     }
-    if (t.indexOf('发展倾向速览') >= 0 || t.indexOf('性格速览') >= 0 || t.indexOf('报告说明') >= 0 || t.indexOf('评估基础信息') >= 0) {
-      html += '<h2 style="font-size:13pt;color:#1a365d;margin-top:14pt;margin-bottom:4pt">' + esc(t) + '</h2>';
+    // 副标题
+    if (/^(发展倾向|性格速览|报告说明|评估基础|排盘依据|判断逻辑|先天倾向|后天改善|置信度)/.test(trimmed)) {
+      html += '<p style="margin:5pt 0 1pt 0;font-weight:bold;color:#334155;font-size:10.5pt">' + esc(t) + '</p>';
       continue;
     }
-    var trimmed = t.replace(/^\s+/, '');
-    if (trimmed.indexOf('★') === 0) {
-      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#d97706;font-weight:bold">★</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+    // 编号断事 ①②③④⑤
+    if (/^[①②③④⑤]/.test(trimmed)) {
+      html += '<p style="margin:6pt 0 2pt 0;font-size:11pt;color:#1a365d;font-weight:bold">' + esc(t) + '</p>';
       continue;
     }
-    if (trimmed.indexOf('⚠') === 0) {
-      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#ea580c;font-weight:bold">⚠</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+    // 子要点 ▷
+    if (trimmed.indexOf('▷') >= 0) {
+      html += '<p style="margin:3pt 0 1pt 0;padding-left:10pt;color:#475569;font-weight:bold;font-size:10pt">' + esc(t) + '</p>';
       continue;
     }
-    if (trimmed.indexOf('✓') === 0) {
-      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#059669;font-weight:bold">✓</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+    // 【】标记
+    if (trimmed.indexOf('【') >= 0) {
+      html += '<p style="margin:5pt 0 1pt 0;font-weight:bold;color:#1e40af;font-size:10.5pt">' + esc(t) + '</p>';
       continue;
     }
-    if (trimmed.indexOf('✗') === 0) {
-      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#dc2626;font-weight:bold">✗</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+    // 标记符号
+    var markerMatch = trimmed.match(/^([★☆○⚠✓✗💬◆■●])(.*)/);
+    if (markerMatch) {
+      var mk = markerMatch[1];
+      var mc = '#374151';
+      if (mk==='★'||mk==='☆') mc='#d97706';
+      else if (mk==='⚠') mc='#ea580c';
+      else if (mk==='✓') mc='#059669';
+      else if (mk==='✗') mc='#dc2626';
+      else if (mk==='💬') mc='#2563eb';
+      html += '<p style="margin:1.5pt 0;padding-left:10pt"><span style="color:'+mc+';font-weight:bold">'+mk+'</span> ' + esc(markerMatch[2].trim()) + '</p>';
       continue;
     }
-    if (trimmed.indexOf('💬') === 0) {
-      html += '<p style="margin:3pt 0;padding-left:12pt"><span style="color:#2563eb;font-weight:bold">💬</span> ' + esc(trimmed.substring(1).trim()) + '</p>';
+    // → 箭头
+    if (trimmed.indexOf('→') === 0) {
+      html += '<p style="margin:1.5pt 0;padding-left:10pt;color:#475569">' + esc(t) + '</p>';
       continue;
     }
-    html += '<p style="margin:3pt 0">' + esc(t) + '</p>';
+    // > 引用
+    if (trimmed.indexOf('>') === 0) {
+      html += '<p style="margin:3pt 0;padding:3pt 8pt;background:#f1f5f9;color:#475569;border-left:2pt solid #3b82f6">' + esc(trimmed.replace(/^>\s*/, '')) + '</p>';
+      continue;
+    }
+    // 普通文本
+    html += '<p style="margin:1.5pt 0">' + esc(t) + '</p>';
   }
+  if (inTable) { html += flushTable(); }
   return html;
 }
 
@@ -1278,12 +1341,12 @@ function initApp() {
   window.downloadReport = function() {
     var tag = document.getElementById('resultTag').textContent;
     var htmlContent = '';
-    htmlContent += '<h1 style="font-size:22pt;color:#1a365d;text-align:center;letter-spacing:0.3em;margin-bottom:2pt">心 境</h1>';
-    htmlContent += '<p style="text-align:center;color:#64748b;font-size:10pt;margin-bottom:2pt">照见真实的性格</p>';
-    htmlContent += '<p style="text-align:center;color:#64748b;font-size:9pt;margin-bottom:8pt">' + esc(tag) + '</p>';
-    htmlContent += '<hr style="border:none;border-top:1.5pt solid #1a365d;margin:8pt 0 16pt 0">';
+    htmlContent += '<h1 style="font-size:20pt;color:#1a365d;text-align:center;letter-spacing:0.3em;margin-bottom:1pt">心 境</h1>';
+    htmlContent += '<p style="text-align:center;color:#64748b;font-size:9pt;margin-bottom:1pt">照见真实的性格</p>';
+    htmlContent += '<p style="text-align:center;color:#64748b;font-size:9pt;margin-bottom:4pt">' + esc(tag) + '</p>';
+    htmlContent += '<hr style="border:none;border-top:1.5pt solid #1a365d;margin:2pt 0 10pt 0">';
     htmlContent += reportToWordHtml(currentReport);
-    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>心境 · 性格报告</title><style>body{font-family:"PingFang SC","Microsoft YaHei","SimSun",sans-serif;font-size:11pt;line-height:1.8;color:#1a202c;margin:40px}p{margin:3pt 0}</style></head><body>' + htmlContent + '</body></html>';
+    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>心境 · 性格报告</title><style>body{font-family:"PingFang SC","Microsoft YaHei","SimSun",sans-serif;font-size:10.5pt;line-height:1.5;color:#1a202c;margin:22px 28px}p{margin:1.5pt 0}h2{font-size:12.5pt;color:#1a365d;margin-top:14pt;margin-bottom:3pt;padding-bottom:2pt;border-bottom:1pt solid #1a365d}table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt}td{border:0.5pt solid #94a3b8;padding:2pt 4pt;text-align:center}hr{border:none;margin:4pt 0}</style></head><body>' + htmlContent + '</body></html>';
     var blob = new Blob(['\ufeff' + wordHtml], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
