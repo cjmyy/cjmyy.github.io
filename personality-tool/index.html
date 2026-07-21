@@ -842,8 +842,16 @@ function autoFillQuestionnaire(text, mode) {
       qText.value = text;
       if (typeof checkBirthInfo === 'function') checkBirthInfo();
       var tag = document.getElementById('resultTag');
-      if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
-    } else if (fillAttempts > 30) {
+      if (tag) tag.textContent = '📥 问卷已加载，正在自动生成报告…';
+      // 自动生成报告
+      setTimeout(function(){
+        if (typeof safeGenerate === 'function') {
+          safeGenerate();
+        } else if (typeof window.generateReport === 'function') {
+          window.generateReport();
+        }
+      }, 1500);
+    } else if (fillAttempts > 120) {
       clearInterval(fillInterval);
     }
   }, 500);
