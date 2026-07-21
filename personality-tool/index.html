@@ -496,6 +496,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
         <button class="btn-sm" onclick="downloadReport()">📥 下载Word</button>
         <button class="btn-sm" onclick="window.print()">🖨️ 打印</button>
       </div>
+      <div id="reportInfo" style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;font-size:0.9rem;line-height:2;display:none;"></div>
       <div class="report-body">
         <pre id="reportHtml"></pre>
       </div>
@@ -1129,8 +1130,24 @@ function initApp() {
         var tag = document.getElementById('resultTag');
         var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : diagMode === 'teacher' ? '诊断·教师版' : '诊断·成人版';
         var verTxt = delivery ? '交付版' : '主人版';
+        var genderTxt = dGender === 'male' ? '男' : '女';
         var nameTag = bi.name ? ' · ' + bi.name : '';
-        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + genderTxt + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        // 报告信息头
+        var infoBox = document.getElementById('reportInfo');
+        var bpName = '';
+        var selOpts = document.getElementById('birthplace').options;
+        for (var oi=0; oi<selOpts.length; oi++) { if (selOpts[oi].value===dBirthplace) { bpName=selOpts[oi].textContent; break; } }
+        if (!bpName) bpName = dBirthplace;
+        infoBox.innerHTML = '<span style="font-weight:700;color:var(--primary);font-size:1.05rem;">' + (bi.name||'') + '</span>' +
+          '　<span style="color:var(--text-l)">' + genderTxt + '</span>' +
+          '　<span style="color:var(--text-l)">' + dYear + '年' + dMonth + '月' + dDay + '日</span>' +
+          (bi.hour>=0 ? ' <span style="color:var(--text-l)">' + String(bi.hour).padStart(2,'0') + ':' + String(bi.minute||0).padStart(2,'0') + '</span>' : '') +
+          '　<span style="color:var(--text-l)">' + (bpName||'') + '</span>' +
+          '　<span style="color:var(--accent);font-weight:600">' + cv.finalType + '</span>' +
+          ' <span style="color:var(--text-l)">×</span> ' +
+          '<span style="color:var(--error);font-weight:600">' + qResult.problemType + '</span>';
+        infoBox.style.display = 'block';
       } else {
         // === 普通性格报告模式 ===
         var report = new PersonalityReport();
@@ -1142,7 +1159,18 @@ function initApp() {
         var tag = document.getElementById('resultTag');
         var modeTxt = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
         var verTxt = delivery ? '交付版' : '主人版';
-        tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + (gender==='male'?'男':'女') + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        // 报告信息头
+        var infoBox2 = document.getElementById('reportInfo');
+        var bpName2 = '';
+        var selOpts2 = document.getElementById('birthplace').options;
+        for (var oi2=0; oi2<selOpts2.length; oi2++) { if (selOpts2[oi2].value===birthplace) { bpName2=selOpts2[oi2].textContent; break; } }
+        if (!bpName2) bpName2 = birthplace;
+        infoBox2.innerHTML = '<span style="color:var(--text-l)">' + (gender==='male'?'男':'女') + '</span>' +
+          '　<span style="color:var(--text-l)">' + year + '年' + month + '月' + day + '日</span>' +
+          '　<span style="color:var(--text-l)">' + String(hour).padStart(2,'0') + ':' + String(minute).padStart(2,'0') + '</span>' +
+          '　<span style="color:var(--text-l)">' + (bpName2||'') + '</span>';
+        infoBox2.style.display = 'block';
       }
 
       result.classList.add('show');
