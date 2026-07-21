@@ -102,7 +102,7 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 <div class="app-header">
 <a class="back-link" href="javascript:backToMode()" style="color:rgba(255,255,255,.8)">← 重新选择</a>
 <h1 id="formTitle">家庭教育问题诊断问卷</h1>
-<div class="sub">越真实，诊断越准 · 填完点底部按钮提交</div>
+<div class="sub">⭐ 所有题目均为必填 · 越真实诊断越准</div>
 </div>
 <div id="questions"></div>
 <div class="section" style="margin:.8rem .8rem 0;border:2px dashed var(--primary-l)">
@@ -179,7 +179,7 @@ function renderQuestions(){
   if(currentMode==='child'){
     h+=section('基本信息',birthInfoBlock()+
       q(1,'孩子年龄',inputRow('age','','岁'))+
-      q(2,'孩子性别',choiceRow('q2',[['男','男'],['女','女']]))+
+      q(2,'孩子性别 <span style="color:#dc2626">*</span>',choiceRow('q2',[['男','男'],['女','女']]))+
       q(3,'孩子年级',inputText('grade','如：小学三年级'))+
       q(4,'是否独生子女',choiceRow('q4',[['是','是'],['否','否']])+inputText('q4_rank','排行第几（如有兄弟姐妹）'))+
       q(5,'主要抚养人',choiceCol('q5',[['母亲','母亲'],['父亲','父亲'],['爷奶/外公外婆','爷爷奶奶/外公外婆'],['其他','其他']]))
@@ -338,11 +338,11 @@ function checkboxCol(name,opts){var h='';opts.forEach(function(o){h+='<label cla
 function abcdQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="A"><span>A 经常如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="B"><span>B 有时如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="C"><span>C 很少如此</span></label><label class="choice"><input type="radio" name="q'+num+'" value="D"><span>D 几乎不</span></label></div></div>'}
 function yesNoQ(num,text){return '<div class="q"><div class="q-text"><span class="q-num">'+num+'.</span>'+text+'</div><div class="choice-row"><label class="choice"><input type="radio" name="q'+num+'" value="是"><span>是</span></label><label class="choice"><input type="radio" name="q'+num+'" value="否"><span>否</span></label><label class="choice"><input type="radio" name="q'+num+'" value="不确定"><span>不确定</span></label></div></div>'}
 function birthInfoBlock(){
-  return '<div class="q"><div class="q-text">姓名</div>'+inputText('bname','填写姓名')+'</div>'+
+  return '<div class="q"><div class="q-text">姓名 <span style="color:#dc2626">*</span></div>'+inputText('bname','填写姓名')+'</div>'+
     '<div class="q"><div class="q-text">联系邮箱 <span style="color:#dc2626">*</span></div>'+inputText('bemail','填写你的邮箱')+'<div class="q-hint">报告将发送到此邮箱，请确保填写正确</div></div>'+
-    '<div class="q"><div class="q-text">出生年月日（公历）</div><div class="input-grid"><div class="input-row"><input type="number" class="input-text" id="byear" placeholder="2015" min="1940" max="2030"></div><div class="input-row"><input type="number" class="input-text" id="bmonth" placeholder="8" min="1" max="12"></div><div class="input-row"><input type="number" class="input-text" id="bday" placeholder="16" min="1" max="31"></div></div></div>'+
+    '<div class="q"><div class="q-text">出生年月日（公历） <span style="color:#dc2626">*</span></div><div class="input-grid"><div class="input-row"><input type="number" class="input-text" id="byear" placeholder="2015" min="1940" max="2030"></div><div class="input-row"><input type="number" class="input-text" id="bmonth" placeholder="8" min="1" max="12"></div><div class="input-row"><input type="number" class="input-text" id="bday" placeholder="16" min="1" max="31"></div></div></div>'+
     '<div class="q"><div class="q-text">出生时间（24小时制，精确到分，不确定填"不详"）</div><div class="input-row"><input type="number" class="input-text" id="bhour" placeholder="14" min="0" max="23"><span class="unit">时</span><input type="number" class="input-text" id="bminute" placeholder="30" min="0" max="59"><span class="unit">分</span></div><div class="q-hint">尽量填准确，关系到性格分析精准度。不知道填"不详"即可</div></div>'+
-    '<div class="q"><div class="q-text">出生地（填到地级市，如"陕西汉中"）</div>'+inputText('bplace','如：陕西汉中')+'</div>'
+    '<div class="q"><div class="q-text">出生地（填到地级市，如"陕西汉中"） <span style="color:#dc2626">*</span></div>'+inputText('bplace','如：陕西汉中')+'</div>'
 }
 
 // ===== Get values =====
