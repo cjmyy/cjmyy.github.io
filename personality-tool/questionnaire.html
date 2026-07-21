@@ -540,6 +540,56 @@ function generateResult(){
   var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
   var link=base+'?v=5.2#q='+encodeURIComponent(b64)+'&mode='+currentMode;
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
+  var btn=document.getElementById('genBtn');
+  btn.textContent='⏳ 正在提交…';btn.disabled=true;
+  // AJAX自动提交到老师邮箱
+  fetch('https://formsubmit.co/ajax/121781953@qq.com',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({
+      _subject:'性格问卷提交 - '+name+' - '+modeText,
+      _template:'table',
+      _captcha:'false',
+      email:email,
+      问卷类型:modeText,
+      姓名:name,
+      工具链接:link,
+      问卷内容:result
+    })
+  }).then(function(r){return r.json()})
+  .then(function(d){
+    btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
+    if(d.success==='true'||d.success===true){
+      showSubmitSuccess(email,modeText);
+    } else if(d.message&&d.message.toLowerCase().indexOf('confirm')>=0){
+      showFallbackPopup(name,email,modeText,link,result,'首次提交需老师邮箱确认，本次请手动复制链接发送');
+    } else {
+      throw new Error(JSON.stringify(d));
+    }
+  })
+  .catch(function(err){
+    console.error('Submit error:',err);
+    btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
+    showFallbackPopup(name,email,modeText,link,result,'网络提交失败，请手动复制链接发送');
+  });
+}
+
+function showSubmitSuccess(email,modeText){
+  var box=document.querySelector('.result-box');
+  box.innerHTML='<h3 style="color:var(--primary)">✅ 提交成功！</h3>'+
+    '<div class="info" style="font-size:1.05rem;line-height:2;padding:1rem 1.2rem">'+
+    '您的'+modeText+'问卷已成功提交！<br><br>'+
+    '老师将在 <strong style="color:var(--primary)">1-3个工作日</strong> 内<br>'+
+    '将性格分析报告发送到您的邮箱：<br>'+
+    '<strong style="color:var(--accent);word-break:break-all">'+email+'</strong><br><br>'+
+    '请留意邮件，感谢您的信任！</div>'+
+    '<div class="result-actions" style="margin-top:1rem">'+
+    '<button class="btn-submit" onclick="closeResult()" style="flex:1">✅ 好的</button>'+
+    '</div>';
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function showFallbackPopup(name,email,modeText,link,result,msg){
   document.getElementById('form_subject').value='性格问卷提交 - '+name+' - '+modeText;
   document.getElementById('form_email').value=email;
   document.getElementById('form_mode').value=modeText;
@@ -547,10 +597,23 @@ function generateResult(){
   document.getElementById('form_link').value=link;
   document.getElementById('form_content').value=result;
   document.getElementById('linkInput').value=link;
-  var btn=document.getElementById('genBtn');
-  btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
+  var box=document.querySelector('.result-box');
+  box.innerHTML='<h3>⚠️ 自动提交未成功</h3>'+
+    '<div class="info" style="font-size:.9rem;line-height:1.8">'+msg+'<br><br>链接已自动复制，请粘贴发给老师</div>'+
+    '<div class="link-box" style="display:block;margin-top:.8rem">'+
+    '<input type="text" id="linkInput" readonly value="'+link+'" style="font-size:.7rem;opacity:.5">'+
+    '</div>'+
+    '<div class="result-actions" style="margin-top:.8rem">'+
+    '<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 再复制一次</button>'+
+    '<button class="btn-link" onclick="sendByEmail()" style="flex:1">📧 发邮件</button>'+
+    '</div>'+
+    '<div class="result-actions" style="margin-top:.5rem">'+
+    '<button class="btn-back-top" onclick="closeResult();window.scrollTo({top:0,behavior:\'smooth\'})" style="flex:1">⬆️ 返回修改</button>'+
+    '<button class="btn-submit" onclick="closeResult()" style="flex:1">✅ 完成了</button>'+
+    '</div>';
   document.getElementById('resultOverlay').classList.add('show');
   autoCopyLink(link);
+  showToast(msg);
 }
 
 // ===== URL hash encoding =====
