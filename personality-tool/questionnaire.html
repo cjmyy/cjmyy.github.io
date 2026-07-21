@@ -606,7 +606,26 @@ function sendByEmail(){
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
   var subject='性格问卷提交 - '+name+' - '+modeText;
   var body='老师您好，我是'+name+'，已完成'+modeText+'性格诊断问卷，请查看：\n\n'+link;
-  window.location.href='mailto:121781953@qq.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  var fullText=subject+'\n\n'+body;
+  var ta=document.createElement('textarea');
+  ta.value=fullText;
+  ta.style.position='fixed';ta.style.top='-9999px';
+  document.body.appendChild(ta);
+  ta.select();ta.setSelectionRange(0,99999);
+  var ok=false;
+  try{ok=document.execCommand('copy')}catch(e){}
+  document.body.removeChild(ta);
+  if(!ok){
+    try{
+      navigator.clipboard.writeText(fullText).then(function(){
+        showToast('邮件内容已复制！请打开邮箱粘贴发送');
+      }).catch(function(){
+        showToast('复制失败，请手动复制链接发微信');
+      });
+      return;
+    }catch(e){}
+  }
+  showToast('邮件内容已复制！请打开邮箱粘贴发送');
 }
 </script>
 </body>
