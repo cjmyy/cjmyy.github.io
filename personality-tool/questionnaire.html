@@ -105,6 +105,21 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 <div class="sub">越真实，诊断越准 · 填完点底部按钮提交</div>
 </div>
 <div id="questions"></div>
+<div class="section" style="margin:.8rem .8rem 0;border:2px dashed var(--primary-l)">
+<div class="section-title">付款凭证（必填）</div>
+<div class="section-body">
+<div class="q"><div class="q-text"><span class="q-num">📌</span>请上传付款截图</div>
+<div class="q-hint">购买后截图上传，老师确认后才会发送报告</div>
+<input type="file" id="paymentScreenshot" accept="image/*" style="width:100%;padding:.5rem;font-size:.9rem;border:1.5px solid var(--border);border-radius:8px;background:#fdfdff">
+<div id="paymentPreview" style="margin-top:.5rem;display:none">
+<img id="paymentPreviewImg" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)">
+</div>
+</div>
+<div class="q"><div class="q-text"><span class="q-num">📝</span>订单编号（选填）</div>
+<input type="text" class="input-text" id="orderNumber" placeholder="平台订单号，方便老师核对">
+</div>
+</div>
+</div>
 <div class="submit-bar">
 <button class="btn-submit" id="genBtn" onclick="generateResult()" style="flex:1">✅ 填完了，提交问卷</button>
 </div>
@@ -335,6 +350,16 @@ function val(id){var el=document.getElementById(id);return el?el.value.trim():''
 function radioVal(name){var c=document.querySelector('input[name="'+name+'"]:checked');return c?c.value:''}
 function checkboxVals(name){var c=document.querySelectorAll('input[name="'+name+'"]:checked');return Array.prototype.map.call(c,function(x){return x.value})}
 
+// File preview
+document.addEventListener('DOMContentLoaded',function(){
+  var fi=document.getElementById('paymentScreenshot');
+  if(fi)fi.addEventListener('change',function(e){
+    var f=e.target.files[0];
+    if(f){var r=new FileReader();r.onload=function(ev){var img=document.getElementById('paymentPreviewImg');img.src=ev.target.result;document.getElementById('paymentPreview').style.display='block'};r.readAsDataURL(f)}
+    else{document.getElementById('paymentPreview').style.display='none'}
+  });
+});
+
 // ===== Format helpers =====
 function fmtAbcd(a){var o=['A','B','C','D'],p=[];o.forEach(function(x){p.push(x+(a===x?'■':'□'))});return p.join(' ')}
 function fmtYN(v){return (v==='是'?'■是':'□是')+' '+(v==='否'?'■否':'□否')+' '+(v==='不确定'?'■不确定':'□不确定')}
@@ -535,6 +560,8 @@ function generateResult(){
   var name=val('bname'),email=val('bemail');
   if(!name){showToast('请填写姓名');return}
   if(!email){showToast('请填写联系邮箱');return}
+  var fileInput=document.getElementById('paymentScreenshot');
+  if(!fileInput||!fileInput.files[0]){showToast('请上传付款截图');return}
   var utf8=unescape(encodeURIComponent(result));
   var b64;try{b64=btoa(utf8)}catch(e){b64=''}
   var base=location.origin+location.pathname.replace(/questionnaire\.html.*$/,'index.html');
@@ -542,20 +569,23 @@ function generateResult(){
   var modeText=currentMode==='child'?'孩子版':currentMode==='teacher'?'教师版':'成人版';
   var gender=radioVal('q2');
   var place=val('bplace');
+  var orderNum=val('orderNumber');
   var btn=document.getElementById('genBtn');
   btn.textContent='⏳ 正在提交…';btn.disabled=true;
-  // AJAX自动提交到老师邮箱（URLSearchParams避免CORS预检，字段名用英文避免编码问题）
-  var params=new URLSearchParams();
-  params.append('_subject','性格问卷 - '+name+' - '+gender+' - '+place+' - '+modeText);
-  params.append('_captcha','false');
-  params.append('client_email',email);
-  params.append('questionnaire_type',modeText);
-  params.append('client_name',name);
-  params.append('tool_link',link);
-  params.append('questionnaire_content',result);
+  // 使用FormData提交（支持文件上传+避免CORS预检）
+  var formData=new FormData();
+  formData.append('_subject','性格问卷 - '+name+' - '+gender+' - '+place+' - '+modeText);
+  formData.append('_captcha','false');
+  formData.append('client_email',email);
+  formData.append('questionnaire_type',modeText);
+  formData.append('client_name',name);
+  formData.append('tool_link',link);
+  formData.append('questionnaire_content',result);
+  formData.append('order_number',orderNum||'未填写');
+  formData.append('payment_screenshot',fileInput.files[0]);
   fetch('https://formsubmit.co/ajax/121781953@qq.com',{
     method:'POST',
-    body:params
+    body:formData
   }).then(function(r){return r.json()})
   .then(function(d){
     btn.textContent='✅ 填完了，提交问卷';btn.disabled=false;
