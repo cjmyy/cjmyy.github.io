@@ -113,12 +113,16 @@ textarea.input-text{min-height:80px;resize:vertical;font-family:inherit;line-hei
 <div class="result-overlay" id="resultOverlay">
 <div class="result-box">
 <h3>✅ 问卷已生成</h3>
-<div class="info" style="font-size:1rem;line-height:1.8">链接已自动复制！<br>请粘贴发给老师（微信或邮件均可）<br><br>老师审阅后将发送你的性格分析报告<br>（1-3个工作日）</div>
+<div class="info" style="font-size:1rem;line-height:1.8">链接已自动复制！<br>请选择以下方式发给老师：<br><br><span style="font-weight:700">方式一：</span>打开微信→粘贴发给老师<br><span style="font-weight:700">方式二：</span>点「📧 发邮件」直接发送<br><br>老师审阅后将发送你的性格分析报告<br>（1-3个工作日）</div>
 <div class="link-box" id="linkBox" style="display:block">
 <input type="text" id="linkInput" readonly style="font-size:.7rem;opacity:.5">
 </div>
 <div class="result-actions" style="margin-top:.8rem">
-<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 再复制一次链接</button>
+<button class="btn-copy" onclick="copyLink()" style="flex:1">📋 再复制一次</button>
+<button class="btn-link" onclick="sendByEmail()" style="flex:1">📧 发邮件</button>
+</div>
+<div class="result-actions" style="margin-top:.5rem">
+<button class="btn-back-top" onclick="closeResult();window.scrollTo({top:0,behavior:'smooth'})" style="flex:1">⬆️ 返回修改</button>
 <button class="btn-submit" onclick="closeResult()" style="flex:1">✅ 完成了</button>
 </div>
 </div>
