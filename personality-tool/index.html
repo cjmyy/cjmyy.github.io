@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <script>(function(){var s=location.search,h=location.hash;if(s.indexOf('cb=')===-1){var sep=s?'&':'?';location.replace(location.pathname+s+sep+'cb='+Date.now()+h);}})();</script>
+<script>
+// 全局错误捕获 - 任何JS错误都显示在页面上
+window.onerror=function(msg,url,line,col,err){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:1rem;font-size:0.85rem;font-weight:600;max-height:40vh;overflow:auto;word-break:break-all;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  d.innerHTML='⚠️ JS错误: '+msg+'<br>行:'+line+'<br>'+(err&&err.stack?('<pre style="white-space:pre-wrap;font-size:0.75rem;margin-top:0.5rem">'+err.stack.substring(0,600)+'</pre>'):'');
+  document.body.appendChild(d);
+  return false;
+};
+window.addEventListener('unhandledrejection',function(e){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:1rem;font-size:0.85rem;font-weight:600;max-height:40vh;overflow:auto;word-break:break-all';
+  d.innerHTML='⚠️ 异步错误: '+(e.reason&&e.reason.message?e.reason.message:e.reason);
+  document.body.appendChild(d);
+});
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -480,7 +496,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
         </div>
       </div>
       <div id="inlineError" style="display:none;margin-top:0.8rem;padding:1rem 1.2rem;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;font-size:0.92rem;color:#dc2626;font-weight:600;line-height:1.6;text-align:center;"></div>
-      <button type="button" class="btn-generate" id="btnGen" onclick="generateReport()" style="margin-top:0.8rem">🔮 生成报告</button>
+      <button type="button" class="btn-generate" id="btnGen" onclick="safeGenerate()" style="margin-top:0.8rem">🔮 生成报告</button>
     </form>
   </div>
   <div class="loading" id="loading">
@@ -946,6 +962,14 @@ async function attemptUnlock() {
     document.getElementById('mainApp').classList.add('show');
     document.getElementById('modeSelect').style.display = 'flex';
     initApp();
+    // 解锁后引擎检测
+    if (typeof window.generateReport !== 'function') {
+      var warnDiv = document.createElement('div');
+      warnDiv.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999;background:#fef3c7;color:#92400e;padding:0.8rem;font-size:0.85rem;text-align:center;font-weight:600';
+      warnDiv.textContent = '⚠️ 引擎加载异常，生成报告可能不可用。如遇问题请刷新重试';
+      document.body.appendChild(warnDiv);
+      setTimeout(function(){ warnDiv.style.display='none'; }, 8000);
+    }
     // Auto-fill questionnaire if data was passed via URL hash
     if (_pendingQuestionnaire) {
       var pq = _pendingQuestionnaire;
@@ -970,6 +994,42 @@ async function attemptUnlock() {
 document.getElementById('pwdInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') { e.preventDefault(); attemptUnlock(); }
 });
+
+// ===== 安全调用包装 =====
+function safeGenerate() {
+  var ie = document.getElementById('inlineError');
+  var btn = document.getElementById('btnGen');
+  // 立即给反馈
+  if (btn) { btn.textContent = '⏳ 正在分析…'; btn.style.background = '#94a3b8'; btn.disabled = true; }
+  // 检查关键函数是否存在
+  if (typeof window.generateReport !== 'function') {
+    var diag = [];
+    diag.push('generateReport: ' + typeof window.generateReport);
+    diag.push('PersonalityReport: ' + typeof (typeof PersonalityReport !== 'undefined' ? PersonalityReport : 'undefined'));
+    diag.push('DiagnosticReport: ' + typeof (typeof DiagnosticReport !== 'undefined' ? DiagnosticReport : 'undefined'));
+    diag.push('unlocked: ' + typeof unlocked !== 'undefined' ? unlocked : '?');
+    var html = '⚠️ 报告生成引擎未就绪<br><br>' +
+      '<div style="font-size:0.8rem;text-align:left;background:#fff5f5;padding:0.8rem;border-radius:8px;margin-top:0.5rem">' +
+      diag.join('<br>') + '</div>' +
+      '<br>请截图此信息，然后<strong>刷新页面</strong>重新输入密码。<br>如反复出现，请换用 Chrome 浏览器打开链接。';
+    if (ie) { ie.innerHTML = html; ie.style.display = 'block'; ie.scrollIntoView({behavior:'smooth',block:'center'}); }
+    else { alert('报告引擎未就绪，请刷新页面重试'); }
+    if (btn) { btn.textContent = '🔮 生成报告'; btn.style.background = ''; btn.disabled = false; }
+    return;
+  }
+  try {
+    window.generateReport();
+  } catch(e) {
+    var html2 = '⚠️ 生成报告时出错：' + (e.message || e) + '<br><br>' +
+      '<pre style="white-space:pre-wrap;font-size:0.75rem;text-align:left;background:#fff5f5;padding:0.8rem;border-radius:8px">' +
+      (e.stack ? e.stack.substring(0,500) : '') + '</pre>' +
+      '<br>请截图此信息，然后<strong>刷新页面</strong>重试。';
+    if (ie) { ie.innerHTML = html2; ie.style.display = 'block'; ie.scrollIntoView({behavior:'smooth',block:'center'}); }
+    else { alert('出错：' + (e.message || e)); }
+    if (btn) { btn.textContent = '🔮 生成报告'; btn.style.background = ''; btn.disabled = false; }
+  }
+}
+window.safeGenerate = safeGenerate;
 
 // ===== Init App =====
 function initApp() {
