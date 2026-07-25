@@ -204,7 +204,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   </div>
   <div class="card">
     <div class="card-title">📋 基本信息</div>
-    <form id="form">
+    <form id="form" novalidate>
       <div id="birthInfoSection">
       <div class="form-group"><label>姓名（选填）</label><input type="text" id="personName" placeholder="如：张小明" style="width:100%;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem"></div>
       <div class="form-grid">
@@ -1108,6 +1108,16 @@ function initApp() {
       var useSensory = document.getElementById('useSensory').checked;
       var sensoryRaw = document.getElementById('sensoryAnswers').value;
 
+      // 非诊断模式校验出生信息
+      if (mode !== 'diagnostic') {
+        if (!year || !month || !day) {
+          throw new Error('请填写出生年月日');
+        }
+        if (!birthplace) {
+          throw new Error('请选择出生地');
+        }
+      }
+
       // Handle custom longitude for overseas/other
       if (birthplace === '__custom__') {
         var customLng = parseFloat(document.getElementById('customLng').value);
@@ -1225,8 +1235,10 @@ function initApp() {
       result.classList.add('show');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
+      console.error('报告生成错误:', err);
       errorBox.textContent = '❌ ' + (err.message || err);
       errorBox.classList.add('show');
+      errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } finally {
       btn.disabled = false;
       btn.textContent = '🔮 生成报告';
