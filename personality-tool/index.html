@@ -420,10 +420,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       <input type="hidden" id="mode" value="child">
       <div class="card-title" style="margin-top:1.2rem">⚙️ 报告选项</div>
       <div class="form-group">
-        <label>报告版本</label>
+        <label>报告版本 <span style="font-size:0.72rem;color:#94a3b8;font-weight:400">（主人版含八字术语，交付版用心理学语言，发给客户选交付版）</span></label>
         <select id="version">
-          <option value="original">主人版（含术语）</option>
-          <option value="delivery">交付版（心理学包装）</option>
+          <option value="original">主人版（含术语，自己看）</option>
+          <option value="delivery">交付版（心理学包装，发客户）</option>
         </select>
       </div>
       <div class="chk-row" id="sensoryRow">
@@ -441,7 +441,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       </div>
       <!-- 诊断模式问卷区域 -->
       <div id="diagnosticSection" style="display:none">
-        <div class="card-title" style="margin-top:1.2rem">📋 问卷分析</div>
+        <div style="margin-top:1.2rem;padding:0.8rem 1rem;background:rgba(13,148,136,.06);border:1.5px dashed var(--accent);border-radius:10px;">
+          <p style="font-size:0.82rem;color:var(--text-l);line-height:1.6;margin:0">
+            <strong style="color:var(--accent)">使用流程：</strong>
+            ① 发问卷链接给家长/客户填写 →
+            ② 收到邮件后点邮件里的链接 →
+            ③ 问卷内容自动填入下方文本框 →
+            ④ 点「生成报告」
+            <br><span style="color:#94a3b8">如果没自动填入，可手动粘贴问卷文本或上传问卷文件</span>
+          </p>
+        </div>
+        <div class="card-title" style="margin-top:1rem">📋 问卷分析</div>
         <div class="form-group">
           <label>问卷类型</label>
           <select id="diagnosticMode">
@@ -456,9 +466,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=teacher','_blank')" style="flex:1;min-width:45%">📝 教师版</button>
         </div>
         <div class="form-group">
-          <label>填写好的问卷内容（直接粘贴文本）</label>
-          <textarea id="questionnaireText" placeholder="家长通过链接填写的问卷会自动加载到此处，也可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
-          <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
+          <label>填写好的问卷内容</label>
+          <textarea id="questionnaireText" placeholder="邮件链接打开后问卷内容会自动填入此处。如果没有自动填入，可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <div class="hint">问卷内容填入后，系统会自动解析出生年月、性别等信息</div>
         <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
           <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
         </div>
@@ -858,6 +868,13 @@ function reportToWordHtml(text) {
 
 // ===== Auto-fill questionnaire from URL hash or pasted link =====
 function autoFillQuestionnaire(text, mode) {
+  // Show loading overlay while diagnostic data loads
+  var loadingOverlay = document.createElement('div');
+  loadingOverlay.id = 'autoFillOverlay';
+  loadingOverlay.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(248,250,252,.95);display:flex;align-items:center;justify-content:center;';
+  loadingOverlay.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="width:44px;height:44px;margin:0 auto 1rem;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.95rem;line-height:1.6">正在加载问卷数据…<br>首次加载约需10-30秒，请勿离开</p></div>';
+  document.body.appendChild(loadingOverlay);
+
   selectMode('diagnostic');
   var fillAttempts = 0;
   var fillInterval = setInterval(function() {
@@ -865,13 +882,32 @@ function autoFillQuestionnaire(text, mode) {
     var qText = document.getElementById('questionnaireText');
     if (qText && document.getElementById('formPage').style.display === 'block') {
       clearInterval(fillInterval);
+      var ov = document.getElementById('autoFillOverlay');
+      if (ov) ov.remove();
       document.getElementById('diagnosticMode').value = mode;
       qText.value = text;
       if (typeof checkBirthInfo === 'function') checkBirthInfo();
       var tag = document.getElementById('resultTag');
       if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
-    } else if (fillAttempts > 30) {
+      // Scroll to the generate button
+      var btn = document.getElementById('btnGen');
+      if (btn) btn.scrollIntoView({behavior:'smooth',block:'center'});
+    } else if (fillAttempts > 120) {
       clearInterval(fillInterval);
+      var ov2 = document.getElementById('autoFillOverlay');
+      if (ov2) ov2.remove();
+      // Auto-fill failed, put data in textarea as fallback
+      var qFallback = document.getElementById('questionnaireText');
+      if (qFallback) {
+        qFallback.value = text;
+        var dm = document.getElementById('diagnosticMode');
+        if (dm) dm.value = mode;
+        if (typeof checkBirthInfo === 'function') checkBirthInfo();
+        var tag2 = document.getElementById('resultTag');
+        if (tag2) tag2.textContent = '📥 问卷数据已加载（加载较慢），请点击「生成报告」';
+      } else {
+        alert('问卷数据加载超时。请手动复制问卷链接，粘贴到页面顶部的「粘贴问卷链接」框中，点「加载」按钮。');
+      }
     }
   }, 500);
 }
