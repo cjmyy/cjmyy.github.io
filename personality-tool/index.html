@@ -2,21 +2,42 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script>(function(){var s=location.search,h=location.hash;if(s.indexOf('cb=')===-1){var sep=s?'&':'?';location.replace(location.pathname+s+sep+'cb='+Date.now()+h);}})();</script>
+<script>
+// 全局错误捕获 - 任何JS错误都显示在页面上
+window.onerror=function(msg,url,line,col,err){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:1rem;font-size:0.85rem;font-weight:600;max-height:40vh;overflow:auto;word-break:break-all;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  d.innerHTML='⚠️ JS错误: '+msg+'<br>行:'+line+'<br>'+(err&&err.stack?('<pre style="white-space:pre-wrap;font-size:0.75rem;margin-top:0.5rem">'+err.stack.substring(0,600)+'</pre>'):'');
+  document.body.appendChild(d);
+  return false;
+};
+window.addEventListener('unhandledrejection',function(e){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;padding:1rem;font-size:0.85rem;font-weight:600;max-height:40vh;overflow:auto;word-break:break-all';
+  d.innerHTML='⚠️ 异步错误: '+(e.reason&&e.reason.message?e.reason.message:e.reason);
+  document.body.appendChild(d);
+});
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>性格分析报告</title>
 <style>
 :root{
   --primary:#1a365d;--primary-l:#2c5282;--primary-d:#0f2540;
   --accent:#0d9488;--accent-l:#14b8a6;
-  --bg:#f8fafc;--card:#fff;--text:#1a202c;--text-l:#64748b;
+  --bg:#f1f5f9;--card:#fff;--text:#1e293b;--text-l:#64748b;
   --border:#e2e8f0;--success:#059669;--error:#dc2626;
-  --radius:16px;--shadow:0 4px 20px rgba(26,54,93,.06);
+  --radius:16px;--shadow:0 4px 24px rgba(26,54,93,.08);
+  --table-head:#1a365d;--table-row-alt:#f1f5f9;--table-border:#cbd5e0;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 /* ===== Lock Screen ===== */
-#lockScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden}
+#lockScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#e2e8f0;overflow:hidden}
 .lock-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:3rem 2rem;width:90%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.06)}
 .lock-title{color:var(--primary);font-size:2.2rem;font-weight:700;letter-spacing:0.3em;margin-bottom:0.3rem;padding-left:0.3em}
 .lock-subtitle{color:var(--text-l);font-size:0.9rem;margin-bottom:2rem;font-weight:400}
@@ -95,14 +116,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .result.show{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .result-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--border)}
-.result-toolbar{display:flex;gap:0.4rem;padding:0.8rem 1rem;background:#f8fafc;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.result-toolbar{display:flex;gap:0.4rem;padding:0.8rem 1rem;background:#e2e8f0;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
 .result-toolbar .tag{flex:1;font-size:0.78rem;color:var(--text-l);font-weight:600}
 .btn-sm{padding:0.45rem 0.9rem;border:1px solid var(--border);background:#fff;color:var(--text-l);border-radius:8px;font-size:0.8rem;cursor:pointer;transition:all .2s;font-weight:600}
 .btn-sm:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
-.report-body{padding:1.2rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.report-body pre{font-family:"SF Mono","Consolas","Courier New",monospace;font-size:0.78rem;line-height:1.65;white-space:pre-wrap;word-break:break-all;color:var(--text)}
+.report-body{padding:1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.report-body pre{font-family:"SF Mono","Consolas","Courier New",monospace;font-size:0.78rem;line-height:1.7;white-space:pre-wrap;word-break:break-all;color:var(--text)}
 @media(min-width:768px){.report-body pre{font-size:0.85rem}}
-.hl-section{color:var(--primary);font-weight:700}
+.hl-section{color:var(--primary);font-weight:700;background:rgba(26,54,93,.06);padding:0 3px;border-radius:3px}
 .hl-divider{color:#cbd5e0}
 .hl-bullet-star{color:#d97706;font-weight:700}
 .hl-bullet-warn{color:#ea580c;font-weight:700}
@@ -110,7 +131,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .hl-bullet-no{color:var(--error);font-weight:700}
 .hl-bullet-talk{color:#2563eb;font-weight:700}
 .hl-arrow{color:var(--primary);font-weight:700}
-.hl-num{color:var(--primary);font-weight:700;background:rgba(44,82,130,.1);padding:0 2px;border-radius:4px}
+.hl-num{color:var(--primary);font-weight:700;background:rgba(44,82,130,.12);padding:0 3px;border-radius:4px}
 .footer{text-align:center;padding:2rem 1rem;color:#94a3b8;font-size:0.72rem;line-height:1.6}
 
 @media print{
@@ -135,7 +156,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="lock-spinner" id="lockSpinner"></div>
     <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v6.5</div>
+    <div class="lock-hint">核心数据已加密保护 · v5.2</div>
   </div>
 </div>
 
@@ -204,7 +225,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   </div>
   <div class="card">
     <div class="card-title">📋 基本信息</div>
-    <form id="form" novalidate>
+    <form id="form" onsubmit="return false">
       <div id="birthInfoSection">
       <div class="form-group"><label>姓名（选填）</label><input type="text" id="personName" placeholder="如：张小明" style="width:100%;padding:.5rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem"></div>
       <div class="form-grid">
@@ -420,10 +441,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       <input type="hidden" id="mode" value="child">
       <div class="card-title" style="margin-top:1.2rem">⚙️ 报告选项</div>
       <div class="form-group">
-        <label>报告版本 <span style="font-size:0.72rem;color:#94a3b8;font-weight:400">（主人版含八字术语，交付版用心理学语言，发给客户选交付版）</span></label>
+        <label>报告版本</label>
         <select id="version">
-          <option value="original">主人版（含术语，自己看）</option>
-          <option value="delivery">交付版（心理学包装，发客户）</option>
+          <option value="original">主人版（含术语）</option>
+          <option value="delivery">交付版（心理学包装）</option>
         </select>
       </div>
       <div class="chk-row" id="sensoryRow">
@@ -441,17 +462,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
       </div>
       <!-- 诊断模式问卷区域 -->
       <div id="diagnosticSection" style="display:none">
-        <div style="margin-top:1.2rem;padding:0.8rem 1rem;background:rgba(13,148,136,.06);border:1.5px dashed var(--accent);border-radius:10px;">
-          <p style="font-size:0.82rem;color:var(--text-l);line-height:1.6;margin:0">
-            <strong style="color:var(--accent)">使用流程：</strong>
-            ① 发问卷链接给家长/客户填写 →
-            ② 收到邮件后点邮件里的链接 →
-            ③ 问卷内容自动填入下方文本框 →
-            ④ 点「生成报告」
-            <br><span style="color:#94a3b8">如果没自动填入，可手动粘贴问卷文本或上传问卷文件</span>
-          </p>
-        </div>
-        <div class="card-title" style="margin-top:1rem">📋 问卷分析</div>
+        <div class="card-title" style="margin-top:1.2rem">📋 问卷分析</div>
         <div class="form-group">
           <label>问卷类型</label>
           <select id="diagnosticMode">
@@ -466,9 +477,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           <button type="button" class="btn-sm" onclick="window.open('questionnaire.html?mode=teacher','_blank')" style="flex:1;min-width:45%">📝 教师版</button>
         </div>
         <div class="form-group">
-          <label>填写好的问卷内容</label>
-          <textarea id="questionnaireText" placeholder="邮件链接打开后问卷内容会自动填入此处。如果没有自动填入，可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
-          <div class="hint">问卷内容填入后，系统会自动解析出生年月、性别等信息</div>
+          <label>填写好的问卷内容（直接粘贴文本）</label>
+          <textarea id="questionnaireText" placeholder="家长通过链接填写的问卷会自动加载到此处，也可手动粘贴问卷文本" oninput="checkBirthInfo()" style="width:100%;padding:0.65rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;font-family:'PingFang SC','Microsoft YaHei',monospace;min-height:200px;resize:vertical;background:#fdfdff;line-height:1.6"></textarea>
+          <div class="hint">支持直接粘贴问卷文本，系统会自动解析出生信息和答案</div>
         <div id="birthInfoHint" style="display:none;margin-top:0.5rem;padding:0.6rem 0.8rem;background:#fff8e1;border:1.5px solid #ffc107;border-radius:10px;font-size:0.82rem;color:#e65100;">
           <div id="birthInfoStatus">⏳ 等待上传问卷...</div>
         </div>
@@ -485,7 +496,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
           <button type="button" class="btn-sm" onclick="document.getElementById('questionnaireFile').click()" style="flex:1">📂 上传问卷文件</button>
         </div>
       </div>
-      <button type="submit" class="btn-generate" id="btnGen" style="margin-top:0.8rem">🔮 生成报告</button>
+      <div id="inlineError" style="display:none;margin-top:0.8rem;padding:1rem 1.2rem;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;font-size:0.92rem;color:#dc2626;font-weight:600;line-height:1.6;text-align:center;"></div>
+      <button type="button" class="btn-generate" id="btnGen" onclick="safeGenerate()" style="margin-top:0.8rem">🔮 生成报告</button>
     </form>
   </div>
   <div class="loading" id="loading">
@@ -501,6 +513,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
         <button class="btn-sm" onclick="downloadReport()">📥 下载Word</button>
         <button class="btn-sm" onclick="window.print()">🖨️ 打印</button>
       </div>
+      <div id="reportInfo" style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;font-size:0.9rem;line-height:2;display:none;"></div>
       <div class="report-body">
         <pre id="reportHtml"></pre>
       </div>
@@ -509,7 +522,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    v6.5
+    v5.2
   </div>
 </div>
 </div>
@@ -517,7 +530,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 </div><!-- /mainApp -->
 
 <!-- ===== Lunar.js (public library, not encrypted) ===== -->
-<script src="lunar.js"></script>
+<script src="lunar.js" defer></script>
 
 <!-- ===== Encrypted Data & Unlock Logic ===== -->
 <script>
@@ -574,6 +587,7 @@ function executeJS(code) {
 
 // ===== Global state =====
 var currentReport = '';
+var currentReportMeta = { delivery: false, name: '', dateStr: '', mode: '', gender: '', birthplace: '', birthYear: '' };
 var unlocked = false;
 var diagnosticDataLoaded = false;
 var _storedAesKey = null;
@@ -632,7 +646,10 @@ async function loadDiagnosticData() {
   if (diagnosticDataLoaded) return true;
   if (!_storedAesKey) return false;
   try {
-    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store' });
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function() { controller.abort(); }, 60000);
+    var resp = await fetch('encrypted_diagnostic.json?v=' + Date.now(), { cache: 'no-store', signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var bundle = await resp.json();
     var encryptedB64 = bundle.files['diagnostic-data.js'];
@@ -655,11 +672,13 @@ function selectMode(mode) {
 
   // 诊断模式需要按需加载诊断数据库（约2MB，只在首次进入时加载）
   if (mode === 'diagnostic' && !diagnosticDataLoaded) {
+    // 防止重复点击导致多次并发加载
+    if (document.getElementById('diagLoading')) return;
     var modePage = document.getElementById('modeSelect');
     var loadingDiv = document.createElement('div');
     loadingDiv.id = 'diagLoading';
     loadingDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;';
-    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-20秒，请勿离开</p>';
+    loadingDiv.innerHTML = '<div style="width:40px;height:40px;margin:0 auto 1rem;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.9rem">正在加载诊断数据库…<br>首次加载约需10-30秒，请勿离开</p>';
     var oldContent = modePage.querySelector('.mode-cards');
     var oldTitle = modePage.querySelector('.mode-title');
     var oldSub = modePage.querySelector('.mode-subtitle');
@@ -677,7 +696,12 @@ function selectMode(mode) {
       if (success) {
         selectMode('diagnostic');
       } else {
-        alert('诊断数据库加载失败，请检查网络连接后重试');
+        var errDiv = document.createElement('div');
+        errDiv.id = 'diagError';
+        errDiv.style.cssText = 'text-align:center;padding:2rem 1rem;width:90%;max-width:380px;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;margin:1rem auto;';
+        errDiv.innerHTML = '<p style="color:#dc2626;font-size:0.95rem;font-weight:600;margin-bottom:0.8rem">❌ 诊断数据库加载失败</p><p style="color:#991b1b;font-size:0.85rem;margin-bottom:1rem">可能是网络较慢，请点击下方按钮重试</p><button onclick="document.getElementById(\'diagError\').remove();selectMode(\'diagnostic\')" style="padding:0.6rem 1.5rem;border:none;border-radius:8px;background:#1a365d;color:#fff;font-weight:600;cursor:pointer">🔄 重新加载</button>';
+        modePage.appendChild(errDiv);
+        errDiv.scrollIntoView({behavior:'smooth',block:'center'});
       }
     });
     return;
@@ -788,6 +812,7 @@ function reportToWordHtml(text) {
     var line = lines[i];
     var t = line.replace(/\s+$/, '');
     var trimmed = t.replace(/^\s+/, '');
+    // 空行：折叠连续空行
     if (!trimmed) {
       if (inTable) { html += flushTable(); tableRows = []; inTable = false; }
       if (!prevEmpty) { html += '<p style="margin:3pt 0">&nbsp;</p>'; }
@@ -795,35 +820,44 @@ function reportToWordHtml(text) {
       continue;
     }
     prevEmpty = false;
+    // 表格边框行：跳过
     if (/^[┌└├]/.test(trimmed)) { inTable = true; continue; }
+    // 表格数据行
     if (inTable && trimmed.indexOf('│') >= 0) {
       var cells = trimmed.split('│').map(function(s){return s.trim();});
       if (cells[0] === '') cells.shift();
       if (cells.length > 0 && cells[cells.length-1] === '') cells.pop();
       if (cells.length >= 2) { tableRows.push(cells); continue; }
     }
+    // 非表格行但之前在表格中：先输出表格
     if (inTable) { html += flushTable(); tableRows = []; inTable = false; }
+    // 粗分隔线
     if (/═{10,}/.test(t)) {
       html += '<hr style="border:none;border-top:2pt solid #1a365d;margin:10pt 0 6pt 0">';
       continue;
     }
+    // 细分隔线
     if (/─{15,}/.test(t)) {
       html += '<hr style="border:none;border-top:0.5pt solid #cbd5e0;margin:4pt 0">';
       continue;
     }
+    // 章节标题
     var secMatch = t.match(/^\s*([一二三四五六七八九十]+、)(.+)$/);
     if (secMatch) {
       html += '<h2 style="font-size:13pt;color:#fff;background:#1a365d;padding:4pt 8pt;margin-top:16pt;margin-bottom:4pt;border-radius:3pt;letter-spacing:0.05em">' + esc(secMatch[1]) + esc(secMatch[2]) + '</h2>';
       continue;
     }
+    // 副标题
     if (/^(发展倾向|性格速览|报告说明|评估基础|排盘依据|判断逻辑|先天倾向|后天改善|置信度)/.test(trimmed)) {
       html += '<p style="margin:5pt 0 1pt 0;font-weight:bold;color:#334155;font-size:10.5pt">' + esc(t) + '</p>';
       continue;
     }
+    // 编号断事 ①②③④⑤
     if (/^[①②③④⑤]/.test(trimmed)) {
       html += '<p style="margin:6pt 0 2pt 0;font-size:11pt;color:#1a365d;font-weight:bold">' + esc(t) + '</p>';
       continue;
     }
+    // 子要点 ▷
     if (trimmed.indexOf('▷') >= 0) {
       var dashStyle = 'margin:3pt 0 1pt 0;padding-left:8pt;color:#475569;font-weight:bold;font-size:10pt';
       if (trimmed.indexOf('结论') >= 0) {
@@ -836,10 +870,12 @@ function reportToWordHtml(text) {
       html += '<p style="'+dashStyle+'">' + esc(t) + '</p>';
       continue;
     }
+    // 【】标记
     if (trimmed.indexOf('【') >= 0) {
       html += '<p style="margin:6pt 0 1pt 0;font-weight:bold;color:#1a365d;font-size:10.5pt;padding-left:4pt;border-left:2pt solid #2c5282">' + esc(t) + '</p>';
       continue;
     }
+    // 标记符号
     var markerMatch = trimmed.match(/^([★☆○⚠✓✗💬◆■●])(.*)/);
     if (markerMatch) {
       var mk = markerMatch[1];
@@ -852,14 +888,17 @@ function reportToWordHtml(text) {
       html += '<p style="margin:1.5pt 0;padding-left:10pt"><span style="color:'+mc+';font-weight:bold">'+mk+'</span> ' + esc(markerMatch[2].trim()) + '</p>';
       continue;
     }
+    // → 箭头
     if (trimmed.indexOf('→') === 0) {
       html += '<p style="margin:1.5pt 0;padding-left:10pt;color:#475569">' + esc(t) + '</p>';
       continue;
     }
+    // > 引用
     if (trimmed.indexOf('>') === 0) {
       html += '<p style="margin:3pt 0;padding:3pt 8pt;background:#f1f5f9;color:#475569;border-left:2pt solid #3b82f6">' + esc(trimmed.replace(/^>\s*/, '')) + '</p>';
       continue;
     }
+    // 普通文本
     html += '<p style="margin:1.5pt 0">' + esc(t) + '</p>';
   }
   if (inTable) { html += flushTable(); }
@@ -868,13 +907,6 @@ function reportToWordHtml(text) {
 
 // ===== Auto-fill questionnaire from URL hash or pasted link =====
 function autoFillQuestionnaire(text, mode) {
-  // Show loading overlay while diagnostic data loads
-  var loadingOverlay = document.createElement('div');
-  loadingOverlay.id = 'autoFillOverlay';
-  loadingOverlay.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(248,250,252,.95);display:flex;align-items:center;justify-content:center;';
-  loadingOverlay.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="width:44px;height:44px;margin:0 auto 1rem;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:var(--text-l);font-size:0.95rem;line-height:1.6">正在加载问卷数据…<br>首次加载约需10-30秒，请勿离开</p></div>';
-  document.body.appendChild(loadingOverlay);
-
   selectMode('diagnostic');
   var fillAttempts = 0;
   var fillInterval = setInterval(function() {
@@ -882,32 +914,21 @@ function autoFillQuestionnaire(text, mode) {
     var qText = document.getElementById('questionnaireText');
     if (qText && document.getElementById('formPage').style.display === 'block') {
       clearInterval(fillInterval);
-      var ov = document.getElementById('autoFillOverlay');
-      if (ov) ov.remove();
       document.getElementById('diagnosticMode').value = mode;
       qText.value = text;
       if (typeof checkBirthInfo === 'function') checkBirthInfo();
       var tag = document.getElementById('resultTag');
-      if (tag) tag.textContent = '📥 已自动加载问卷数据，请检查后点击「生成报告」';
-      // Scroll to the generate button
-      var btn = document.getElementById('btnGen');
-      if (btn) btn.scrollIntoView({behavior:'smooth',block:'center'});
+      if (tag) tag.textContent = '📥 问卷已加载，正在自动生成报告…';
+      // 自动生成报告
+      setTimeout(function(){
+        if (typeof safeGenerate === 'function') {
+          safeGenerate();
+        } else if (typeof window.generateReport === 'function') {
+          window.generateReport();
+        }
+      }, 1500);
     } else if (fillAttempts > 120) {
       clearInterval(fillInterval);
-      var ov2 = document.getElementById('autoFillOverlay');
-      if (ov2) ov2.remove();
-      // Auto-fill failed, put data in textarea as fallback
-      var qFallback = document.getElementById('questionnaireText');
-      if (qFallback) {
-        qFallback.value = text;
-        var dm = document.getElementById('diagnosticMode');
-        if (dm) dm.value = mode;
-        if (typeof checkBirthInfo === 'function') checkBirthInfo();
-        var tag2 = document.getElementById('resultTag');
-        if (tag2) tag2.textContent = '📥 问卷数据已加载（加载较慢），请点击「生成报告」';
-      } else {
-        alert('问卷数据加载超时。请手动复制问卷链接，粘贴到页面顶部的「粘贴问卷链接」框中，点「加载」按钮。');
-      }
     }
   }, 500);
 }
@@ -972,11 +993,12 @@ function loadPastedLink() {
 
 // ===== Pre-fetch encrypted bundle on page load =====
 var _preFetchedBundle = null;
+var _bundleLoadFailed = false;
 (function() {
   fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(b) { _preFetchedBundle = b; })
-    .catch(function() {});
+    .catch(function() { _bundleLoadFailed = true; });
 })();
 
 // ===== Unlock =====
@@ -1004,7 +1026,7 @@ async function attemptUnlock() {
       bundle = _preFetchedBundle;
     } else {
       var resp = await fetch('encrypted_bundle.json?v=' + Date.now(), { cache: 'no-store' });
-      if (!resp.ok) throw new Error('核心数据加载失败');
+      if (!resp.ok) throw new Error('数据加载夺败，请检查网络后重试。如多次失败，请用Chrome浏览器打开此链接。');
       bundle = await resp.json();
     }
     // Step 3: Parallel decryption
@@ -1024,6 +1046,14 @@ async function attemptUnlock() {
     document.getElementById('mainApp').classList.add('show');
     document.getElementById('modeSelect').style.display = 'flex';
     initApp();
+    // 解锁后引擎检测
+    if (typeof window.generateReport !== 'function') {
+      var warnDiv = document.createElement('div');
+      warnDiv.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999;background:#fef3c7;color:#92400e;padding:0.8rem;font-size:0.85rem;text-align:center;font-weight:600';
+      warnDiv.textContent = '⚠️ 引擎加载异常，生成报告可能不可用。如遇问题请刷新重试';
+      document.body.appendChild(warnDiv);
+      setTimeout(function(){ warnDiv.style.display='none'; }, 8000);
+    }
     // Auto-fill questionnaire if data was passed via URL hash
     if (_pendingQuestionnaire) {
       var pq = _pendingQuestionnaire;
@@ -1048,6 +1078,42 @@ async function attemptUnlock() {
 document.getElementById('pwdInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') { e.preventDefault(); attemptUnlock(); }
 });
+
+// ===== 安全调用包装 =====
+function safeGenerate() {
+  var ie = document.getElementById('inlineError');
+  var btn = document.getElementById('btnGen');
+  // 立即给反馈
+  if (btn) { btn.textContent = '⏳ 正在分析…'; btn.style.background = '#94a3b8'; btn.disabled = true; }
+  // 检查关键函数是否存在
+  if (typeof window.generateReport !== 'function') {
+    var diag = [];
+    diag.push('generateReport: ' + typeof window.generateReport);
+    diag.push('PersonalityReport: ' + typeof (typeof PersonalityReport !== 'undefined' ? PersonalityReport : 'undefined'));
+    diag.push('DiagnosticReport: ' + typeof (typeof DiagnosticReport !== 'undefined' ? DiagnosticReport : 'undefined'));
+    diag.push('unlocked: ' + typeof unlocked !== 'undefined' ? unlocked : '?');
+    var html = '⚠️ 报告生成引擎未就绪<br><br>' +
+      '<div style="font-size:0.8rem;text-align:left;background:#fff5f5;padding:0.8rem;border-radius:8px;margin-top:0.5rem">' +
+      diag.join('<br>') + '</div>' +
+      '<br>请截图此信息，然后<strong>刷新页面</strong>重新输入密码。<br>如反复出现，请换用 Chrome 浏览器打开链接。';
+    if (ie) { ie.innerHTML = html; ie.style.display = 'block'; ie.scrollIntoView({behavior:'smooth',block:'center'}); }
+    else { alert('报告引擎未就绪，请刷新页面重试'); }
+    if (btn) { btn.textContent = '🔮 生成报告'; btn.style.background = ''; btn.disabled = false; }
+    return;
+  }
+  try {
+    window.generateReport();
+  } catch(e) {
+    var html2 = '⚠️ 生成报告时出错：' + (e.message || e) + '<br><br>' +
+      '<pre style="white-space:pre-wrap;font-size:0.75rem;text-align:left;background:#fff5f5;padding:0.8rem;border-radius:8px">' +
+      (e.stack ? e.stack.substring(0,500) : '') + '</pre>' +
+      '<br>请截图此信息，然后<strong>刷新页面</strong>重试。';
+    if (ie) { ie.innerHTML = html2; ie.style.display = 'block'; ie.scrollIntoView({behavior:'smooth',block:'center'}); }
+    else { alert('出错：' + (e.message || e)); }
+    if (btn) { btn.textContent = '🔮 生成报告'; btn.style.background = ''; btn.disabled = false; }
+  }
+}
+window.safeGenerate = safeGenerate;
 
 // ===== Init App =====
 function initApp() {
@@ -1084,17 +1150,20 @@ function initApp() {
     return out;
   }
 
-  document.getElementById('form').addEventListener('submit', function(e) {
-    e.preventDefault();
+  function generateReport() {
     var btn = document.getElementById('btnGen');
     var loading = document.getElementById('loading');
     var errorBox = document.getElementById('errorBox');
     var result = document.getElementById('result');
-    btn.disabled = true;
-    btn.textContent = '⏳ 分析中…';
-    loading.classList.add('show');
+    var inlineError = document.getElementById('inlineError');
+    // 重置状态
+    inlineError.style.display = 'none';
+    inlineError.textContent = '';
     errorBox.classList.remove('show');
     result.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = '⏳ 分析中…';
+    btn.style.background = '#94a3b8';
     try {
       var year = +document.getElementById('year').value;
       var month = +document.getElementById('month').value;
@@ -1107,16 +1176,6 @@ function initApp() {
       var delivery = document.getElementById('version').value === 'delivery';
       var useSensory = document.getElementById('useSensory').checked;
       var sensoryRaw = document.getElementById('sensoryAnswers').value;
-
-      // 非诊断模式校验出生信息
-      if (mode !== 'diagnostic') {
-        if (!year || !month || !day) {
-          throw new Error('请填写出生年月日');
-        }
-        if (!birthplace) {
-          throw new Error('请选择出生地');
-        }
-      }
 
       // Handle custom longitude for overseas/other
       if (birthplace === '__custom__') {
@@ -1136,6 +1195,7 @@ function initApp() {
 
       var output = delivery ? 'delivery' : 'full';
       var reportText = '';
+      loading.classList.add('show');
 
       if (mode === 'diagnostic') {
         // === 诊断报告模式 ===
@@ -1196,6 +1256,9 @@ function initApp() {
         var cv = crossValidate(baziType, qResult);
 
         // 生成诊断报告
+        if (typeof DiagnosticReport === 'undefined') {
+          throw new Error('诊断数据库未加载成功，请刷新页面重新进入。如果反复出现此问题，请换用Chrome浏览器打开链接');
+        }
         reportText = DiagnosticReport.generate({
           baziResult: baziAnalysis,
           questionnaireResult: qResult,
@@ -1206,45 +1269,78 @@ function initApp() {
         });
 
         currentReport = reportText;
+        currentReportMeta = { delivery: delivery, name: bi.name || '', dateStr: dYear + String(dMonth).padStart(2,'0') + String(dDay).padStart(2,'0'), mode: diagMode, gender: dGender, birthplace: dBirthplace, birthYear: dYear };
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
         var diagModeTxt = diagMode === 'child' ? '诊断·孩子版' : diagMode === 'teacher' ? '诊断·教师版' : '诊断·成人版';
         var verTxt = delivery ? '交付版' : '主人版';
+        var genderTxt = dGender === 'male' ? '男' : '女';
         var nameTag = bi.name ? ' · ' + bi.name : '';
-        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
-        currentReportMeta = { delivery: delivery, name: bi.name || '', dateStr: dYear + String(dMonth).padStart(2,'0') + String(dDay).padStart(2,'0'), mode: diagMode, gender: dGender, birthplace: dBirthplace, birthYear: dYear };
+        tag.textContent = diagModeTxt + ' · ' + verTxt + nameTag + ' · ' + genderTxt + ' · ' + dYear + '-' + String(dMonth).padStart(2, '0') + '-' + String(dDay).padStart(2, '0') + ' · ' + cv.finalType + ' × ' + qResult.problemType;
+        // 报告信息头
+        var infoBox = document.getElementById('reportInfo');
+        var bpName = '';
+        var selOpts = document.getElementById('birthplace').options;
+        for (var oi=0; oi<selOpts.length; oi++) { if (selOpts[oi].value===dBirthplace) { bpName=selOpts[oi].textContent; break; } }
+        if (!bpName) bpName = dBirthplace;
+        infoBox.innerHTML = '<span style="font-weight:700;color:var(--primary);font-size:1.05rem;">' + (bi.name||'') + '</span>' +
+          '　<span style="color:var(--text-l)">' + genderTxt + '</span>' +
+          '　<span style="color:var(--text-l)">' + dYear + '年' + dMonth + '月' + dDay + '日</span>' +
+          (bi.hour>=0 ? ' <span style="color:var(--text-l)">' + String(bi.hour).padStart(2,'0') + ':' + String(bi.minute||0).padStart(2,'0') + '</span>' : '') +
+          '　<span style="color:var(--text-l)">' + (bpName||'') + '</span>' +
+          '　<span style="color:var(--accent);font-weight:600">' + cv.finalType + '</span>' +
+          ' <span style="color:var(--text-l)">×</span> ' +
+          '<span style="color:var(--error);font-weight:600">' + qResult.problemType + '</span>';
+        infoBox.style.display = 'block';
       } else {
         // === 普通性格报告模式 ===
         var personNameVal = '';
-        var pnInput = document.getElementById('personName');
-        if (pnInput) personNameVal = pnInput.value.trim();
+        var pnInputEl = document.getElementById('personName');
+        if (pnInputEl) personNameVal = pnInputEl.value.trim();
         var report = new PersonalityReport();
         reportText = report.generate(year, month, day, hour, minute, false, gender, birthplace, false, mode, output, sensoryAnswers, personNameVal);
 
         currentReport = reportText;
+        currentReportMeta = { delivery: delivery, name: personNameVal, dateStr: year + String(month).padStart(2,'0') + String(day).padStart(2,'0'), mode: mode, gender: gender, birthplace: birthplace, birthYear: year };
         document.getElementById('reportHtml').innerHTML = formatReport(reportText);
 
         var tag = document.getElementById('resultTag');
         var modeTxt = mode === 'child' ? '孩子版' : mode === 'teacher' ? '教师版' : '成人版';
         var verTxt = delivery ? '交付版' : '主人版';
-        tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-        currentReportMeta = { delivery: delivery, name: personNameVal, dateStr: year + String(month).padStart(2,'0') + String(day).padStart(2,'0'), mode: mode, gender: gender, birthplace: birthplace, birthYear: year };
+        tag.textContent = modeTxt + ' · ' + verTxt + ' · ' + (gender==='male'?'男':'女') + ' · ' + year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        // 报告信息头
+        var infoBox2 = document.getElementById('reportInfo');
+        var bpName2 = '';
+        var selOpts2 = document.getElementById('birthplace').options;
+        for (var oi2=0; oi2<selOpts2.length; oi2++) { if (selOpts2[oi2].value===birthplace) { bpName2=selOpts2[oi2].textContent; break; } }
+        if (!bpName2) bpName2 = birthplace;
+        infoBox2.innerHTML = '<span style="color:var(--text-l)">' + (gender==='male'?'男':'女') + '</span>' +
+          '　<span style="color:var(--text-l)">' + year + '年' + month + '月' + day + '日</span>' +
+          '　<span style="color:var(--text-l)">' + String(hour).padStart(2,'0') + ':' + String(minute).padStart(2,'0') + '</span>' +
+          '　<span style="color:var(--text-l)">' + (bpName2||'') + '</span>';
+        infoBox2.style.display = 'block';
       }
 
       result.classList.add('show');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      console.error('报告生成错误:', err);
-      errorBox.textContent = '❌ ' + (err.message || err);
+      var errMsg = '❌ ' + (err.message || err);
+      // 在按钮上方显示错误（手机端可见）
+      inlineError.innerHTML = errMsg + '<br><br><span style="font-size:0.8rem;color:#991b1b;">请检查上方提示信息，修正后重新点击生成报告</span>';
+      inlineError.style.display = 'block';
+      inlineError.scrollIntoView({behavior:'smooth',block:'center'});
+      // 同时更新errorBox（备用）
+      errorBox.textContent = errMsg;
       errorBox.classList.add('show');
-      errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } finally {
       btn.disabled = false;
       btn.textContent = '🔮 生成报告';
+      btn.style.background = '';
       loading.classList.remove('show');
     }
-  });
+  }
+  window.generateReport = generateReport;
 
   window.copyReport = function() {
     navigator.clipboard.writeText(currentReport).then(function() {
@@ -1260,10 +1356,10 @@ function initApp() {
     });
   };
 
-  var currentReportMeta = { delivery: false, name: '', dateStr: '', mode: '', gender: '', birthplace: '', birthYear: '' };
   window.downloadReport = function() {
-    var meta = currentReportMeta;
     var tag = document.getElementById('resultTag').textContent;
+    var meta = currentReportMeta;
+    // 构建客户信息标题
     var custName = meta.name || '客户';
     var genderTxt = meta.gender === 'male' ? '男' : '女';
     var age = '';
@@ -1272,6 +1368,7 @@ function initApp() {
       age = calcAge + '岁';
     }
     var bpName = meta.birthplace || '';
+    // 查找出生地显示名
     if (bpName) {
       var selOpts = document.getElementById('birthplace').options;
       for (var oi=0; oi<selOpts.length; oi++) { if (selOpts[oi].value===bpName) { bpName=selOpts[oi].textContent; break; } }
