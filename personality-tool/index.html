@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>(function(){var s=location.search,h=location.hash;if(s.indexOf('cb=')===-1){var sep=s?'&':'?';location.replace(location.pathname+s+sep+'cb='+Date.now()+h);}})();</script>
+<script>(function(){var s=location.search,h=location.hash||'';if(s.indexOf('cb=')===-1){var sep=s?'&':'?';var u=location.pathname+s+sep+'cb='+Date.now();if(h)u+=h;location.replace(u);}})();</script>
 <script>
 // 全局错误捕获 - 任何JS错误都显示在页面上
 window.onerror=function(msg,url,line,col,err){
@@ -156,7 +156,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
     <div class="lock-spinner" id="lockSpinner"></div>
     <div id="lockProgress" style="display:none;font-size:0.8rem;color:var(--text-l);margin-top:0.5rem;min-height:1.2rem;"></div>
     <div class="lock-error" id="lockError">密码错误，请重新输入</div>
-    <div class="lock-hint">核心数据已加密保护 · v5.2</div>
+    <div class="lock-hint">核心数据已加密保护 · v6.6</div>
   </div>
 </div>
 
@@ -522,7 +522,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="footer">
     本工具基于性格分析理论框架生成，所有判断规则来源于系统化整理的知识库。<br>
     仅供参考，不构成任何医学、心理诊断或教育承诺。<br>
-    v5.2
+    v6.6
   </div>
 </div>
 </div>
@@ -907,28 +907,60 @@ function reportToWordHtml(text) {
 
 // ===== Auto-fill questionnaire from URL hash or pasted link =====
 function autoFillQuestionnaire(text, mode) {
-  selectMode('diagnostic');
+  console.log('[autoFill] Starting, mode=' + mode + ', text length=' + (text||'').length);
+  // Ensure diagnostic data is loaded first
+  if (typeof diagnosticDataLoaded === 'undefined' || !diagnosticDataLoaded) {
+    console.log('[autoFill] Diagnostic data not loaded, loading...');
+    selectMode('diagnostic');
+    var waitAttempts = 0;
+    var waitInterval = setInterval(function() {
+      waitAttempts++;
+      if (typeof diagnosticDataLoaded !== 'undefined' && diagnosticDataLoaded) {
+        clearInterval(waitInterval);
+        console.log('[autoFill] Diagnostic data loaded, proceeding');
+        selectMode('diagnostic');
+        doAutoFill(text, mode);
+      } else if (waitAttempts > 120) {
+        clearInterval(waitInterval);
+        console.error('[autoFill] Diagnostic data load timeout');
+        alert('数据加载超时，请刷新页面重试');
+      }
+    }, 500);
+  } else {
+    selectMode('diagnostic');
+    doAutoFill(text, mode);
+  }
+}
+function doAutoFill(text, mode) {
+  console.log('[autoFill] doAutoFill called');
   var fillAttempts = 0;
   var fillInterval = setInterval(function() {
     fillAttempts++;
     var qText = document.getElementById('questionnaireText');
-    if (qText && document.getElementById('formPage').style.display === 'block') {
+    var formPage = document.getElementById('formPage');
+    if (qText && formPage && formPage.style.display === 'block') {
       clearInterval(fillInterval);
-      document.getElementById('diagnosticMode').value = mode;
+      console.log('[autoFill] Form found, filling text (attempt ' + fillAttempts + ')');
+      var dm = document.getElementById('diagnosticMode');
+      if (dm) dm.value = mode;
       qText.value = text;
+      qText.dispatchEvent(new Event('input', {bubbles: true}));
       if (typeof checkBirthInfo === 'function') checkBirthInfo();
       var tag = document.getElementById('resultTag');
       if (tag) tag.textContent = '📥 问卷已加载，正在自动生成报告…';
-      // 自动生成报告
       setTimeout(function(){
+        console.log('[autoFill] Triggering report generation');
         if (typeof safeGenerate === 'function') {
           safeGenerate();
         } else if (typeof window.generateReport === 'function') {
           window.generateReport();
+        } else {
+          console.error('[autoFill] No generate function found');
         }
-      }, 1500);
+      }, 2000);
     } else if (fillAttempts > 120) {
       clearInterval(fillInterval);
+      console.error('[autoFill] Form not found after 60s');
     }
   }, 500);
 }
