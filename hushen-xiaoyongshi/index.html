@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6f5c">
+<title>护身小勇士·亲子安全闯关｜汉师附小防性侵·防拐骗亲子安全作业</title>
+<style>
+:root{
+  --green:#1f6f5c; --green-d:#155446; --green-l:#e7f3ee;
+  --orange:#f0883e; --orange-l:#fdeede;
+  --yellow:#f7c948; --yellow-l:#fef6dd;
+  --red:#d65a4b; --red-l:#fdebe8;
+  --blue:#2f6fb0; --blue-l:#e8f1f9;
+  --ink:#27332e; --muted:#6c7d75; --line:#dfe8e3; --card:#ffffff;
+  --cream:#fbf8f0; --shadow:0 10px 30px rgba(21,84,70,.12);
+  --radius:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);background:linear-gradient(170deg,#eef6f2 0%,#fbf8f0 60%,#fdf1e4 100%);
+  min-height:100vh;line-height:1.6;
+}
+#app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 16px 34px;position:relative}
+.screen{display:none;animation:fade .35s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen{animation:none}*{transition:none!important}}
+
+.brand{display:flex;align-items:center;gap:10px;padding:16px 2px 6px;color:var(--green-d);font-weight:700;letter-spacing:.5px}
+.brand .brand-left{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.brand .logo{width:38px;height:38px;flex:none;border-radius:50%;display:block}
+.brand .bname{font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#soundBtn{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:transform .12s,opacity .2s}
+#soundBtn:active{transform:scale(.9)}
+#soundBtn.off{opacity:.45}
+
+.hero{text-align:center;padding:18px 8px 10px}
+.hero .mascot{font-size:84px;line-height:1;filter:drop-shadow(0 8px 14px rgba(240,136,62,.3));animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero h1{font-size:29px;margin:14px 0 6px;color:var(--green-d);letter-spacing:1px}
+.hero .subtitle{display:inline-block;margin:0 0 10px;padding:5px 14px;border-radius:999px;background:var(--cream);border:1.5px solid var(--green);color:var(--green-d);font-size:13.5px;font-weight:800;letter-spacing:.5px}
+.hero .slogan{color:var(--muted);font-size:15px;margin:0 auto 18px;max-width:340px}
+.field{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:8px 0}
+.field label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.field input{width:100%;border:2px solid var(--line);border-radius:14px;padding:13px 14px;font-size:17px;font-family:inherit;color:var(--ink);background:#fff}
+.field input:focus{outline:none;border-color:var(--green)}
+.grade-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px}
+.grade{border:2px solid var(--line);background:#fff;border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
+.grade:active{transform:scale(.96)}
+.grade.sel{border-color:var(--green);background:var(--green-l)}
+.grade .g-emoji{font-size:30px}
+.grade .g-name{font-weight:700;font-size:15px;margin-top:4px}
+.grade .g-age{font-size:12px;color:var(--muted)}
+.btn{display:block;width:100%;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:18px;color:#fff;
+  background:linear-gradient(135deg,var(--orange),#e9752b);border-radius:16px;padding:16px;margin:18px 0 6px;
+  box-shadow:0 8px 18px rgba(240,136,62,.35);transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.green{background:linear-gradient(135deg,#2a8a72,var(--green));box-shadow:0 8px 18px rgba(31,111,92,.32)}
+.btn.blue{background:linear-gradient(135deg,#3d82bf,var(--blue));box-shadow:0 8px 18px rgba(47,111,176,.32)}
+.btn.ghost{background:#fff;color:var(--green-d);border:2px solid var(--green);box-shadow:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.tip{font-size:12.5px;color:var(--muted);text-align:center;margin:6px 0 0}
+.parent-note{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1px solid #f0dd9a;border-radius:16px;padding:12px 14px;font-size:13.5px;color:#7a5c12;margin-top:14px}
+.cover-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 0}
+.cover-tags span{font-size:12px;font-weight:700;border-radius:20px;padding:4px 12px}
+.tag-body{background:var(--red-l);color:var(--red)}
+.tag-kidnap{background:var(--blue-l);color:var(--blue)}
+.tag-net{background:var(--orange-l);color:#b06a22}
+
+.topbar{position:sticky;top:0;z-index:5;background:linear-gradient(170deg,#eef6f2,#f6fbf8);padding:12px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.progress-row{display:flex;align-items:center;gap:10px}
+.stars{font-size:15px;letter-spacing:1px;white-space:nowrap}
+.lvtag{font-size:12px;color:#fff;background:var(--green);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.bar{flex:1;height:10px;background:#e2ece7;border-radius:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:10px;transition:width .4s}
+.scene{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-top:14px}
+.scene .who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green-d);font-weight:700;margin-bottom:8px;flex-wrap:wrap}
+.scene .chap{background:var(--green-l);border-radius:20px;padding:2px 10px;font-size:12px}
+.scene .kind{border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700}
+.kind.sex{background:var(--red-l);color:var(--red)}
+.kind.kid{background:var(--blue-l);color:var(--blue)}
+.scene h2{font-size:21px;margin:4px 0 4px;color:var(--green-d);line-height:1.4}
+.scene .story{font-size:16.5px;color:var(--ink);margin:6px 0 4px}
+.scene .face{font-size:54px;text-align:center;margin:6px 0 10px}
+.choices{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.choice{border:2px solid var(--line);background:#fff;border-radius:16px;padding:15px 16px;font-size:16.5px;font-family:inherit;text-align:left;cursor:pointer;color:var(--ink);line-height:1.5;transition:transform .12s,border-color .12s,background .12s;display:flex;gap:10px;align-items:flex-start}
+.choice:active{transform:scale(.98)}
+.choice .key{flex:none;width:26px;height:26px;border-radius:50%;background:var(--green-l);color:var(--green-d);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.choice.right{border-color:var(--green);background:var(--green-l)}
+.choice.wrong{border-color:var(--red);background:var(--red-l)}
+.choice:disabled{cursor:default}
+
+.modal-back{position:fixed;inset:0;background:rgba(21,54,46,.45);display:none;align-items:flex-end;justify-content:center;z-index:30;padding:0}
+.modal-back.show{display:flex;animation:fade .2s}
+.modal{background:#fff;width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:24px 20px calc(20px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes up{from{transform:translateY(60%)}to{transform:none}}
+.modal .sprite{font-size:56px;text-align:center}
+.modal h3{text-align:center;font-size:21px;margin:6px 0 8px}
+.modal h3.ok{color:var(--green-d)} .modal h3.no{color:#b06a22}
+.modal .say{font-size:16px;color:var(--ink);margin:0 0 8px}
+.modal .learn{background:var(--green-l);border-radius:14px;padding:12px 14px;font-size:15px;color:var(--green-d);margin:10px 0}
+.modal .learn.warn{background:var(--orange-l);color:#9a5a1c}
+.modal .chant{text-align:center;font-size:20px;font-weight:800;color:var(--orange);letter-spacing:2px;margin:10px 0 4px}
+.modal .btns{margin-top:14px}
+
+.family{background:linear-gradient(135deg,#fff4e0,#fde8d2);border:2px dashed var(--orange);border-radius:var(--radius);padding:20px 18px;margin-top:14px}
+.family .fh{display:flex;align-items:center;gap:8px;font-weight:800;color:#b5651d;font-size:18px}
+.family p{font-size:16px;margin:10px 0 4px}
+.family .ask{background:#fff;border-radius:14px;padding:12px 14px;font-size:16.5px;color:var(--ink);margin:10px 0}
+.family .do{font-size:14px;color:#9a6a2c}
+
+.cert{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:0;overflow:hidden;margin-top:16px}
+.cls-card{background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:30px 24px 26px;text-align:center;margin-top:4vh}
+.cls-card .cls-crest img{width:66px;height:66px;border-radius:50%}
+.cls-card .cls-emoji{font-size:48px;margin:12px 0 2px}
+.cls-card h2{font-size:23px;color:var(--green-d);margin:6px 0 6px;letter-spacing:.5px}
+.cls-card .cls-sub{color:var(--muted);font-size:15px;margin:0 0 20px;line-height:1.6}
+.cls-card .field{text-align:left}
+#scr-class .btn{margin-top:18px}
+.cert .cert-top{background:linear-gradient(135deg,#2a8a72,var(--green));color:#fff;padding:22px 18px;text-align:center}
+.cert .cert-top .crest{font-size:46px}
+.cert .cert-top .crest{width:84px;height:84px;margin:0 auto 4px;display:block;border-radius:50%}
+.cert .cert-top h2{margin:8px 0 4px;font-size:23px}
+.cert .cert-top>div{font-size:13.5px;opacity:.95;letter-spacing:.5px;line-height:1.5}
+.cert .cert-body{padding:22px 20px;text-align:center}
+.cert .bigname{font-size:26px;font-weight:800;color:var(--green-d);margin:6px 0;display:inline-block;border-bottom:3px dotted var(--yellow);padding:0 12px}
+.cert .certclass{font-size:17px;font-weight:800;color:var(--red);margin:8px 0 0;letter-spacing:.5px;min-height:20px}
+.cert .line{font-size:16px;color:var(--ink);margin:10px 0}
+.cert .medals{font-size:34px;letter-spacing:6px;margin:14px 0 6px}
+.cert .seal{margin-top:14px;font-size:13px;color:var(--muted)}
+.cert .seal b{color:var(--red)}
+.finish-actions{display:flex;gap:10px;margin-top:14px}
+.finish-actions .btn{margin:0}
+.teacher{margin-top:18px;background:#fff;border-radius:18px;border:1px solid var(--line);padding:14px 16px;font-size:13px;color:var(--muted)}
+.teacher summary{font-weight:700;color:var(--green-d);font-size:14px;cursor:pointer}
+.teacher ul{margin:10px 0 0;padding-left:18px} .teacher li{margin:5px 0}
+footer.docf{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-height:1.7}
+@media print{body{background:#fff}.topbar,.choices,.btn,.modal-back,.brand{display:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="brand">
+    <span class="brand-left"><img class="logo" src="xiaohui.png" alt="汉师附小校徽"><span class="bname">汉师附小 · 护身小勇士</span></span>
+    <button id="soundBtn" type="button" aria-label="开关音效" title="开关音效">🔊</button>
+  </div>
+
+  <section class="screen active" id="scr-start">
+    <div class="hero">
+      <div class="mascot" aria-hidden="true">🦸</div>
+      <h1>护身小勇士 · 亲子安全闯关</h1>
+      <span class="subtitle">汉师附小防性侵 · 防拐骗亲子安全作业</span>
+      <p class="slogan">和安全精灵一起闯过 15 道关：识破骗子、保护身体、聪明脱险，集满护身星！</p>
+      <div class="cover-tags">
+        <span class="tag-body">🛡 防性侵</span>
+        <span class="tag-kidnap">🚸 防拐骗</span>
+        <span class="tag-net">📱 网络安全</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="pname">小勇士，请填写你的<b>真实姓名</b>（要印在奖状上，不要填小名哦）</label>
+      <input id="pname" type="text" maxlength="12" placeholder="填写真实姓名，如：李小明" autocomplete="name">
+      <label style="margin-top:16px">请选择你的年级</label>
+      <div class="grade-grid" id="gradeGrid">
+        <div class="grade" data-g="low"><div class="g-emoji">🐥</div><div class="g-name">低年级</div><div class="g-age">1—2年级</div></div>
+        <div class="grade" data-g="mid"><div class="g-emoji">🐰</div><div class="g-name">中年级</div><div class="g-age">3—4年级</div></div>
+        <div class="grade" data-g="high"><div class="g-emoji">🦊</div><div class="g-name">高年级</div><div class="g-age">5—6年级</div></div>
+      </div>
+    </div>
+    <button class="btn" id="startBtn" disabled>开始闯关 🚀</button>
+    <p class="tip">全程约 12—15 分钟 · 答错不扣分，安全精灵会带你再选一次</p>
+    <div class="parent-note"><span>👨‍👩‍👧</span><span>这是一份<b>亲子安全作业</b>：请爸爸妈妈陪孩子一起读、一起选；每隔几关会出现“亲子时刻”，记得停下来聊一聊哦。</span></div>
+    <footer class="docf">汉师附小安保处 · 心理辅导室 出品<br>主题：防拐骗 · 防性侵 · 网络安全（1—6年级）</footer>
+  </section>
+
+  <section class="screen" id="scr-play">
+    <div class="topbar">
+      <div class="progress-row">
+        <span class="lvtag" id="lvTag">低年级</span>
+        <div class="bar"><i id="barFill"></i></div>
+        <span class="stars" id="starBox">⭐×0</span>
+      </div>
+    </div>
+    <div id="stage"></div>
+  </section>
+
+  <section class="screen" id="scr-class">
+    <div class="cls-card">
+      <div class="cls-crest"><img src="xiaohui.png" alt="汉师附小校徽"></div>
+      <div class="cls-emoji">🏆</div>
+      <h2>太棒了，你已通关！</h2>
+      <p class="cls-sub">最后一步：填上你的<b>班级</b>，<br>马上为你生成印有姓名和班级的电子奖状。</p>
+      <div class="field">
+        <label for="pclass">你的班级是？（会印到奖状上，如：三年级2班）</label>
+        <input id="pclass" type="text" maxlength="14" placeholder="请填写班级，如：三年级2班" autocomplete="off">
+      </div>
+      <button class="btn green" id="genCertBtn">✨ 生成我的电子奖状</button>
+      <p class="tip">填好后点这个绿色按钮即可，姓名你在开场已经填好啦。</p>
+    </div>
+  </section>
+
+  <section class="screen" id="scr-cert">
+    <div class="cert">
+      <div class="cert-top"><img class="crest" src="xiaohui.png" alt="汉师附小校徽"><h2>护身小勇士 奖状</h2><div>汉师附小防性侵 · 防拐骗亲子安全作业</div></div>
+      <div class="cert-body">
+        <div class="line">恭喜小勇士</div>
+        <div class="certclass" id="certClass"></div>
+        <div class="bigname" id="certName">同学</div>
+        <div class="line" id="certLine">完成了本年级全部 15 关护身挑战</div>
+        <div class="medals" id="certMedals">⭐⭐⭐</div>
+        <div class="line">你已经学会：识破骗子与不良企图、大声说“不”、<br>保护身体与家庭隐私、危险时聪明脱险、遇事求助。</div>
+        <div class="seal">特发此状，以资鼓励！<br><b>汉师附小安保处 · 心理辅导室</b>　2026年10月</div>
+      </div>
+    </div>
+    <div class="field" id="collectBox" style="margin-top:16px;display:none">
+      <label for="cname">提交留痕（请填写或核对姓名）</label>
+      <input id="cname" type="text" maxlength="12" placeholder="学生姓名">
+      <label for="cclass" style="margin-top:12px">班级（如：三年级2班）</label>
+      <input id="cclass" type="text" maxlength="14" placeholder="所在班级">
+      <button class="btn green" id="submitBtn">✅ 提交我的闯关成绩</button>
+      <p class="tip" id="submitTip">提交后可把上方奖状截图发到班级群打卡</p>
+    </div>
+    <p class="tip" id="shotTip" style="text-align:center;margin:12px 2px 0">奖状已印好，点下方<b>“📸 截图奖状打卡”</b>，按提示截图发到班级群即可。</p>
+    <div class="finish-actions">
+      <button class="btn ghost" id="againBtn">🔁 再玩一次</button>
+      <button class="btn blue" id="shotBtn">📸 截图奖状打卡</button>
+    </div>
+    <details class="teacher">
+      <summary>老师留痕与组织说明（点开展开）</summary>
+      <ul>
+        <li>本文件可直接部署成手机网址并生成二维码，发到各年级班级群；学生微信点开即玩，无需安装、无需登录、零课时零场地。</li>
+        <li>留痕方式（任选其一）：① 配置一个免费收集表（如腾讯文档收集表 / 问卷星）的提交地址，学生点“提交”即带分数跳转登记；② 由家长把奖状截图发班级群，家委或班主任按群登记完成名单。</li>
+        <li>数据仅含姓名、班级、年级、得星与用时，不收集其他敏感信息；答错不判“错”，重在全员覆盖与亲子参与，不排名。</li>
+        <li>三条线各 15 关，覆盖演练要求 7 项：与陌生人的分寸、识破不良企图、身体与隐私保护、家庭信息保护、防拐技巧、防性侵、安全脱险与求助。</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="安全精灵提示">
+    <div class="sprite" id="mSprite">🧚</div>
+    <h3 id="mTitle"></h3>
+    <p class="say" id="mSay"></p>
+    <div class="learn" id="mLearn"></div>
+    <div class="chant" id="mChant" style="display:none"></div>
+    <div class="btns"><button class="btn green" id="mNext">继续 →</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ======================= 老师配置区（只改这一行）=======================
+   把本班“成绩收集表”的网址粘贴到下面引号中间，例如：
+   var COLLECT_URL="https://docs.qq.com/form/page/xxxxxxxx";
+   支持腾讯文档收集表 / 问卷星 / 金山表单等任意手机表单。
+   —— 填了：学生通关点“提交”会自动打开该表完成登记（老师后台导名单留痕）；
+   —— 留空（保持 ""）：走“奖状截图发班级群”打卡模式，无需建表。        */
+var COLLECT_URL="";
+/* ===================================================================== */
+
+/* ================= 音效引擎（Web Audio 纯合成，无需音频文件）================= */
+var SND=(function(){
+  var ctx=null,muted=false,master=null;
+  try{muted=localStorage.getItem("huxiao_muted")==="1";}catch(e){}
+  function ac(){
+    if(!ctx){
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC)return null;
+      ctx=new AC();master=ctx.createGain();master.gain.value=0.5;master.connect(ctx.destination);
+    }
+    if(ctx.state==="suspended"){ctx.resume();}
+    return ctx;
+  }
+  function tone(freq,start,dur,type,vol){
+    var c=ac();if(!c||muted)return;
+    var t0=c.currentTime+start,osc=c.createOscillator(),g=c.createGain();
+    osc.type=type||"sine";osc.frequency.setValueAtTime(freq,t0);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||0.25,t0+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    osc.connect(g);g.connect(master);osc.start(t0);osc.stop(t0+dur+0.02);
+  }
+  return {
+    unlock:function(){ac();},
+    toggle:function(){muted=!muted;try{localStorage.setItem("huxiao_muted",muted?"1":"0");}catch(e){}if(!muted)this.click();return muted;},
+    isMuted:function(){return muted;},
+    /* 选中/轻点 */
+    click:function(){tone(660,0,0.08,"triangle",0.18);},
+    /* 答对：明亮上行叮咚 */
+    right:function(){tone(659.25,0,0.14,"sine",0.26);tone(987.77,0.10,0.22,"sine",0.26);},
+    /* 答错：温柔两音提示，不刺耳 */
+    wrong:function(){tone(392,0,0.16,"sine",0.18);tone(329.63,0.16,0.26,"sine",0.18);},
+    /* 亲子时刻：柔和双音 */
+    family:function(){tone(587.33,0,0.16,"triangle",0.2);tone(783.99,0.14,0.26,"triangle",0.2);},
+    /* 得星：清脆叮 */
+    star:function(){tone(1318.5,0,0.12,"triangle",0.2);},
+    /* 通关：小号式上行号角 */
+    win:function(){var n=[523.25,659.25,783.99,1046.5];for(var i=0;i<n.length;i++){tone(n[i],i*0.13,0.3,"triangle",0.26);}},
+    /* 提交成功 */
+    done:function(){tone(523.25,0,0.12,"sine",0.24);tone(783.99,0.1,0.28,"sine",0.24);}
+  };
+})();
+
+/* kind: sex=身体防护(防性侵)  kid=防拐骗  net=网络安全 */
+var DATA={
+low:[
+ {kind:"sex",t:"第1关 · 背心和小裤衩",e:"🩲",s:"课间，好朋友闹着要看你背心里面，还伸手想拉你的衣服。",
+  c:["嘻嘻，给他看看也没关系","大声说“不要”，把衣服拉好，去找老师"],r:1,
+  ok:"背心、裤衩遮住的地方是身体的“小秘密”，谁都不能随便看、随便摸。你保护得很好！",
+  no:"安全精灵轻轻拦住：身体小秘密不能给别人看哦。就算是好朋友开玩笑，也要大声说“不”，再去找信任的大人。",
+  chant:"小背心、小裤衩，遮住的地方不许碰！",
+  family:{q:"和爸爸妈妈一起说说：除了爸妈帮你洗澡、医生在爸妈在场时检查身体，还有谁可以碰你的小秘密？",d:"答案是：没有别人。"}},
+ {kind:"kid",t:"第2关 · 陌生人的糖",e:"🍬",s:"校门口，一个不认识的叔叔拿着糖说：“我车上还有好多玩具，跟我去拿吧。”",
+  c:["有糖有玩具，跟他去拿","不收、不跟，扭头走回学校找老师"],r:1,
+  ok:"不认识的人给东西、叫你跟走，都要拒绝。回到人多、安全的地方找大人，做得棒！",
+  no:"安全精灵出现：不能跟陌生人走哦，也不要收他的东西。真想吃糖，回家告诉爸爸妈妈。",
+  chant:"不认识，给东西，不要不跟往回走！"},
+ {kind:"kid",t:"第3关 · “你妈妈让我接你”",e:"🚗",s:"放学时，一个没见过的阿姨说：“你妈妈加班，让我来接你，快上车！”可她答不出你们家的暗号。",
+  c:["妈妈的朋友，赶紧上车","不跟她走，回学校找老师，亲自打电话问妈妈"],r:1,
+  ok:"接人要对“家庭暗号”、要由老师或爸妈电话确认。暗号对不上，谁说都不走，这是铁规矩！",
+  no:"安全精灵拉住车门：真有急事，爸妈一定会打电话、老师也会知道。暗号对不上就绝不上车，回学校找老师。",
+  chant:"接我先对小暗号，对不上来我不走！",
+  family:{q:"和孩子一起约定一个只有自家人知道的“接人暗号”，并约定：任何人来接，对不上暗号绝不跟走。",d:"例如“小海豚”，定期更换。"}},
+ {kind:"sex",t:"第4关 · 这是秘密吗",e:"🤫",s:"邻居叔叔摸了你，还小声说：“这是我们的秘密，不许告诉爸爸妈妈，说了你就惨了。”",
+  c:["好害怕，替他保守秘密","回去马上告诉爸爸妈妈"],r:1,
+  ok:"关于身体、让你害怕的“秘密”不是真秘密，一定要告诉信任的大人。说出来不是不听话，是勇敢！",
+  no:"安全精灵抱抱你：坏人常用“保密”吓唬孩子。这种秘密一定要说，爸爸妈妈和老师是来保护你的。",
+  chant:"坏秘密，不要藏，告诉大人我最棒！"},
+ {kind:"sex",t:"第5关 · 谁能碰我",e:"🚦",s:"想一想：下面哪种情况是安全的？",
+  c:["医生在妈妈陪着时检查身体","大哥哥说“给你钱”让你摸他","亲戚趁没人摸你大腿还说逗你玩"],r:0,
+  ok:"医生检查要有爸爸妈妈在场，这是安全的。让你不舒服、要你保密的触摸，不管是谁，都要拒绝并告诉大人。",
+  no:"安全精灵提醒：让人不舒服、要好处、要保密的触摸都不安全，哪怕是熟人。大声说“不”，离开，再告诉信任的大人。",
+  chant:"不舒服，就拒绝，老师爸妈来保护！"},
+ {kind:"net",t:"第6关 · 网上问信息",e:"📱",s:"玩平板时，弹窗里有人问：“你家住哪？爸爸妈妈电话多少？”",
+  c:["人家问了，就告诉他","不告诉，马上叫爸爸妈妈来看"],r:1,
+  ok:"家庭住址、电话、爸妈在哪上班都是隐私，不能在网上告诉陌生人。你做得很对！",
+  no:"安全精灵飞来：网上不能随便说家里的信息，关掉它，马上请爸爸妈妈处理。",
+  family:{q:"家长和孩子一起把家庭住址、爸妈电话背一遍，并约定“这些信息不告诉网上不认识的人”。",d:""}},
+ {kind:"sex",t:"第7关 · 光身子的视频",e:"🙈",s:"有人发来图片，点开是光身子的人，还说“快看看，别告诉别人”。",
+  c:["好奇，转发给同学一起看","马上关掉，告诉爸爸妈妈"],r:1,
+  ok:"这种东西不是给小朋友看的。不是你的错，及时告诉大人，既能保护你，也能保护同学。",
+  no:"安全精灵遮住屏幕：不要看也不要转发。马上关掉，告诉爸爸妈妈，让大人去处理。",
+  chant:"不好看的，快关掉，告诉爸妈最重要！"},
+ {kind:"kid",t:"第8关 · 商场里找不到妈妈",e:"🛒",s:"在商场一转身，妈妈不见了。你有点慌，这时候最该找谁？",
+  c:["自己到处跑着找妈妈","站在原地附近，找穿制服的工作人员或服务台广播"],r:1,
+  ok:"走失要“原地等 + 找制服”：服务台、收银员、保安、警察都能帮你广播。千万别跟“主动要带你去找”的陌生人走。",
+  no:"安全精灵安抚：别乱跑！越跑越难找。留在原地或找穿制服的工作人员，他们会用广播帮你。",
+  chant:"走失原地等一等，制服叔叔来帮忙！",
+  family:{q:"带孩子去商场、车站前约定“走散集合点”，并让孩子记住家长电话；教孩子识别制服和服务台。",d:""}},
+ {kind:"sex",t:"第9关 · 说了没人信",e:"📢",s:"你把不舒服的事告诉了一个大人，可他正忙着没当回事。",
+  c:["算了，以后再也不说了","继续找其他信任的大人，直到有人帮我"],r:1,
+  ok:"求助说一遍没人听，就再说一遍！可以找爸妈、老师、爷爷奶奶、警察。你没有做错任何事。",
+  no:"安全精灵给你打气：不是你说得不对，是他没认真听。换一个信任的大人继续说，一定会有人帮你。",
+  chant:"没人听，不放弃，换个大人继续提！"},
+ {kind:"sex",t:"第10关 · 我的安全圈",e:"🌟",s:"遇到危险或心里难受，下列做法哪个最棒？",
+  c:["自己一个人憋着","找信任的大人，也可以拨 110 或 12355","只在网上跟陌生人说"],r:1,
+  ok:"记住啦：110 是报警电话，12355 是青少年帮助热线。再加上爸爸、妈妈、老师，你的安全圈很强大！",
+  no:"安全精灵提醒：网上的陌生人不一定能帮你，还可能有危险。要找现实里信任的大人，或者打 110、12355。",
+  chant:"遇危险，找大人，110、12355 记住它！",
+  family:{q:"和爸爸妈妈一起，写下 3—5 个“遇到任何事都可以去找”的大人名字，贴在冰箱上。",d:"这是孩子的“信任圈名单”。"}},
+ {kind:"kid",t:"第11关 · 一个人在家敲门",e:"🚪",s:"你一个人在家，有人敲门说“我是查水表的/你妈妈的快递”，让你开门。",c:["他说是工作人员，就开门","不开门、不搭话，隔着门说爸妈在忙，有事等大人回来，或先给爸妈打电话"],r:1,ok:"大人不在家，任何人敲门都不开，也不透露“只有我一个人”。让他留下电话或等爸妈回来，你做得很安全！",no:"安全精灵挡住门：哪怕对方穿制服、说是熟人，也不能一个人开门。隔着门回应，马上去打电话告诉爸妈。",chant:"独自在家不开门，先找爸妈问清楚！",family:{q:"和孩子演练独自在家应对敲门、接到陌生电话的统一说法，约定“不开门、不说只有我一人、先回电家长”。",d:""}},
+ {kind:"sex",t:"第12关 · 抱抱亲亲",e:"🫂",s:"亲戚见面非要抱你亲你，你心里很不舒服。",c:["长辈嘛，必须忍着","可以礼貌拒绝，改用挥手、击掌打招呼，告诉爸妈自己不喜欢"],r:1,ok:"身体是你自己的。不想被抱亲，可以拒绝，这不没礼貌。真正爱你的大人会尊重你。",no:"安全精灵点点头：礼貌和身体安全不冲突。可以说“我不想亲亲，我们击个掌吧”，再把感受告诉爸妈。",chant:"不想要的亲近，我可以说不要！"},
+ {kind:"kid",t:"第13关 · 找小狗的阿姨",e:"🆘",s:"在公园，一个阿姨着急地说她的小狗丢了，请你帮她一起去那边草丛找。",c:["帮助别人，跟她去","大人遇到困难会找别的大人，不跟她去，留在爸妈身边或找工作人员"],r:1,ok:"正常的大人不会让小朋友离开家人、去偏僻的地方帮忙。拒绝她不是冷漠，是保护自己。",no:"安全精灵提醒：找人、找狗、找东西，大人应该找大人或警察。你可以指给他看“那边有保安叔叔”，自己别跟着走。",chant:"大人求助找大人，我不离爸妈身边！"},
+ {kind:"sex",t:"第14关 · 一直挠痒痒",e:"😄",s:"有人总爱挠你痒痒、把你抱到腿上，你说了“别这样”他还不停。",c:["是开玩笑，忍一忍","认真说“住手，我不喜欢”，离开并告诉爸妈"],r:1,ok:"玩笑让你不舒服、你说了还不停，就不是好玩的事了。明确拒绝、离开、告诉大人，三步都对。",no:"安全精灵认真说：你的“停”必须被尊重。大声再说一次“不要”，马上离开去告诉爸爸妈妈。",chant:"我说停就要停，不停就去告大人！"},
+ {kind:"sex",t:"第15关 · 不是我的错",e:"🌈",s:"万一真的遇到了不好的身体接触，应该怎么想？",c:["是我不听话才发生的，不能说","这绝对不是我的错，一定要告诉信任的大人，110、12355 都能帮我"],r:1,ok:"记住：伤害从来不是孩子的错，也不丢人。说出来是勇敢，大人有责任保护你、帮助你。",no:"安全精灵抱抱你：无论发生什么，都不是你的错，你依然值得被爱。告诉爸妈、老师，或打 12355、110。",chant:"受伤害，不怪我，勇敢说出来！"}
+
+],
+mid:[
+ {kind:"sex",t:"第1关 · 坏人长什么样",e:"🕵️",s:"大家都说“要小心陌生人”。可你知道吗，伤害小朋友的人，大多数其实是认识的人。",
+  c:["只有从没见过的怪叔叔才危险","亲戚、邻居、老师、网友也可能，关键看行为"],r:1,
+  ok:"对！危险不看是谁，只看行为。让你不舒服、要你对爸妈保密的身体接触，都要警惕，哪怕他很熟。",
+  no:"安全精灵提醒：坏人不会把“坏”写在脸上，很多还是孩子认识、信任的人。认行为，不认面孔。",
+  chant:"不看是谁看行为，让我保密就不对！"},
+ {kind:"sex",t:"第2关 · 邻居的“帮忙”",e:"🚪",s:"邻居叔叔说：“帮我进屋里拿个东西。”推开门，屋里只有他一个人。",
+  c:["是邻居，应该帮忙，进去","在门外说“我去叫大人来”，不单独进屋"],r:1,
+  ok:"警惕“单独相处”和“封闭房间”。帮忙可以，但请大人出面，不跟任何人单独进屋、上车、去角落。",
+  no:"安全精灵拉住你：单独和一个大人进屋有风险。可以礼貌地说“我去叫我爸妈来帮忙”，先离开。",
+  chant:"单独处，要当心，叫上大人才进门！",
+  family:{q:"和孩子约定：任何大人要孩子单独帮忙（带路、进屋、上车、去偏僻处），都先给爸妈打电话确认。",d:""}},
+ {kind:"sex",t:"第3关 · 送东西又保密",e:"🎁",s:"有人摸了你不该摸的地方，又送你玩具，说“别声张，这是我们的秘密”。",
+  c:["收了东西，当作没发生","拒绝，尽快离开并告诉信任的大人"],r:1,
+  ok:"“给好处+让保密”是常见套路。说出来不是你的错，越早告诉大人越安全。",
+  no:"安全精灵摇头：收了东西不代表你有错，但一定要告诉大人。坏人用礼物让你不敢说，我们偏要说。",
+  chant:"给好处，叫保密，这种事情要警惕！"},
+ {kind:"sex",t:"第4关 · 好秘密坏秘密",e:"🔐",s:"下面哪个“秘密”，必须告诉大人？",
+  c:["给妈妈准备的生日惊喜","有人摸你身体，还让你瞒着爸妈","和同学约好的藏猫地点"],r:1,
+  ok:"让人开心、到时候能公开的是好秘密；关于身体、让你害怕、要瞒家长的，是坏秘密，一定要说。",
+  no:"安全精灵解释：生日惊喜是好秘密；关于身体的秘密会让孩子一直害怕，那是坏秘密，必须找大人帮忙。",
+  chant:"好秘密，能公开；坏秘密，说出来！"},
+ {kind:"net",t:"第5关 · 游戏里的大哥哥",e:"🎮",s:"游戏里一个“大哥哥”总送你装备，今天说：“发张你身体的照片给我，我再送你稀有皮肤。”",
+  c:["想要皮肤，就发一张","不发，马上告诉家长，保留聊天记录并举报"],r:1,
+  ok:"先用礼物接近，再要身体照片，这是网络引诱的套路。照片可能被反复利用，第一时间告诉家长才能止损。",
+  no:"安全精灵挡住发送键：千万别发！这不是普通朋友。马上告诉爸爸妈妈，把聊天记录留好、举报拉黑。",
+  chant:"送礼物，要照片，立刻拒绝找爸妈！",
+  family:{q:"家长和孩子一起检查常用游戏、社交账号，约定“索要照片、见面、保密”的事都可以随时告诉你。",d:""}},
+ {kind:"sex",t:"第6关 · 关上门的办公室",e:"🏫",s:"放学后，一位老师单独把你留在办公室，关上门，说要讲个“秘密”。",
+  c:["老师的话必须听，乖乖留下","借口上厕所或找同学，马上离开，事后告诉家长"],r:1,
+  ok:"权威身份不等于安全。遇到关门、独处、讲奇怪秘密，可以找理由立刻离开，然后告诉家长。",
+  no:"安全精灵提醒：让你不安的“单独留下+关门”，可以礼貌离开。真正关心你的老师不会要求你对家长保密。",
+  chant:"关门独处讲秘密，找个理由快离开！"},
+ {kind:"kid",t:"第7关 · “你爸出车祸了”",e:"🏥",s:"校门口有个陌生人焦急地说：“你爸出车祸在医院，快跟我走，晚了就来不及了！”",
+  c:["一听就慌了，跟他快走","先不跟走，找老师当面给爸妈或亲戚打电话核实"],r:1,
+  ok:"越是催你“快点、保密”，越要停下来核实。真出事，老师和家人电话能确认；骗子就靠你一慌跟走。",
+  no:"安全精灵帮你稳住：深呼吸，别上车。回学校请老师当面拨通爸妈电话，确认是真的再行动。",
+  chant:"越催越慌越不走，打电话来问清楚！"},
+ {kind:"kid",t:"第8关 · 被人拉住了",e:"😱",s:"路上突然有人拽你，说“我是你爸，跟我回家”，想把你拉走，周围有人。",
+  c:["吓懵了，被拖着走","大声喊“我不认识他！救命！”，抱住栏杆/路灯，向具体的人求助"],r:1,
+  ok:"要明确喊“我不认识他”，打破“是家务事”的误会；抱住固定物、指认某个路人“请您帮我报警”，更容易获救。",
+  no:"安全精灵大喊：别只是哭！用力喊“我不认识他、救命”，抱住栏杆不松手，盯着一位大人请他打110。",
+  chant:"被人拽，大声喊，我不认识他快报警！",
+  family:{q:"在家和孩子演练一次：被拉住时怎么喊、抱什么、向谁求助，并记住一个可信赖邻居/店铺。",d:""}},
+ {kind:"sex",t:"第9关 · 同学的悄悄话",e:"👫",s:"好朋友红着眼告诉你：“有人对我做了奇怪的事，你要答应永远替我保密。”",
+  c:["答应永远保密，谁也不说","陪他一起告诉老师或家长，不往外传"],r:1,
+  ok:"这种秘密不能替他守，但也不能到处说。陪他找信任的大人，同时保护他的隐私，才是真帮他。",
+  no:"安全精灵轻声说：替他永远保密可能让他继续受伤害。陪着他、相信他，一起去找大人，才够朋友。",
+  chant:"好朋友，遇伤害，陪他求助不宣扬！"},
+ {kind:"sex",t:"第10关 · 勇敢是什么",e:"📞",s:"下列哪个行为，才是真正的勇敢？",
+  c:["什么都自己扛、替坏人保密","会大声拒绝、会反复求助直到有人听"],r:1,
+  ok:"会拒绝、会求助、会一遍遍说直到有人听，这都是勇敢。求助是能力，不是告状。记住 110 和 12355。",
+  no:"安全精灵点头：一个人硬扛不是勇敢。真正的勇敢是敢说“不”、敢找大人帮忙。",
+  chant:"会拒绝，会求助，这样才是真勇敢！"},
+ {kind:"sex",t:"第11关 · 辅导班的独处",e:"📚",s:"兴趣班下课，一个成年男老师说“你单独留下来，我给你补补，别让别的同学知道”。",c:["老师关心我，留下吧","不单独留下，和同学一起走，回家告诉爸妈这个要求"],r:1,ok:"“单独留下+对同学保密”是两个预警信号。真正的辅导会公开、会让家长知道。跟着大部队走最安全。",no:"安全精灵提醒：让你对家人、同学保密的“特殊照顾”要警惕。可以说“我爸妈在等我”，离开后一定告诉家长。",chant:"特殊照顾要保密，跟着同学一起走！"},
+ {kind:"kid",t:"第12关 · 带路给感谢费",e:"💰",s:"一位开车的叔叔说他找不到路，愿意给你一百块，请你上车带他到附近的小区。",c:["有钱拿，上车带路","不上车、不靠近车窗，告诉他找路边的大人或导航，自己马上离开"],r:1,ok:"用钱引诱孩子上车是典型拐骗话术。帮人要守边界：指路可以站远远地说，绝不上车、不近车。",no:"安全精灵拉开距离：正常开车的人有导航、会问大人。后退到安全距离，说完立刻走开。",chant:"给钱带路是陷阱，不近车来不上车！"},
+ {kind:"sex",t:"第13关 · 手机里的秘密",e:"📲",s:"有人在网上让你发身体照片，说“发了就当你小女朋友/小男朋友，这是秘密”。",c:["喜欢我才这样，悄悄发","坚决不发，告诉家长并保留记录、举报拉黑"],r:1,ok:"用“男女朋友”名义要身体照片，是网络性引诱。照片一旦发出可能被传播利用，马上告诉家长才能止损。",no:"安全精灵挡在屏幕前：真正的喜欢不会逼你做害怕的事。别发、别删聊天，马上告诉爸爸妈妈。",chant:"恋爱名义要照片，不发举报找爸妈！"},
+ {kind:"kid",t:"第14关 · 商场走失升级版",e:"🏬",s:"商场里和家长走散，一个“热心阿姨”马上过来说“我带你去广播室找妈妈”，要拉你走。",c:["跟她去广播室","不跟她走，自己走到附近收银台/服务台找穿制服的员工，或请店员帮忙广播"],r:1,ok:"主动凑上来要“带你走”的人未必是工作人员。最安全的是你自己走到固定摊位、找穿制服、有工牌的人。",no:"安全精灵提醒：留在正规店铺里找收银员、保安，让他们用广播。不跟任何自称帮忙的人离开。",chant:"走失进店铺找制服，不跟生人到处走！"},
+ {kind:"sex",t:"第15关 · 信任圈",e:"🔑",s:"关于“遇到事能求助的人”，下面哪个做法最好？",c:["只告诉一个人，他不听就算了","准备 3—5 个信任的大人，一个没认真听就换下一个，也可打 110、12355"],r:1,ok:"多准备几个求助对象，才不会因为某个人没当回事而把话咽回去。家人、老师、亲属、警察、热线都算。",no:"安全精灵送你一把钥匙：把 3—5 个名字写下来贴冰箱。谁没认真听，就继续找下一个，直到有人帮你。",chant:"求助名单多几个，没人听就继续说！"}
+
+],
+high:[
+ {kind:"sex",t:"第1关 · 藏起来的危险",e:"🎭",s:"关于儿童性侵害，下面哪个说法正确？",
+  c:["只有陌生人才会害孩子","施害者多数是熟人，还可能用权威、感情或网络控制","男孩不会遇到这种事"],r:1,
+  ok:"侵害不分性别场合，七成以上施害者是熟人。权威、感情、游戏、礼物都可能成为控制手段。",
+  no:"安全精灵纠正：男孩也可能受害，陌生人反而是少数。要警惕的是“利用信任和权力的控制”。",
+  chant:"施害者，多熟人，权威网络要看清！"},
+ {kind:"net",t:"第2关 · 最懂你的网友",e:"💬",s:"网上的“知己”天天陪你聊、说只对你好，接着提出见面、要私密照，还说“这是我们的秘密”。",
+  c:["他最懂我，可以答应","这是性引诱，要警惕并告诉家长","只要不见面就绝对没事"],r:1,
+  ok:"先套近乎、再要照片、最后用秘密和感情控制，是典型的网络诱骗路径。即使没见面，索要私密影像也已越界。",
+  no:"安全精灵点破：这种“懂你”是被设计出来的。保存聊天记录、告诉家长、举报拉黑，才安全。",
+  chant:"先甜言，后索照，识破套路早报告！",
+  family:{q:"家长与孩子约定：网上任何人索要私密照片、视频或要求单独见面，第一时间告诉家里，不批评、先保护。",d:""}},
+ {kind:"net",t:"第3关 · 被照片威胁了",e:"😰",s:"对方拿到你的照片后威胁：“不继续发、不给钱，我就发给你同学和老师！”",
+  c:["害怕曝光，继续照做、转钱","立即告诉信任的大人或报警110，停止私下转账，保留记录","删掉软件，自己躲起来"],r:1,
+  ok:"这是敲诈勒索，妥协只会被反复威胁，对方最怕警方和家长知道。保留证据、第一时间求助，你不是过错方。",
+  no:"安全精灵严肃地说：给钱、继续发只会让威胁没完没了。马上告诉家长、拨 110，平台和公安有处置办法。",
+  chant:"被威胁，莫转账，家长警察来帮忙！"},
+ {kind:"sex",t:"第4关 · “你最特别”",e:"🌟",s:"一个成年人总对你说“我只对你好”，制造你们的专属秘密，还让你疏远别的朋友。",
+  c:["说明我很特别、很有魅力","这是情感操控和孤立，是危险信号"],r:1,
+  ok:"特别对待、专属秘密、逐步孤立，是取得信任、切断求助通道的手法。感到被控制或不安，要告诉其他大人。",
+  no:"安全精灵提醒：真正关心你的人不会让你瞒着家人、远离朋友。这种“特殊关系”要警惕，去告诉信任的人。",
+  chant:"独宠你，孤立你，警惕这是坏把戏！"},
+ {kind:"sex",t:"第5关 · 同学之间",e:"🤝",s:"年龄大很多的同学以“谈恋爱”为名，逼你身体接触、拍私密影像，说“你愿意的就不许说”。",
+  c:["双方愿意，就只能忍着","对方有年龄、力量、地位优势，这不是真正自愿，要求助"],r:1,
+  ok:"明显的年龄、力量或地位不对等下，年幼一方往往无法真正“同意”。被迫、被引诱、被拍下，都应告诉大人，不是你的错。",
+  no:"安全精灵强调：被哄骗、被施压的“愿意”不算数。利用优势的一方要负责，你需要的是保护和帮助。",
+  chant:"被施压，非自愿，告诉大人求保护！",
+  family:{q:"和孩子谈一次青春期边界：真正的喜欢会尊重“不”，用感情、道德逼迫突破身体界限本身就是危险信号。",d:""}},
+ {kind:"kid",t:"第6关 · 网友约见面",e:"📍",s:"聊了很久的网友约你单独见面，说“就我们俩，别告诉爸妈，给你个惊喜”。",
+  c:["聊这么久了，可以单独去","不单独赴约；要见就在家长陪同下去人多的公共场所，或干脆不见"],r:1,
+  ok:"线上身份可以伪装，“单独、保密、惊喜”都是高危信号。真朋友不会害怕你的家人知道。",
+  no:"安全精灵拦住：你不知道屏幕后面是谁。绝不单独见网友；任何情况下都让家长陪同、选公共场所。",
+  chant:"网友约，不独行，家长陪，人多处！"},
+ {kind:"kid",t:"第7关 · 危险当下",e:"🏃",s:"放学路上有人堵你、拉你、想把你拽上车。最优先做的是？",
+  c:["怕丢人，不敢出声","先保性命，往人多处跑并大声呼救，记住特征事后报警","为护住书包不放手"],r:1,
+  ok:"生命安全高于一切。可先假意顺从、记住长相车牌口音地点，脱险后立即告诉家长并拨110，必要时就医。",
+  no:"安全精灵大喊：东西可以丢，命最重要！朝人多、亮的地方跑，喊“住手、救命、我不认识他”，事后留线索报警。",
+  chant:"能跑就跑大声喊，记住特征快报案！"},
+ {kind:"kid",t:"第8关 · 车里人的“问路”",e:"🚙",s:"一辆车停在身边，大人探出头说自己迷路了，请你上车带路，还开出高价“感谢费”。",
+  c:["助人为乐，上车带路","保持两三步距离，告诉他可以问路边的大人或警察，自己绝不上车"],r:1,
+  ok:"正常的大人不会向小孩子求助、更不会让孩子上车。保持距离、不上车、不靠近车窗，是防拐的关键。",
+  no:"安全精灵提醒：帮人要有边界。请他去找成年人或警察帮忙，你后退到安全距离，随时可以跑开。",
+  chant:"大人问路找大人，给我再多不上车！",
+  family:{q:"和孩子复盘：遇到车辆求助、星探搭讪、冒充外卖/维修敲门时的统一应对——不开门、不上车、先核实、找大人。",d:""}},
+ {kind:"sex",t:"第9关 · 不幸发生之后",e:"🩹",s:"如果不幸遭遇侵害，关于证据和身体，下面哪个做法正确？",
+  c:["马上洗澡、扔掉所有衣物","暂不洗澡，保留衣物和聊天记录，尽快报警并到正规医院检查"],r:1,
+  ok:"及时保留物证、聊天记录、监控线索有助于追究。即使没马上报警，之后仍可求助；检查和心理支持越早越好。",
+  no:"安全精灵安抚：这不是你的错，也不“脏”。先别清洗、别丢衣物，在信任的大人陪同下报警、就医、做心理支持。",
+  chant:"不洗澡，留证据，家长陪同快就医！"},
+ {kind:"sex",t:"第10关 · 看见与接住",e:"🤲",s:"你怀疑有同学可能正受到侵害，最合适的做法是？",
+  c:["怕多事，装作不知道","告诉信任的老师或家长，必要时可由学校依法报告，注意保护他的隐私"],r:1,
+  ok:"学校老师等密切接触未成年人的人员，发现侵害或疑似情形有依法强制报告的责任。你能做的，是把信号带给可信的大人。",
+  no:"安全精灵强调：漠视可能让伤害继续。不围观、不传播，把情况平静告诉老师或家长，就是在救他。",
+  chant:"见同伴，遇危险，告诉大人护隐私！",
+  family:{q:"家长请记住孩子可能的求助信号：突然怕某人、拒学、噩梦、情绪突变、不明钱物或身体不适。平静询问、不逼细节。",d:""}},
+ {kind:"sex",t:"第11关 · 教练的“特权”",e:"🏅",s:"教练总以“按摩放松、单独加练”为由，在封闭房间里对你做超出训练的身体接触，还说是“正常的、别说出去影响你比赛”。",c:["为了比赛，忍一忍","这是越界行为，不因权威而正当；拒绝、离开并告诉家长或学校，必要时报警"],r:1,ok:"训练、治疗都有专业边界，不可能要求保密。施害者常用“为你好、影响前途”施压，权威身份不是同意的理由。",no:"安全精灵明确说：让你不适、要求保密的身体接触就是越界，无论他是谁。先保证安全，再告诉家长、学校或拨110。",chant:"权威越界也要拒，告诉家长和学校！"},
+ {kind:"net",t:"第12关 · 免费皮肤陷阱",e:"🎁",s:"陌生网友说“免费送你限定皮肤/明星签名照，只要扫个码、填下你和爸妈的信息”。",c:["白送的，赶紧扫码填写","不扫码、不填信息，这是盗取信息和诈骗，告诉家长"],r:1,ok:"天上不掉馅饼。索要家长信息、验证码、让扫码的，多是诈骗或信息盗取，还可能为进一步诱骗铺路。",no:"安全精灵点破：别被礼物冲昏头。个人和家庭信息、验证码一律不给，退出并告诉家长。",chant:"免费礼物要信息，不扫不填告家长！"},
+ {kind:"sex",t:"第13关 · 酒和聚会",e:"🍹",s:"有人在聚会/网友局上劝你喝酒、说“喝一点没事，去里面房间单独聊”，你感到不安。",c:["不好意思拒绝，照做","坚定拒绝，离开该环境回到可信赖的人身边，并告知家长行踪"],r:1,ok:"酒精会削弱判断力，“喝酒+进封闭房间+和不太熟的人”是明确的高危组合。提前报备行踪、结伴、敢于离场都是保护。",no:"安全精灵提醒：任何时候你都有权拒绝饮酒、拒绝进房间。找借口离开，回到熟人身边，和家长保持联系。",chant:"劝酒独处要拒绝，果断离开报平安！",family:{q:"和孩子约定外出报备规则：去哪、和谁、何时回，保持联系；明确可以“找借口离场”并随时来接，不责备。",d:""}},
+ {kind:"net",t:"第14关 · 账号“好友”借钱",e:"💳",s:"一个用了你同学头像和昵称的账号私信你，说急用钱/要验证码，让你别声张先帮忙。",c:["是同学，赶紧转钱或给验证码","先通过电话或当面找本人核实，不转账不给验证码，并提醒本人"],r:1,ok:"头像昵称可以仿冒，借钱、要验证码、催你保密是诈骗特征。务必用另一个渠道找本人确认。",no:"安全精灵提醒：哪怕头像一模一样也要二次核实。涉及钱和验证码，一律暂停，先打电话或当面问。",chant:"冒充熟人来借钱，电话核实再决定！"},
+ {kind:"kid",t:"第15关 · 被尾随了",e:"👣",s:"放学路上，你发现同一个人已经跟了你好一会儿，前面越来越偏。",c:["加快脚步往家里/没人的小巷跑","立刻转身走向人多、亮的店铺，明确向店员或警察求助，必要时打电话给家长/110"],r:1,ok:"被尾随时千万别往偏僻、无人的地方跑。要反向走向人多处的“安全屋”（便利店、餐馆、岗亭），当众求助。",no:"安全精灵支招：过马路、进店、靠近带监控的地方，大声说明“那个人一直跟着我”，请店员帮忙联系家长或报警。",chant:"被尾随别往偏处跑，人多店里去求助！"}
+
+]
+};
+
+var $=function(id){return document.getElementById(id);};
+var state={g:null,name:"",idx:0,stars:0,wrong:0,startT:0,lastRight:false,pendingFamily:null};
+var LVNAME={low:"低年级 1—2年级",mid:"中年级 3—4年级",high:"高年级 5—6年级"};
+var LVCN={low:"低年级(1-2年级)",mid:"中年级(3-4年级)",high:"高年级(5-6年级)"};
+var KINDNAME={sex:"身体防护",kid:"防拐骗",net:"网络安全"};
+
+/* 首次触摸即解锁音频（兼容微信/iOS），并初始化声音按钮 */
+(function(){
+  var sb=$("soundBtn");
+  function syncBtn(){if(sb){sb.textContent=SND.isMuted()?"🔇":"🔊";sb.classList.toggle("off",SND.isMuted());}}
+  syncBtn();
+  document.addEventListener("pointerdown",function on(){SND.unlock();document.removeEventListener("pointerdown",on);},{once:true});
+  if(sb)sb.addEventListener("click",function(e){e.stopPropagation();SND.unlock();var m=SND.toggle();syncBtn();});
+})();
+
+function show(id){
+  var s=document.querySelectorAll(".screen");
+  for(var i=0;i<s.length;i++)s[i].classList.remove("active");
+  $(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML;}
+
+var gradeSel=null;
+document.querySelectorAll(".grade").forEach(function(el){
+  el.addEventListener("click",function(){
+    document.querySelectorAll(".grade").forEach(function(x){x.classList.remove("sel");});
+    el.classList.add("sel");gradeSel=el.getAttribute("data-g");
+    $("startBtn").disabled=false;SND.click();
+  });
+});
+$("startBtn").addEventListener("click",function(){
+  if(!gradeSel)return;
+  var nm0=($("pname").value||"").trim();
+  if(!nm0){alert("请先填写你的真实姓名（要印在奖状上哦，不要填小名）～");$("pname").focus();return;}
+  SND.unlock();SND.click();
+  state.g=gradeSel;state.name=nm0;
+  state.idx=0;state.stars=0;state.wrong=0;state.startT=Date.now();state.pendingFamily=null;
+  $("lvTag").textContent=LVNAME[state.g];
+  show("scr-play");render();
+});
+
+function render(){
+  var lv=DATA[state.g],total=lv.length,item=lv[state.idx];
+  var html='<div class="scene">'
+    +'<div class="who"><span class="chap">第 '+(state.idx+1)+' / '+total+' 关</span>'
+    +'<span class="kind '+(item.kind==="kid"?"kid":item.kind==="net"?"":"sex")+'">'+(KINDNAME[item.kind]||"安全")+'</span>'
+    +'<span>安全精灵陪你闯关</span></div>'
+    +'<h2>'+esc(item.t)+'</h2>'
+    +'<div class="face" aria-hidden="true">'+item.e+'</div>'
+    +'<p class="story">'+esc(item.s)+'</p>'
+    +'<div class="choices">'
+    +item.c.map(function(opt,i){
+        return '<button class="choice" data-i="'+i+'"><span class="key">'+String.fromCharCode(65+i)+'</span><span>'+esc(opt)+'</span></button>';
+      }).join("")
+    +'</div></div>';
+  $("stage").innerHTML=html;
+  $("barFill").style.width=Math.round(state.idx/total*100)+"%";
+  $("starBox").textContent="⭐×"+state.stars;
+  Array.prototype.forEach.call($("stage").querySelectorAll(".choice"),function(btn){
+    btn.addEventListener("click",function(){choose(parseInt(btn.getAttribute("data-i"),10),btn);});
+  });
+}
+
+function choose(i,btn){
+  var item=DATA[state.g][state.idx],isRight=(i===item.r);
+  var btns=$("stage").querySelectorAll(".choice");
+  for(var k=0;k<btns.length;k++){btns[k].disabled=true;}
+  btns[item.r].classList.add("right");
+  state.lastRight=isRight;
+  if(isRight){state.stars++;SND.right();setTimeout(function(){SND.star();},180);}
+  else{btn.classList.add("wrong");state.wrong++;SND.wrong();}
+  $("starBox").textContent="⭐×"+state.stars;
+  setTimeout(function(){openFeedback(isRight,item);},420);
+}
+
+function openFeedback(isRight,item){
+  $("mSprite").textContent=isRight?"🌟":"🧚";
+  var h=$("mTitle");h.className=isRight?"ok":"no";
+  h.textContent=isRight?"太棒了，答对啦！":"安全精灵来帮你";
+  $("mSay").textContent=isRight?("“"+item.c[item.r]+"”")
+    :"如果这样做，可能会有危险哦。更安全的做法是：“"+item.c[item.r]+"”";
+  var l=$("mLearn");l.className="learn"+(isRight?"":" warn");
+  l.textContent=isRight?item.ok:item.no;
+  var c=$("mChant");
+  if(item.chant){c.style.display="block";c.textContent=item.chant;}else{c.style.display="none";}
+  $("mNext").textContent=isRight?"继续 →":"我记住了，再选一次 ↺";
+  state.pendingFamily=isRight?(item.family||null):null;
+  $("modalBack").classList.add("show");
+}
+
+$("mNext").addEventListener("click",function(){
+  SND.click();
+  $("modalBack").classList.remove("show");
+  if(!state.lastRight){render();return;} /* 答错：回到本关重选，在错误里学会 */
+  if(state.pendingFamily){var f=state.pendingFamily;state.pendingFamily=null;showFamily(f);return;}
+  advance();
+});
+
+function showFamily(f){
+  $("stage").innerHTML='<div class="family"><div class="fh">👨‍👩‍👧 亲子时刻 · 和爸爸妈妈聊一聊</div>'
+    +'<p>先别急着走，这一关请和爸爸妈妈一起说一说：</p>'
+    +'<div class="ask">'+esc(f.q)+'</div>'
+    +(f.d?'<p class="do">'+esc(f.d)+'</p>':'')
+    +'<button class="btn" id="famOk">聊好了，继续闯关 →</button></div>';
+  window.scrollTo(0,0);
+  SND.family();
+  $("famOk").addEventListener("click",function(){SND.click();advance();});
+}
+
+function advance(){
+  state.idx++;
+  if(state.idx>=DATA[state.g].length){finish();}else{render();}
+}
+
+function finish(){
+  $("barFill").style.width="100%";
+  var total=DATA[state.g].length;
+  $("certName").textContent=(state.name||"小勇士")+" 同学";
+  $("cname").value=state.name||"";
+  $("certClass").textContent="";
+  var pc=$("pclass"); if(pc){pc.value="";}
+  $("certLine").textContent="完成了本年级全部 "+total+" 关护身挑战";
+  $("certMedals").textContent=state.stars>=total?"⭐⭐⭐⭐⭐":state.stars>=total-2?"⭐⭐⭐⭐":"⭐⭐⭐";
+  var used=Math.round((Date.now()-state.startT)/1000);
+  try{
+    var all=JSON.parse(localStorage.getItem("huxiao_records")||"[]");
+    all.push({name:state.name,grade:state.g,stars:state.stars,total:total,
+      wrong:state.wrong,sec:used,at:new Date().toISOString()});
+    localStorage.setItem("huxiao_records",JSON.stringify(all));
+  }catch(e){}
+  var hasForm=COLLECT_URL&&/^https?:\/\//i.test(COLLECT_URL);
+  $("collectBox").style.display=hasForm?"":"none";
+  var st=document.getElementById("shotTip"); if(st)st.style.display=hasForm?"none":"";
+  $("submitTip").textContent="得星 "+state.stars+" / "+total+" · 用时约 "+used+" 秒（答错重选不计星，多练几次就满星）";
+  $("submitBtn").disabled=false;
+  $("submitBtn").textContent="✅ 复制成绩并去登记表填写";
+  show("scr-class");
+  setTimeout(function(){SND.win();if(pc){try{pc.focus();}catch(e){}}},350);
+}
+
+function copyText(t){
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true;}
+  }catch(e){}
+  try{
+    var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();var ok=document.execCommand("copy");document.body.removeChild(ta);return ok;
+  }catch(e2){return false;}
+}
+$("submitBtn").addEventListener("click",function(){
+  var nm=($("cname").value||"").trim(),cl=($("cclass").value||"").trim();
+  if(!nm){$("submitTip").textContent="请先填写学生姓名再提交～";$("cname").focus();return;}
+  var total=DATA[state.g].length;
+  var record=nm+" "+cl+" "+LVCN[state.g]+" 护身闯关 得星"+state.stars+"/"+total+" 已通关";
+  try{
+    var all=JSON.parse(localStorage.getItem("huxiao_submit")||"[]");
+    all.push({name:nm,className:cl,grade:state.g,stars:state.stars,total:total,
+      at:new Date().toLocaleString("zh-CN")});
+    localStorage.setItem("huxiao_submit",JSON.stringify(all));
+  }catch(e){}
+  var copied=copyText(record);
+  SND.done();
+  if(COLLECT_URL&&/^https?:\/\//i.test(COLLECT_URL)){
+    $("submitTip").textContent=(copied?"成绩已自动复制，":"")+"即将打开班级成绩表，请在表里粘贴（或照填）后提交。";
+    setTimeout(function(){window.location.href=COLLECT_URL;},900);
+  }else{
+    $("submitBtn").disabled=true;
+    $("submitBtn").textContent="✅ 已完成";
+    $("submitTip").textContent=(copied?"成绩已复制。":"")+"请把上方奖状截图发到班级群，完成打卡。";
+  }
+});
+$("againBtn").addEventListener("click",function(){
+  SND.click();
+  $("submitBtn").disabled=false;
+  $("submitBtn").textContent=COLLECT_URL?"✅ 复制成绩并去登记表填写":"✅ 提交我的闯关成绩";
+  if($("pclass"))$("pclass").value="";
+  show("scr-start");
+});
+function makeCert(){
+  var pc=$("pclass");
+  var cl=(pc?pc.value:"").trim();
+  if(!cl){alert("请先填写你的班级（如：三年级2班），班级会印到奖状上哦～");if(pc)pc.focus();return;}
+  $("certClass").textContent="【 "+cl+" 】";
+  var cc=$("cclass"); if(cc){cc.value=cl;}
+  SND.star();
+  show("scr-cert");
+}
+$("genCertBtn").addEventListener("click",makeCert);
+$("pclass").addEventListener("keydown",function(ev){ if(ev.key==="Enter"){ev.preventDefault();makeCert();} });
+$("shotBtn").addEventListener("click",function(){
+  SND.click();
+  alert("奖状上已经有你的姓名和班级啦！请用手机截图（一般同时按“电源键+音量减”），再发到班级群打卡。");
+});
+})();
+</script>
+</body>
+</html>
